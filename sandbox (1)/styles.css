@@ -1,0 +1,517 @@
+/* Estilos generales para el cuerpo del documento */
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  color: rgb(1, 10, 2);
+  padding: 0.5rem 1rem;
+  z-index: 100;
+
+  display: flex; /*Habilita el modo flexbox*/
+  flex-direction: row; /*Apila los hijos (h1 y nav) verticalmente*/
+  align-items: center; /*Centra los hijos horizontalmente (centrara la navegacion)*/
+
+  justify-content: space-between;
+}
+
+/*Posicion del titulo*/
+header h1 {
+  font-family: "Anton", sans-serif; /*Fuente del titulo*/
+  /*Al anular align-items center se estira al ancho completo*/
+  align-self: flex-start;
+  margin: 0; /*Empuja el elemto nav  lejos */
+  padding: 0; /* Asegura que no haya padding extra que los separe*/
+  padding-left: 1rem;
+  flex-shrink: 0;
+  letter-spacing: 0.1rem;
+}
+
+header nav {
+  /* Permitir que la navegación crezca y ocupe el espacio */
+  flex-grow: 1;
+  display: flex;
+  justify-content: center; /* Centra la lista de enlaces de navegación */
+  padding-top: 15px; /* 0.5rem arriba, 0.5rem abajo, 0 a los lados */
+}
+
+/* Estilos para el nuevo botón de inicio de sesión */
+.btn-inicio-sesion {
+  /* Apariencia de botón */
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+  padding: 8px 15px; /* Espaciado interno */
+
+  border-radius: 20px; /* Hace los bordes redondos */
+  border: 1px solid #235d25;
+
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+
+  /* Para que no se encoja */
+  flex-shrink: 0;
+  margin-left: 1rem; /* Pequeño espacio a la izquierda para separarlo de la navegación si es necesario */
+
+  /* Transiciones para un efecto hover */
+  transition: background-color 0.3s, color 0.3s;
+  margin-right: 2rem;
+}
+
+.btn-UsuarioNombre {
+  /* Apariencia de botón */
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+  padding: 8px 15px; /* Espaciado interno */
+
+  border-radius: 20px; /* Hace los bordes redondos */
+  border: 1px solid #235d25;
+
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+
+  /* Para que no se encoja */
+  flex-shrink: 0;
+  margin-left: 1rem; /* Pequeño espacio a la izquierda para separarlo de la navegación si es necesario */
+
+  /* Transiciones para un efecto hover */
+  transition: background-color 0.3s, color 0.3s;
+  margin-right: 2rem;
+}
+
+.btn-inicio-sesion:hover {
+  background-color: white;
+  color: #0ccc12;
+  cursor: pointer;
+  border-color: #0ccc12;
+}
+.btn-UsuarioNombre:hover {
+  background-color: white;
+  color: #0ccc12;
+  cursor: pointer;
+  border-color: #0ccc12;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  width: auto;
+}
+nav ul li {
+  margin: 0 15px;
+}
+
+nav ul li a {
+  color: #000000;
+  text-decoration: none;
+  font-weight: bold;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 2px;
+  transition: transform 0.3s ease-in-out;
+}
+
+nav ul li a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 100%;
+  height: 2px;
+  background-color: #141313;
+  transition: transform 0.3s ease-in-out;
+}
+
+nav ul li a:hover {
+  transform: translateY(-5px);
+}
+
+nav ul li a:hover::after {
+  transform: translateY(3px);
+  bottom: 5px;
+}
+
+.container {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+.slider-btn {
+  /* Estilo visual */
+  position: absolute;
+  top: 50%; /* Centra verticalmente */
+  transform: translateY(-50%); /* Ajuste fino para centrado perfecto */
+  z-index: 10; /* Asegura que estén encima de las imágenes */
+
+  /* Apariencia */
+  background-color: transparent;
+  color: white;
+  border: none;
+  padding: 15px 20px; /* Tamaño del botón */
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1; /* Para centrar el símbolo */
+  border-radius: 50%;
+}
+
+/* 3. Posicionamiento Específico */
+.slider-btn.prev {
+  left: 10px; /* Cerca del borde izquierdo */
+}
+
+.slider-btn.next {
+  right: 10px; /* Cerca del borde derecho */
+}
+
+/* : Estilo al pasar el raton */
+.slider-btn:hover {
+  background-color: rgba(0, 0, 0, 0.247);
+}
+.slide-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  max-height: 55vh;
+  overflow: hidden;
+}
+
+.slider {
+  display: flex;
+  aspect-ratio: 16 / 9;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x mandatory; /*X le dice a Css que se ajuste a lo largo del eje x*/
+  scroll-behavior: smooth;
+  box-shadow: 0 1.5rem 3rem -0.75rem hsla(0, 0%, 0%, 0.25);
+}
+.slider img {
+  flex: 1 0 100%;
+  scroll-snap-align: start;
+  object-fit: cover;
+
+  /* Prioriza la parte inferior de la imagen. */
+  object-position: center 250%;
+}
+.slider-nav {
+  display: flex;
+  column-gap: 1rem;
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translate(-50%);
+  z-index: 1;
+}
+.slider-nav a {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: #fff;
+  opacity: 0.75;
+  transition: opacity ease 250ms;
+}
+
+/* Asegura que la página tome el 100% de la altura y usa el Poppins como fuente base */
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #d9f0d3; /* Fondo gris muy claro para contraste */
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  padding-top: 55px;
+}
+
+main {
+  padding: 20px;
+}
+.slider-nav a:hover {
+  opacity: 1;
+}
+
+.categoria-wrapper {
+  width: 100%;
+  margin: 1rem 0; /* Agrega un pequeño margen para separarlo de otros elementos */
+  overflow: hidden;
+  text-align: center;
+}
+
+.categoria-slider {
+  display: inline-flex; /* Alinea las tarjetas en una fila */
+  padding: 0 1rem; /* Padding a los lados para que las tarjetas no toquen los bordes */
+
+  /* Permite el desplazamiento horizontal y oculta la barra de desplazamiento */
+  overflow-x: auto;
+  scrollbar-width: none; /* Oculta la barra en Firefox */
+  -ms-overflow-style: none; /* Oculta la barra en IE/Edge */
+
+  /* Estilos de desplazamiento de carrusel */
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  gap: 10px; /* Espacio entre las tarjetas */
+}
+/* Oculta la barra de desplazamiento en navegdores */
+.categoria-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.categoria-card {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  flex-shrink: 0; /* evita que se encojan */
+
+  display: block; /*Ancho disponible*/
+  text-align: center;
+
+  padding: 10px 15px; /* 
+  background-color: transparent; 
+  border: none; /* Sin borde */
+
+  color: #090909;
+  text-decoration: none; /* quita el subrayado */
+
+  /* Alineación para el desplazamiento */
+  scroll-snap-align: start;
+  transition: color 0.3s;
+}
+
+/* Estilos para el contenido princial */
+main {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Estilo para las secciones y artículos */
+section,
+article {
+  background: #fff;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgb(29, 1, 46);
+}
+
+.contenedor-padre {
+  display: flex;
+  justify-content: space-between; /* Distribuye el espacio entre las cajas */
+  align-items: stretch;
+  width: 100%;
+  height: auto;
+  margin: 20px auto;
+  border: 2px solid #ffffff;
+  background-color: #ffffff;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.fila-uno div,
+.fila-dos div {
+  /* Define el ancho para que quepan dos cajas por fila */
+  width: 48%;
+  margin: 2px;
+  padding: 60px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+/* Estilos para las imagenes dentro del main (para evitar conflicto con el carrusel) */
+main img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem 0;
+}
+
+input {
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Estilos para el pie de pagina */
+footer {
+  background-color: #235d25;
+  color: rgb(224, 221, 221);
+  padding: 10px;
+  text-align: center;
+  margin-top: 2rem;
+}
+/* =============================================== */
+/* === ESTILOS NAVEGACIÓN Y PERFIL DROPDOWN === */
+/* =============================================== */
+
+/* Contenedor principal del menú desplegable (necesario para posicionamiento) */
+.perfil-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Estilos del botón  (asumo que tienes algo similar a esto) */
+.btn-UsuarioNombre {
+  padding: 8px 12px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  border-radius: 20px; /* Bordes redondeados como en tu imagen */
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  transition: background-color 0.2s;
+  /* (Añade aquí tu color de borde verde si lo tenías) */
+}
+
+/* Contenido del menú desplegable */
+.dropdown-content {
+  display: none; /* CLAVE: Oculto por defecto */
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  right: 0;
+  border-radius: 5px;
+}
+
+/* CLAVE: ESTILOS PARA LOS ENLACES DENTRO DEL MENÚ */
+.dropdown-content a {
+  color: black;
+  padding: 10px 15px;
+  text-decoration: none; /* 🔑 SOLUCIÓN 1: Esto elimina el subrayado */
+  display: block; /* 🔑 SOLUCIÓN 2: Esto hace que cada opción esté en una línea separada */
+  text-align: left;
+  font-size: 15px;
+  font-family: "Poppins", sans-serif;
+  /* Color de texto ajustado al diseño */
+  color: #4a004a;
+}
+
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+
+/* Clase que se activa con JavaScript para mostrar el menú */
+.show {
+  display: block;
+}
+
+/* =============================================== */
+/* === ESTILOS ESPECÍFICOS PARA LA PÁGINA PERFIL === */
+/* =============================================== */
+
+/* Contenedor principal del formulario, centrado en la página */
+.container-perfil {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.container-perfil h2 {
+  font-family: "Poppins", sans-serif;
+  color: #333;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+/* Estilos para el formulario en sí */
+#perfilForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: left;
+}
+
+/* Estilos para las etiquetas */
+#perfilForm label {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: -5px;
+}
+
+/* Estilos para los campos de entrada de texto */
+#perfilForm input[type="text"],
+#perfilForm input[type="email"],
+#perfilForm input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+/* Efecto al enfocar (hacer clic) en un campo */
+#perfilForm input:focus {
+  border-color: #3f51b5;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+}
+
+/* Estilo específico para el campo de email deshabilitado */
+#perfilForm input[disabled] {
+  background-color: #f5f5f5;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Estilos para el botón de Guardar Cambios */
+#perfilForm button[type="submit"] {
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 600;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+#perfilForm button[type="submit"]:hover {
+  background-color: #45a049;
+}
+
+/* MENSAJES DE ÉXITO/ERROR (SOLUCIÓN PARA OCULTAR BARRAS)  */
+#mensajeExito,
+#mensajeError {
+  /* CLAVE: Ocultamos los mensajes hasta que JavaScript los muestre */
+  display: none;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  margin-top: 10px;
+  min-height: 0; /* Asegura que no tome altura si está vacío */
+}
+
+#mensajeExito {
+  background-color: #e6ffe6; /* Fondo verde claro */
+  /* border: 1px solid #4caf50; <-- ELIMINADO para quitar la línea */
+  color: #3c763d;
+}
+
+#mensajeError {
+  background-color: #ffe6e6; /* Fondo rojo claro */
+  /* border: 1px solid #d9534f; <-- ELIMINADO para quitar la línea */
+  color: #a94442;
+}

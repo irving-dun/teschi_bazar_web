@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+  <html lang="es"></html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subir Producto - TeschiBazar</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="publiproducto.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <header>
+      <h1>TESCHI-BAZAR</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="">Acerca de</a></li>
+        </ul>
+      </nav>
+      <button
+        id="iniciaSesionButton"
+        onclick="window.location.href='login.html'"
+        class="btn-inicio-sesion"
+      >
+        Iniciar Sesión
+      </button>
+
+      <div id="contenedorPerfilUsuario" style="display: none"></div>
+    </header>
+
+    <main class="container-form">
+      <h2>Subir Nuevo Producto</h2>
+
+      <form id="formularioProducto" class="product-form">
+        <div class="form-section">
+          <h3>1. Imagenes del Producto</h3>
+
+          <div class="multimedia-area" id="clicAreaMultimedia">
+            <span class="icon-camera">📸</span>
+            <p>
+              Arrastra y suelta fotos de tu producto aquí o haz clic para
+              seleccionarlas (Máximo 3 fotos)
+            </p>
+            <input
+              type="file"
+              id="imagenes"
+              name="imagenes"
+              accept="image/*"
+              multiple
+              required
+            />
+          </div>
+          <p style="font-size: 0.8em; text-align: center; margin-top: -10px">
+            💡CONSEJO: Las fotos de alta calidad con buena iluminación rinden
+            mejor en la plataforma y atraen mas clientes
+          </p>
+        </div>
+
+        <script>
+          // ===============================================
+          // Lógica para abrir el selector de archivos ===
+          // ===============================================
+
+          document.addEventListener("DOMContentLoaded", () => {
+            // 1. Obtenemos el input de archivo (el elemento que debe ser activado)
+            const inputArchivo = document.getElementById("imagenes");
+
+            // 2. Obtenemos el area visible donde el usuario hace clic (el div azul)
+            const areaCliqueable =
+              document.getElementById("clicAreaMultimedia");
+
+            // Comprobación de seguridad
+            if (!inputArchivo || !areaCliqueable) {
+              console.error("Error: Elementos multimedia no encontrados.");
+              return;
+            }
+
+            // Agregamos un escuchador de eventos al área azul
+            areaCliqueable.addEventListener("click", () => {
+              // Palabra reservada 'inputArchivo.click()': Este es el comando mágico.
+              // Ejecuta programáticamente el evento de clic en el input de archivo oculto.
+              inputArchivo.click();
+            });
+          });
+        </script>
+
+        <div class="form-section">
+          <h3>2. Información del Producto</h3>
+
+          <div class="form-group">
+            <label for="nombre_producto">Nombre del Producto</label>
+            <input
+              type="text"
+              id="nombre_producto"
+              name="nombre_producto"
+              required
+              maxlength="100"
+              placeholder="Ej: iPhone 14 Pro Max, Labial, Llavero de Harry Potter"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea
+              id="descripcion"
+              name="descripcion"
+              rows="4"
+              required
+              maxlength="500"
+              placeholder="Detalles sobre como color, tamaño, defectos (si tiene), tipo, etc."
+            ></textarea>
+          </div>
+
+          <div class="options-group" style="gap: 20px">
+            <div class="form-group" style="flex: 1">
+              <label for="id_categoria">Categoría</label>
+              <select id="id_categoria" name="id_categoria" required>
+                <option value="1">Ropa</option>
+                <option value="2">Maquillaje</option>
+                <option value="3">Accesorios</option>
+                <option value="3">Libros</option>
+                <option value="3">Electrónica</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="flex: 1">
+              <label for="estado_producto">Estado del Producto</label>
+              <select id="estado_producto" name="estado_producto" required>
+                <option value="nuevo">Nuevo</option>
+                <option value="usado">Usado</option>
+                <option value="reacondicionado">Reacondicionado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="disponibilidad">Unidades Disponibles</label>
+            <input
+              type="number"
+              id="disponibilidad"
+              name="disponibilidad"
+              min="1"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>3. Precio y Logística</h3>
+
+          <div class="form-group">
+            <label for="precio">Precio (MXN)</label>
+            <input
+              type="number"
+              id="precio"
+              name="precio"
+              step="10"
+              min="0"
+              required
+            />
+          </div>
+
+            <div class="toggle-item">
+              <label for="ubicacion_entrega">Ubicación de Entrega</label>
+              <select
+                id="ubicacion_entrega"
+                name="ubicacion_entrega"
+                required
+                style="width: auto; margin-left: 10px"
+              >
+                <option value="" disabled selected>
+                  Selecciona el edificio
+                </option>
+                <option value="Edificio A">Edificio A</option>
+                <option value="Edificio A">Edificio B</option>
+                <option value="Edificio A">Edificio D</option>
+                <option value="Edificio A">Edificio E</option>
+                <option value="Edificio A">Edificio F</option>
+                <option value="Edificio A">Edificio G</option>
+                <option value="Edificio A">Edificio H</option>
+                <option value="Edificio A">Edificio I</option>
+                <option value="Edificio A">Edificio J</option>
+                <option value="Edificio A">Edificio K</option>
+                <option value="Edificio A">Edificio Q</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button type="submit" class="btn-submit">Publicar Artículo</button>
+          <button type="button" class="btn-save-draft">Guardar Borrador</button>
+        </div>
+      </form>
+    </main>
+    <footer>
+      <p>&copy; Teschi-Bazar</p>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <script src="firebase-config.js"></script>
+
+    <script src="scriptIndex.js"></script>
+    <script src="scriptSubirProducto.js"></script>
+
+    <script src="script.js"></script>
+  </body>
+</html>

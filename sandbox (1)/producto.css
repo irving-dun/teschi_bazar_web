@@ -1,0 +1,175 @@
+/* --- Variables Generales (Si no están en styles.css) --- */
+:root {
+  --color-principal: #ffffff;
+  --color-sombra-tarjeta: rgba(0, 0, 0, 0.1);
+}
+
+/* --- Estilos del Contenedor Principal --- */
+.product-detail-container {
+  padding: 40px 20px;
+  background-color: #f4f7f6;
+  min-height: 90vh;
+  display: flex;
+  justify-content: center;
+}
+
+.product-grid {
+  display: grid;
+  /* Define dos columnas: 1.5 partes para imágenes, 1 parte para información */
+  grid-template-columns: 1.5fr 1fr;
+  gap: 30px;
+  max-width: 1200px;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px var(--color-sombra-tarjeta);
+  padding: 30px;
+}
+
+/* Manejo en dispositivos pequeños (una columna) */
+@media (max-width: 900px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+}
+
+/* --- COLUMNA DE IMÁGENES --- */
+.product-images {
+  display: flex;
+  flex-direction: column;
+}
+
+.main-image {
+  width: 100%;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#mainProductImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.thumbnail-gallery {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s, border 0.2s;
+  object-fit: cover;
+  border: 2px solid transparent;
+}
+
+.thumbnail:hover,
+.thumbnail.active {
+  opacity: 1;
+  border-color: var(--color-principal);
+}
+
+/* --- COLUMNA DE INFORMACIÓN --- */
+.product-info-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Título y Precio */
+.info-header h2 {
+  font-size: 2em;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.precio-final {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: #dc3545; /* Color secundario (rojo/naranja) */
+  margin-bottom: 15px;
+}
+
+/* Tarjetas Azules de Información (detail-card) */
+.detail-card {
+  padding: 20px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, var(--color-principal), #ffffff);
+  color: rgb(0, 0, 0);
+}
+
+.detail-card h3 {
+  font-size: 1.2em;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  padding-bottom: 5px;
+}
+
+.detail-card p {
+  margin: 5px 0;
+  font-size: 0.95em;
+}
+
+.detail-card strong {
+  font-weight: 600;
+}
+
+/* Descripción */
+.description-section h3 {
+  font-size: 1.5em;
+  color: #333;
+  margin-top: 0;
+}
+
+.description-section p {
+  line-height: 1.6;
+  color: #555;
+}
+
+/* Botones de Acción */
+.action-buttons-single {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto; /* Empuja los botones hacia la parte inferior del panel */
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1em;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #000000; /* Botón Comprar (Rojo) */
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #20d05e;
+}
+
+.btn-secondary {
+  background-color: #f0f0f0; /* Botón Contactar (Gris claro) */
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn-secondary:hover {
+  background-color: #e0e0e0;
+}

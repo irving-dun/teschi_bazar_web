@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teschi-Bazar - Ropa</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <header>
+      <h1>TESCHI-BAZAR</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="">Acerca de</a></li>
+        </ul>
+      </nav>
+      <button
+        id="iniciaSesionButton"
+        onclick="window.location.href='login.html'"
+        class="btn-inicio-sesion"
+      >
+        Iniciar Sesión
+      </button>
+
+      <div id="contenedorPerfilUsuario" style="display: none"></div>
+    </header>
+
+    <div class="categoria-wrapper">
+      <div class="categoria-slider">
+        <a href="ropa.html" class="categoria-card">Ropa</a>
+        <a href="maquillaje.html" class="categoria-card">Maquillaje</a>
+        <a href="accesorios.html" class="categoria-card">Accesorios</a>
+        <a href="libros.html" class="categoria-card">Libros</a>
+        <a href="electronica.html" class="categoria-card">Electrónica</a>
+      </div>
+    </div>
+
+    <main>
+      <section id="inicio">
+        <h2>Artículos de Ropa</h2>
+        <p>Explora la mejor selección de moda y accesorios disponibles.</p>
+
+        <div class="contenedor-padre fila-uno">
+          <div class="caja-izquierda" id="producto-1">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos/NIKE.JPG" alt="Tenis Nike Initiator" />
+            </div>
+            <div class="producto-mitad info-mitad">
+              <h3>Tenis Nike Initiator</h3>
+              <p class="precio">$1899.00</p>
+              <p>Zapatos de running unisex</p>
+            </div>
+          </div>
+
+          <div class="caja-centro" id="producto-2">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos/MOCHILA.JPG" alt="Mochila escolar" />
+            </div>
+            <div class="producto-mitad info-mitad">
+              <h3>Mochila escolar</h3>
+              <p class="precio">$599.00</p>
+              <p>Mochila escolar con multiples compartimientos</p>
+            </div>
+          </div>
+
+          <div class="caja-derecha" id="producto-3">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos/CARGO.JPG" alt="Pantalones Cargo" />
+            </div>
+            <div class="producto-mitad info-mitad">
+              <h3>Pantalones Cargo</h3>
+              <p class="precio">$500.00</p>
+              <p>Talla mediana</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="contenedor-padre fila-dos">
+          <div class="caja-izquierda" id="producto-4">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos/CHAMARRA.JPG" alt="Chamarra Deportiva" />
+            </div>
+            <div class="producto-mitad info-mitad">
+              <h3>Chamarra Deportiva</h3>
+              <p class="precio">$750.00</p>
+              <p>Talla grande, color azul.</p>
+            </div>
+          </div>
+
+          <div class="caja-centro" id="producto-5">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos/nueva_imagen_5.jpg" alt="Vestido Casual" />
+            </div>
+            <div class="producto-mitad info-mitad">
+              <h3>Vestido Casual</h3>
+              <p class="precio">$400.00</p>
+              <p>Corte midi, estampado floral. Talla chica.</p>
+            </div>
+          </div>
+
+          <div class="caja-derecha" id="producto-6">
+            <div class="producto-mitad imagen-mitad">
+              <img
+                src="productos/nueva_imagen_6.jpg"
+                alt="Sudadera con Capucha"
+              />
+            </div>
+            <div class="producto-mitad info-mitad">
+              <h3>Sudadera con Capucha</h3>
+              <p class="precio">$650.00</p>
+              <p>Color gris, sin detalles. Algodón suave.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; Teschi-Bazar</p>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="scriptIndex.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teschi-Bazar</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <header>
+      <h1>TESCHI-BAZAR</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="">Acerca de</a></li>
+        </ul>
+      </nav>
+      <button
+        id="iniciaSesionButton"
+        onclick="window.location.href='login.html'"
+        class="btn-inicio-sesion"
+      >
+        Iniciar Sesión
+      </button>
+
+      <div id="contenedorPerfilUsuario" style="display: none"></div>
+    </header>
+
+    <div class="categoria-wrapper">
+      <div class="categoria-slider">
+        <a href="ropa.html" class="categoria-card">Ropa</a>
+        <a href="maquillaje.html" class="categoria-card">Maquillaje</a>
+        <a href="accesorios.html" class="categoria-card">Accesorios</a>
+        <a href="libros.html" class="categoria-card">Libros</a>
+        <a href="electronica.html" class="categoria-card">Electrónica</a>
+      </div>
+    </div>
+
+    <main>
+      <section id="inicio">
+        <h2>Articulos de Maquillaje</h2>
+        <p>...</p>
+        <div class="contenedor-padre fila-uno">
+          <div class="caja-izquierda">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos\BASE.JPG" alt="producto1" />
+            </div>
+
+            <div class="producto-mitad info-mitad">
+              <h3>Base de Maquillaje HD</h3>
+
+              <p class="precio">$349.50</p>
+              <p>Cobertura completa y acabado mate</p>
+            </div>
+          </div>
+
+          <div class="caja-centro">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos\PALETA.JPG" alt="producto3" />
+            </div>
+
+            <div class="producto-mitad info-mitad">
+              <h3>Paleta de sombras Nude</h3>
+              <p class="precio">$285.00</p>
+              <p>12 tonos neutros, mate y brillantes</p>
+            </div>
+          </div>
+
+          <div class="caja-derecha">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos\LABIAL.JPG" alt="producto3" />
+            </div>
+
+            <div class="producto-mitad info-mitad">
+              <h3>Labial liquido Mate</h3>
+              <p class="precio">$125.99</p>
+              <p>Larga duración, color rojo intenso</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; Teschi-Bazar</p>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="scriptIndex.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teschi-Bazar</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <div class="categoria-wrapper">
+    <div class="categoria-slider">
+      <a href="ropa.html" class="categoria-card">Ropa</a>
+      <a href="maquillaje.html" class="categoria-card">Maquillaje</a>
+      <a href="accesorios.html" class="categoria-card">Accesorios</a>
+      <a href="libros.html" class="categoria-card">Libros</a>
+      <a href="electronica.html" class="categoria-card">Electrónica</a>
+    </div>
+  </div>
+
+  <body>
+    <header>
+      <h1>TESCHI-BAZAR</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="">Acerca de</a></li>
+        </ul>
+      </nav>
+      <button
+        id="iniciaSesionButton"
+        onclick="window.location.href='login.html'"
+        class="btn-inicio-sesion"
+      >
+        Iniciar Sesión
+      </button>
+
+      <div id="contenedorPerfilUsuario" style="display: none"></div>
+    </header>
+
+    <main>
+      <section id="inicio">
+        <h2>Articulos de Libros</h2>
+        <p>...</p>
+        <div class="contenedor-padre fila-uno">
+          <div class="caja-izquierda">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos\FICCION.JPG" alt="libro1" />
+            </div>
+
+            <div class="producto-mitad info-mitad">
+              <h3>Novela de Ciencia Ficción</h3>
+
+              <p class="precio">$280.00</p>
+              <p>Una epica aventura intergaláctica</p>
+            </div>
+          </div>
+
+          <div class="caja-centro">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos\HABITOS.JPG" alt="libro2" />
+            </div>
+
+            <div class="producto-mitad info-mitad">
+              <h3>El poder de los Hábitos</h3>
+              <p class="precio">$350.00</p>
+              <p>Guía para cambiar tu vida con rutinas</p>
+            </div>
+          </div>
+
+          <div class="caja-derecha">
+            <div class="producto-mitad imagen-mitad">
+              <img src="productos\RECETAS.JPG" alt="libro3" />
+            </div>
+
+            <div class="producto-mitad info-mitad">
+              <h3>Recetas veganas para principiantes</h3>
+              <p class="precio">$210.00</p>
+              <p>Platillos sencillos y nutritivos</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; Teschi-Bazar</p>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="scriptIndex.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

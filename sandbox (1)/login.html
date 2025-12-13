@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inicia sesion en TESCHI-BAZAR</title>
+    <link rel="stylesheet" href="logstyles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <div id="perfil-cargado" style="display: none"></div>
+    <div class="contenedor-principal" id="contenedor-principal">
+      <div class="form-contenedor sign-up-contenedor">
+        <form class="formulario" id="registroForm">
+          <h1>Regístrate aquí</h1>
+          <input type="text" placeholder="Nombre" id="reg-nombre" />
+          <input type="email" placeholder="Correo electrónico" id="reg-email" />
+          <input type="tel" placeholder="Telefono" id="reg-telefono" />
+          <input type="password" placeholder="Contraseña" id="reg-password" />
+          <button type="submit">REGISTRAR</button>
+          <div class="social-media">
+            <p>o usa tu cuenta</p>
+            <a href="#" class="social-icon"
+              ><i class="fab fa-facebook-f"></i
+            ></a>
+            <a href="#" class="social-icon"><i class="fab fa-google"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-tiktok"></i></a>
+          </div>
+        </form>
+      </div>
+
+      <div class="form-contenedor sign-in-contenedor">
+        <form class="formulario" id="loginForm">
+          <h1>Inicia sesión aquí</h1>
+          <input type="email" placeholder="Correo electrónico" id="log-email" />
+          <input type="password" placeholder="Contraseña" id="log-password" />
+
+          <div class="recuerdame">
+            <div class="recuerdame-checkbox-group">
+              <input type="checkbox" id="recuerdame" />
+              <label for="recuerdame">Recuérdame</label>
+            </div>
+            <a href="#" id="forgotPasswordLink" class="olvidaste-contrasena"
+              >¿Olvidaste la contraseña?</a
+            >
+          </div>
+          <button type="submit">INICIAR SESIÓN</button>
+          <div class="social-media">
+            <p>o usa tu cuenta</p>
+            <a href="#" class="social-icon"
+              ><i class="fab fa-facebook-f"></i
+            ></a>
+            <a href="#" class="social-icon"><i class="fab fa-google"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-tiktok"></i></a>
+          </div>
+        </form>
+      </div>
+
+      <div class="overlay-contenedor">
+        <div class="overlay">
+          <div class="overlay-panel overlay-left">
+            <h1>Bienvenido</h1>
+            <p>Si quieres comprar o vender algo estas en el lugar correcto</p>
+            <button class="ghost" id="signIn">INICIAR SESIÓN</button>
+          </div>
+          <div class="overlay-panel overlay-right">
+            <h1>Comienza ahora</h1>
+            <p>
+              Si aún no tienes una cuenta, únete a nosotros y comienza a vender
+              y comprar
+            </p>
+            <button class="ghost" id="signUp">REGÍSTRATE</button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="login-error-mensaje"
+        style="
+          color: #f44336;
+          margin-bottom: 15px;
+          padding: 10px;
+          border: 1px solid #f44336;
+          border-radius: 5px;
+          background-color: #fdd;
+          display: none;
+          text-align: center;
+        "
+      ></div>
+      <form id="loginForm"></form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script src="firebase-config.js"></script>
+
+    <script src="scriptyLogin.js"></script>
+  </body>
+</html>

@@ -1,0 +1,284 @@
+/* ==================================== */
+/* 1. RESET Y ESTILOS GLOBALES */
+/* ==================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif; /* Usamos una fuente genérica para la consistencia */
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #e6e6e6;
+    overflow: hidden;
+}
+
+/* ==================================== */
+/* 2. CONTENEDOR PRINCIPAL Y PANELES */
+/* ==================================== */
+.contenedor-principal {
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
+                0 10px 10px rgba(0, 0, 0, 0.22);
+    position: relative;
+    overflow: hidden;
+    width: 900px; /* Ancho total */
+    max-width: 100%;
+    min-height: 550px; /* Alto total */
+}
+
+/* Contenedores de formularios (blanco) */
+.form-contenedor {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;
+}
+
+/* Formulario de Registro (oculto inicialmente) */
+.sign-up-contenedor {
+    left: 0;
+    width: 50%;
+    opacity: 0; 
+    z-index: 1; /* Detrás del formulario de Sign In */
+}
+
+/* Formulario de Inicio de Sesión (visible inicialmente) */
+.sign-in-contenedor {
+    left: 0;
+    width: 50%;
+    z-index: 2; /* Visible al inicio */
+}
+
+/* Panel superpuesto (azul/gris) */
+.overlay-contenedor {
+    position: absolute;
+    top: 0;
+    left: 50%; /* Inicia en la mitad derecha */
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.6s ease-in-out;
+    z-index: 100; /* CLAVE: Siempre por encima de los formularios */
+}
+
+.overlay {
+    /* Fondo con el gradiente azul/gris */
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+    color: #FFFFFF;
+    position: relative;
+    left: -100%; 
+    height: 100%;
+    width: 200%; /* El doble para contener los dos mensajes */
+    transform: translateX(0);
+    transition: transform 0.6s ease-in-out;
+}
+
+.overlay-panel {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    text-align: center;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
+}
+
+.overlay-panel h1 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.overlay-panel p {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Panel izquierdo del overlay (contenido de "Hola amigos") */
+.overlay-left {
+    transform: translateX(-20%);
+    opacity: 0; /* Oculto inicialmente */
+}
+
+/* Panel derecho del overlay (contenido de "Comienza tu viaje") */
+.overlay-right {
+    right: 0;
+    transform: translateX(0);
+    opacity: 1; /* Visible inicialmente */
+}
+
+
+/* ==================================== */
+/* 3. ESTILOS DE ELEMENTOS (INPUTS Y BOTONES) */
+/* ==================================== */
+.formulario {
+    /* ... estilos del formulario ... */
+    background-color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 50px;
+    height: 100%;
+    text-align: center;
+}
+
+.formulario h1{
+    font-weight: bold;
+    margin-bottom: 25px;
+}
+
+.formulario input {
+    /* Ajuste para que los inputs se vean más parecidos a tus imágenes */
+    background-color: #f0f0f0; 
+    border: none;
+    padding: 12px 15px;
+    margin: 8px 0;
+    width: 100%;
+    border-radius: 8px;
+    height: 50px; /* Ajuste de altura */
+}
+
+/* Estilo para los botones de los formularios (Fondo azul) */
+
+
+/* CLAVE: Estilos para los botones dentro del panel azul (contorno blanco) */
+button {
+    border-radius: 20px;
+    border: 1px solid #4facfe;
+    background-color: #4facfe;
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 12px 45px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: transform 80ms ease-in;
+    margin-top: 15px;
+    cursor: pointer;
+    
+}
+button:active{
+    transform: scale(0.95);
+}
+
+/* ... (Otros estilos como social media, recuerdame) ... */
+
+.social-media {
+    margin: 20px 0 10px; /* Ajuste de margen */
+    text-align: center;
+}
+
+.social-media p {
+    font-size: 12px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.social-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+    width: 40px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    margin: 0 5px;
+    color: #333;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.recuerdame {
+    /* ... estilos ... */
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: 10px 0 20px 0;
+    font-size: 12px;
+}
+.recuerdame-checkbox-group{
+    display: flex;
+    align-items: center;
+}
+.recuerdame input[type="checkbox"] {
+    
+    width: 15px;      /* Tamaño estándar pequeño para el checkbox */
+    height: 15px;
+    
+    margin: 0;
+    padding: 0;
+    
+    /* Asegúrate de que el fondo y borde sean visibles si se aplica un estilo genérico */
+    background-color: transparent;
+    border: none;
+    
+    /* Separa el checkbox del texto "Recuérdame" */
+    margin-right: 5px;
+}
+
+.recuerdame-checkbox-group label{
+    margin: 0;
+    white-space: nowrap;
+}
+
+.olvidaste-contrasena{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    color: #4facfe;
+    text-decoration: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* ==================================== */
+/* 4. CLASES DE ANIMACIÓN (ESTADO "LOGIN" -> "REGISTRO") */
+/* ==================================== */
+
+/* Estado al hacer clic en REGÍSTRATE (right-panel-active) */
+
+/* El formulario de Login se desliza a la derecha */
+.contenedor-principal.right-panel-active .sign-in-contenedor {
+    transform: translateX(100%);
+}
+
+/* El formulario de Registro se desliza a la derecha y se hace visible */
+.contenedor-principal.right-panel-active .sign-up-contenedor {
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5; 
+}
+
+/* El contenedor del overlay se mueve a la izquierda (el panel azul salta) */
+.contenedor-principal.right-panel-active .overlay-contenedor {
+    transform: translateX(-100%);
+    border-radius: 20px 0 0 20px; 
+}
+
+/* El overlay interno se mueve a la derecha para mostrar el mensaje "Hola amigos" */
+.contenedor-principal.right-panel-active .overlay {
+    transform: translateX(50%); /* Mover el 50% para que el contenido de la izquierda se vea */
+}
+
+/* El panel derecho del overlay (Comienza tu viaje) se oculta */
+.contenedor-principal.right-panel-active .overlay-right {
+    transform: translateX(20%);
+    opacity: 0;
+}
+
+/* El panel izquierdo del overlay (Hola amigos) se hace visible */
+.contenedor-principal.right-panel-active .overlay-left {
+    transform: translateX(0);
+    opacity: 1;
+}
