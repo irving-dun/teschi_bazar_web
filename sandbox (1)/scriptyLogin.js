@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // --- Control de las Animaciones ---
+  // --- Control de las Animaciones --
   const registraSesionButton = document.getElementById("signUp");
   const iniciaSesionBoton = document.getElementById("signIn");
 
