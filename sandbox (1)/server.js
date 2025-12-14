@@ -1,112 +1,128 @@
 
+// Dependencias
 const express = require('express');
-const mysql = require('mysql2/promise'); // Módulo de conexión a MySQL
-const cors = require('cors'); // Para permitir peticiones desde el Frontend
+const mysql = require('mysql2/promise'); // Usaremos la versión con promesas para async/await
+const cors = require('cors');
+const multer = require('multer'); // Nuevo: Para manejar la carga de archivos
+const path = require('path');   // Nuevo: Para manejar rutas de archivos
 
 const app = express();
-const port = 3000; // El puerto donde correrá el servidor Node.js
+const port = 3000;
 
 // Middleware
-app.use(cors()); // Habilita la comunicación entre tu frontend (localhost) y este backend (localhost:3000)
-app.use(express.json()); // Permite a la API leer datos JSON enviados en el cuerpo (body) de las solicitudes POST
+app.use(cors()); // Permite peticiones desde el Frontend
+app.use(express.json()); // Permite que Express lea JSON en el body de las peticiones
 
-// =======================================================
-// CONFIGURACIÓN DE LA BASE DE DATOS
-// =======================================================
+// Nuevo: Servir archivos estáticos (para que el Frontend pueda ver las imágenes)
+// Esto hace que http://localhost:3000/uploads/nombre_archivo.jpg funcione
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// --- Configuración de la Base de Datos (Asegúrate de que coincida con tu XAMPP) ---
 const dbConfig = {
     host: 'localhost',
-    user: 'root',
-    password: '', // Contraseña vacía por defecto de XAMPP
-    database: 'teschibazar' // Nombre de tu base de datos
+    user: 'root', // Usuario por defecto de XAMPP
+    password: '', // Contraseña por defecto de XAMPP
+    database: 'teschibazar', // ¡Tu base de datos!
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 };
 
-// Función para probar la conexión al inicio
-async function testDbConnection() {
+let pool; // La conexión a la base de datos
+
+// Función para inicializar la conexión
+async function initializeDatabase() {
     try {
-        const connection = await mysql.createConnection(dbConfig);
+        pool = await mysql.createPool(dbConfig);
+        const connection = await pool.getConnection();
+        connection.release(); // Libera la conexión de vuelta al pool
         console.log('✅ Conexión a MySQL exitosa!');
-        await connection.end();
-    } catch (error) {
-        console.error('❌ Error al conectar a MySQL. Asegúrate de que XAMPP-MySQL esté corriendo.', error.message);
-        process.exit(1); // Detiene el proceso si falla la conexión a la DB
+    } catch (err) {
+        console.error('❌ Error al conectar con MySQL:', err.message);
+        process.exit(1); // Sale de la aplicación si no se puede conectar
     }
 }
 
-// =======================================================
-// 1. API DE LECTURA (GET /api/productos) - Migrado de api_productos.php
-// =======================================================
-app.get('/api/productos', async (req, res) => {
-    let connection;
-    try {
-        connection = await mysql.createConnection(dbConfig);
-        
-        // Ejecuta la consulta para obtener todos los productos
-        const [rows] = await connection.execute('SELECT * FROM productos');
-        
-        // Envía el resultado como JSON
-        res.json(rows); 
-    } catch (error) {
-        console.error('Error al obtener productos:', error);
-        res.status(500).json({ error: 'Error interno del servidor al obtener productos.' });
-    } finally {
-        if (connection) connection.end(); // Siempre cierra la conexión
+// --- Configuración de MULTER (Carga de Imágenes) ---
+
+// 1. Configuración de Almacenamiento
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        // Guarda los archivos en la carpeta 'uploads' (¡debe existir!)
+        cb(null, path.join(__dirname, 'uploads')); 
+    },
+    filename: (req, file, cb) => {
+        // Genera un nombre de archivo único para evitar colisiones
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
-// =======================================================
-// 2. API DE INSERCIÓN (POST /api/productos/insertar) - Migrado de api_insertar_producto.php
-// =======================================================
-app.post('/api/productos/insertar', async (req, res) => {
-    let connection;
+// 2. Instancia de Multer
+const upload = multer({ storage: storage });
+
+// =================================================================
+// RUTAS DE LA API
+// =================================================================
+
+// 🚀 RUTA 1: POST - Insertar un nuevo producto con imagen
+// Usamos upload.single('imagen') donde 'imagen' debe ser el 'name' del input de archivo en el Frontend
+app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) => {
+    // Los datos de texto están en req.body
+    const { id_usuario_vendedor, nombre_producto, descripcion, precio, categoria_id, estado } = req.body;
+
+    // La información del archivo subido está en req.file
+    const imagen_url = req.file ? '/uploads/' + req.file.filename : null; 
+
+    // Validación mínima (¡ajustar según tus necesidades!)
+    if (!id_usuario_vendedor || !nombre_producto || !precio || !imagen_url) {
+        // Si la imagen o algún campo clave falta, responde con un error 400
+        return res.status(400).json({ mensaje: 'Faltan datos requeridos (incluyendo la imagen).' });
+    }
+
+    // Consulta SQL: Ahora incluye la columna imagen_url
+    const sql = "INSERT INTO productos (id_usuario_vendedor, nombre_producto, descripcion, precio, categoria_id, estado, imagen_url) VALUES (?, ?, ?, ?, ?, ?, ?)";
     
-    // Desestructuración de los datos requeridos del body
-    const { vendedor_uid, nombre, descripcion, precio, categoria_id, estado } = req.body;
-
-    // Validación de datos
-    if (!vendedor_uid || !nombre || !descripcion || !precio || !categoria_id || !estado) {
-        return res.status(400).json({ error: 'Faltan datos requeridos.' });
-    }
-
     try {
-        connection = await mysql.createConnection(dbConfig);
+        const [result] = await pool.query(sql, [id_usuario_vendedor, nombre_producto, descripcion, precio, categoria_id, estado, imagen_url]);
         
-        const sql = `
-            INSERT INTO productos 
-            (id_usuario_vendedor, nombre_producto, descripcion, precio, id_categoria, estado_producto, disponibilidad, fecha_publicacion) 
-            VALUES (?, ?, ?, ?, ?, ?, 1, NOW())
-        `;
-
-        // Ejecución de la consulta con Prepared Statements
-        const [result] = await connection.execute(
-            sql,
-            [vendedor_uid, nombre, descripcion, precio, categoria_id, estado]
-        );
-        
-        // Éxito: devolver el ID del producto insertado
         res.status(201).json({ 
-            success: true, 
-            mensaje: "Producto registrado con éxito!", 
-            id_producto: result.insertId 
+            mensaje: 'Producto insertado con éxito', 
+            id_producto: result.insertId,
+            ruta_imagen: imagen_url
         });
-
-    } catch (error) {
-        console.error('Error al registrar producto:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: "Error interno del servidor al registrar producto." 
-        });
-    } finally {
-        if (connection) connection.end(); 
+    } catch (err) {
+        console.error('Error al insertar producto:', err);
+        // Borrar el archivo si la inserción en DB falla
+        if (req.file) {
+             const fs = require('fs');
+             fs.unlinkSync(req.file.path); 
+        }
+        res.status(500).json({ error: 'Error interno del servidor al insertar producto.' });
     }
 });
 
 
-// =======================================================
-// INICIAR SERVIDOR
-// =======================================================
+// 📚 RUTA 2: GET - Obtener todos los productos
+app.get('/api/productos', async (req, res) => {
+    const sql = "SELECT * FROM productos";
+    
+    try {
+        const [rows] = await pool.query(sql); // rows contiene el resultado de la consulta
+        res.json(rows);
+    } catch (err) {
+        console.error('Error al consultar productos:', err);
+        res.status(500).json({ error: 'Error al obtener datos de la base de datos.' });
+    }
+});
 
-// Llama a la función de prueba de conexión y luego inicia el servidor
-testDbConnection().then(() => {
+
+// =================================================================
+// INICIO DEL SERVIDOR
+// =================================================================
+
+// Inicializa la base de datos y luego inicia el servidor web
+initializeDatabase().then(() => {
     app.listen(port, () => {
         console.log(`Servidor Node.js corriendo en http://localhost:${port}`);
     });

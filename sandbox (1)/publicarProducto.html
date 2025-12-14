@@ -40,7 +40,11 @@
     <main class="container-form">
       <h2>Subir Nuevo Producto</h2>
 
-      <form id="formularioProducto" class="product-form">
+      <form
+        id="formularioProducto"
+        class="product-form"
+        enctype="multipart/form-data"
+      >
         <div class="form-section">
           <h3>1. Imagenes del Producto</h3>
 
@@ -53,9 +57,8 @@
             <input
               type="file"
               id="imagenes"
-              name="imagenes"
+              name="imagen"
               accept="image/*"
-              multiple
               required
             />
           </div>
@@ -69,25 +72,17 @@
           // ===============================================
           // Lógica para abrir el selector de archivos ===
           // ===============================================
-
           document.addEventListener("DOMContentLoaded", () => {
-            // 1. Obtenemos el input de archivo (el elemento que debe ser activado)
             const inputArchivo = document.getElementById("imagenes");
-
-            // 2. Obtenemos el area visible donde el usuario hace clic (el div azul)
             const areaCliqueable =
               document.getElementById("clicAreaMultimedia");
 
-            // Comprobación de seguridad
             if (!inputArchivo || !areaCliqueable) {
               console.error("Error: Elementos multimedia no encontrados.");
               return;
             }
 
-            // Agregamos un escuchador de eventos al área azul
             areaCliqueable.addEventListener("click", () => {
-              // Palabra reservada 'inputArchivo.click()': Este es el comando mágico.
-              // Ejecuta programáticamente el evento de clic en el input de archivo oculto.
               inputArchivo.click();
             });
           });
@@ -122,22 +117,22 @@
 
           <div class="options-group" style="gap: 20px">
             <div class="form-group" style="flex: 1">
-              <label for="id_categoria">Categoría</label>
-              <select id="id_categoria" name="id_categoria" required>
+              <label for="categoria_id">Categoría</label>
+              <select id="categoria_id" name="categoria_id" required>
                 <option value="1">Ropa</option>
                 <option value="2">Maquillaje</option>
                 <option value="3">Accesorios</option>
-                <option value="3">Libros</option>
-                <option value="3">Electrónica</option>
+                <option value="4">Libros</option>
+                <option value="5">Electrónica</option>
               </select>
             </div>
 
             <div class="form-group" style="flex: 1">
-              <label for="estado_producto">Estado del Producto</label>
-              <select id="estado_producto" name="estado_producto" required>
-                <option value="nuevo">Nuevo</option>
-                <option value="usado">Usado</option>
-                <option value="reacondicionado">Reacondicionado</option>
+              <label for="estado">Estado del Producto</label>
+              <select id="estado" name="estado" required>
+                <option value="Nuevo">Nuevo</option>
+                <option value="Usado">Usado</option>
+                <option value="Reacondicionado">Reacondicionado</option>
               </select>
             </div>
           </div>
@@ -169,30 +164,29 @@
             />
           </div>
 
-            <div class="toggle-item">
-              <label for="ubicacion_entrega">Ubicación de Entrega</label>
-              <select
-                id="ubicacion_entrega"
-                name="ubicacion_entrega"
-                required
-                style="width: auto; margin-left: 10px"
-              >
-                <option value="" disabled selected>
-                  Selecciona el edificio
-                </option>
-                <option value="Edificio A">Edificio A</option>
-                <option value="Edificio A">Edificio B</option>
-                <option value="Edificio A">Edificio D</option>
-                <option value="Edificio A">Edificio E</option>
-                <option value="Edificio A">Edificio F</option>
-                <option value="Edificio A">Edificio G</option>
-                <option value="Edificio A">Edificio H</option>
-                <option value="Edificio A">Edificio I</option>
-                <option value="Edificio A">Edificio J</option>
-                <option value="Edificio A">Edificio K</option>
-                <option value="Edificio A">Edificio Q</option>
-              </select>
-            </div>
+          <div class="toggle-item">
+            <label for="ubicacion_entrega">Ubicación de Entrega</label>
+            <select
+              id="ubicacion_entrega"
+              name="ubicacion_entrega"
+              required
+              style="width: auto; margin-left: 10px"
+            >
+              <option value="" disabled selected>
+                Selecciona el edificio
+              </option>
+              <option value="Edificio A">Edificio A</option>
+              <option value="Edificio B">Edificio B</option>
+              <option value="Edificio D">Edificio D</option>
+              <option value="Edificio E">Edificio E</option>
+              <option value="Edificio F">Edificio F</option>
+              <option value="Edificio G">Edificio G</option>
+              <option value="Edificio H">Edificio H</option>
+              <option value="Edificio I">Edificio I</option>
+              <option value="Edificio J">Edificio J</option>
+              <option value="Edificio K">Edificio K</option>
+              <option value="Edificio Q">Edificio Q</option>
+            </select>
           </div>
         </div>
 
@@ -214,7 +208,7 @@
     <script src="firebase-config.js"></script>
 
     <script src="scriptIndex.js"></script>
-    <script src="scriptSubirProducto.js"></script>
+    <script src="scriptSubirProducto.js"></script> 
 
     <script src="script.js"></script>
   </body>
