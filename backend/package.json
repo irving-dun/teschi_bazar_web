@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/MarPardo31/teschi_bazar_web#readme",
   "dependencies": {
+
     "cors": "2.8.5",
     "express": "5.2.1",
     "multer": "^2.0.2",        
@@ -26,6 +27,7 @@
     "mysqli": "^9.15.3",       
     "socket.io": "^4.8.1",     
     "firebase-admin": "^13.6.0" 
+
   }
  
 }
