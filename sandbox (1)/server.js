@@ -1,6 +1,4 @@
-// =======================================================
-// CONFIGURACIÓN DE DEPENDENCIAS Y SERVIDOR EXPRESS
-// =======================================================
+
 const express = require('express');
 const mysql = require('mysql2/promise'); // Módulo de conexión a MySQL
 const cors = require('cors'); // Para permitir peticiones desde el Frontend
