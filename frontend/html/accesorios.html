@@ -16,7 +16,8 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="styles.css" />
+
+    <link rel="stylesheet" href="/frontend/css/styles.css" />
   </head>
   <body>
     <header>
@@ -57,7 +58,7 @@
         <div class="contenedor-padre fila-uno">
           <div class="caja-izquierda">
             <div class="producto-mitad imagen-mitad">
-              <img src="productos\RELOJ.JPG" alt="accesorio1" />      
+              <img src="/frontend/imgProductos/RELOJ.JPG" alt="accesorio1" />      
             </div>
 
             <div class="producto-mitad info-mitad">
@@ -71,7 +72,7 @@
 
           <div class="caja-centro">
             <div class="producto-mitad imagen-mitad">
-              <img src="productos\LENTES.JPG" alt="accesorio2" />
+              <img src="/frontend/imgProductos/LENTES.JPG" alt="accesorio2" />
             </div>
 
             <div class="producto-mitad info-mitad">
@@ -85,7 +86,7 @@
 
           <div class="caja-derecha">
             <div class="producto-mitad imagen-mitad">
-              <img src="productos\CARTERAS.JPG" alt="accesorio3" />        
+              <img src="/frontend/imgProductos/CARTERAS.JPG" alt="accesorio3" />        
             </div>
 
             <div class="producto-mitad info-mitad">
@@ -105,8 +106,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="firebase-config.js"></script>
-    <script src="scriptIndex.js"></script>
-    <script src="script.js"></script>
+
+    <script src="../../backend/firebase-config.js"></script> 
+    
+    <script src="../../frontend/javascript/scriptIndex.js"></script>
+    
+    <script src="../../frontend/javascript/script.js"></script>
   </body>
 </html>

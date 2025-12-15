@@ -14,7 +14,7 @@
       rel="stylesheet"
     />
 
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="/frontend/css/styles.css" />
   </head>
 
   <body>
@@ -55,7 +55,7 @@
         <div class="contenedor-padre fila-uno">
           <div class="caja-izquierda" id="producto-1">
             <div class="producto-mitad imagen-mitad">
-              <img src="productos/NIKE.JPG" alt="Tenis Nike Initiator" />
+              <img src="/frontend/imgProductos/NIKE.JPG" alt="Tenis Nike Initiator" />
             </div>
             <div class="producto-mitad info-mitad">
               <h3>Tenis Nike Initiator</h3>
@@ -66,7 +66,7 @@
 
           <div class="caja-centro" id="producto-2">
             <div class="producto-mitad imagen-mitad">
-              <img src="productos/MOCHILA.JPG" alt="Mochila escolar" />
+              <img src="/frontend/imgProductos/MOCHILA.JPG" alt="Mochila escolar" />
             </div>
             <div class="producto-mitad info-mitad">
               <h3>Mochila escolar</h3>
@@ -77,7 +77,7 @@
 
           <div class="caja-derecha" id="producto-3">
             <div class="producto-mitad imagen-mitad">
-              <img src="productos/CARGO.JPG" alt="Pantalones Cargo" />
+              <img src="/frontend/imgProductos/CARGO.JPG" alt="Pantalones Cargo" />
             </div>
             <div class="producto-mitad info-mitad">
               <h3>Pantalones Cargo</h3>
@@ -90,7 +90,7 @@
         <div class="contenedor-padre fila-dos">
           <div class="caja-izquierda" id="producto-4">
             <div class="producto-mitad imagen-mitad">
-              <img src="productos/CHAMARRA.JPG" alt="Chamarra Deportiva" />
+              <img src="/frontend/imgProductos/CHAMARRA.JPG" alt="Chamarra Deportiva" />
             </div>
             <div class="producto-mitad info-mitad">
               <h3>Chamarra Deportiva</h3>
@@ -101,7 +101,7 @@
 
           <div class="caja-centro" id="producto-5">
             <div class="producto-mitad imagen-mitad">
-              <img src="productos/nueva_imagen_5.jpg" alt="Vestido Casual" />
+              <img src="/frontend/imgProductos/VESTIDO.JPG" alt="Vestido Casual" />
             </div>
             <div class="producto-mitad info-mitad">
               <h3>Vestido Casual</h3>
@@ -113,7 +113,7 @@
           <div class="caja-derecha" id="producto-6">
             <div class="producto-mitad imagen-mitad">
               <img
-                src="productos/nueva_imagen_6.jpg"
+                src="/frontend/imgProductos/CAPUCHA.JPG"
                 alt="Sudadera con Capucha"
               />
             </div>
@@ -134,8 +134,11 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="firebase-config.js"></script>
-    <script src="scriptIndex.js"></script>
-    <script src="script.js"></script>
+
+    <script src="../../backend/firebase-config.js"></script> 
+    
+    <script src="../../frontend/javascript/scriptIndex.js"></script>
+    
+    <script src="../../frontend/javascript/script.js"></script>
   </body>
 </html>
