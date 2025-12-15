@@ -173,3 +173,171 @@
 .btn-secondary:hover {
   background-color: #e0e0e0;
 }
+/* ======================================================= */
+/* ESTILOS ESPECÍFICOS DEL CHAT */
+/* ======================================================= */
+
+/* --- Contenedor General --- */
+#chat-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    max-width: 90vw; /* Responsivo para móviles */
+    height: 500px;
+    max-height: 80vh;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+/* Clases para manejar visibilidad con JS */
+.chat-oculto {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px) scale(0.95);
+}
+
+.chat-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+/* --- Encabezado --- */
+#chat-header {
+    background-color: #007bff; /* Color primario para el encabezado */
+    color: white;
+    padding: 15px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#chat-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    flex-grow: 1;
+}
+
+#chat-vendedor-info {
+    font-size: 0.85em;
+    opacity: 0.8;
+    margin-right: 15px;
+}
+
+#cerrar-chat-btn {
+    background: none;
+    color: white;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 5px;
+}
+
+/* --- Cuerpo de Mensajes --- */
+#chat-body {
+    flex-grow: 1; /* Ocupa todo el espacio restante */
+    padding: 15px;
+    overflow-y: auto; /* Scroll para los mensajes */
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#loading-indicator {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 10px 0;
+    opacity: 0.5;
+}
+
+/* --- Pie de Página (Input y Botón) --- */
+#chat-footer {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid #eee;
+}
+
+#chat-input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    resize: none; 
+    height: 40px; /* Altura inicial */
+    margin-right: 10px;
+    transition: height 0.2s;
+}
+
+#enviar-mensaje-btn {
+    background-color: #28a745; /* Color de éxito */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    height: 40px;
+}
+
+#enviar-mensaje-btn:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+#enviar-mensaje-btn:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+
+/* --- Estilos de Mensajes (Burbujas) --- */
+.mensaje-chat {
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 15px;
+    line-height: 1.4;
+    word-wrap: break-word; 
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.mensaje-chat p {
+    margin: 0 0 5px 0;
+}
+
+.mensaje-chat .timestamp {
+    display: block;
+    font-size: 0.75em;
+    text-align: right;
+    opacity: 0.7;
+}
+
+/* Mensaje del USUARIO (Mío) */
+.mio {
+    align-self: flex-end; /* A la derecha */
+    background-color: #d4edda; /* Verde claro */
+    color: #155724;
+    border-bottom-right-radius: 5px; /* Esquina más cerrada */
+    border-top-right-radius: 15px;
+}
+
+/* Mensaje del OTRO (Vendedor/Comprador) */
+.otro {
+    align-self: flex-start; /* A la izquierda */
+    background-color: #e9ecef; /* Gris claro */
+    color: #495057;
+    border-bottom-left-radius: 5px; /* Esquina más cerrada */
+    border-top-left-radius: 15px;
+}
