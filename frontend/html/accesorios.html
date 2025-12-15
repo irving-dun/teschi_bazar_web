@@ -1,116 +1,107 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Teschi-Bazar</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Anton&display=swap"
-      rel="stylesheet"
-    />
+  <title>Teschi-Bazar - Accesorios</title>
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
 
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
 
-    <link rel="stylesheet" href="/frontend/css/styles.css" />
-  </head>
-  <body>
-    <header>
-      <h1>TESCHI-BAZAR</h1>
-      <nav>
-        <ul>
-          <li><a href="index.html">Inicio</a></li>
+  <link rel="stylesheet" href="/frontend/css/productos.css" />
+</head>
 
-          <li><a href="">Acerca de</a></li>
-        </ul>
-      </nav>
+<body>
+  <header>
+    <h1>TESCHI-BAZAR</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
 
-      <button
-        id="iniciaSesionButton"
-        onclick="window.location.href='login.html'"
-        class="btn-inicio-sesion"
-      >
-        Iniciar Sesión
-      </button>
+        <li><a href="">Acerca de</a></li>
+      </ul>
+    </nav>
 
-      <div id="contenedorPerfilUsuario" style="display: none"></div>
-    </header>
+    <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
+      Iniciar Sesión
+    </button>
 
-    <div class="categoria-wrapper">
-      <div class="categoria-slider">
-        <a href="ropa.html" class="categoria-card">Ropa</a>
-        <a href="maquillaje.html" class="categoria-card">Maquillaje</a>
-        <a href="accesorios.html" class="categoria-card">Accesorios</a>
-        <a href="libros.html" class="categoria-card">Libros</a>
-        <a href="electronica.html" class="categoria-card">Electrónica</a>
-      </div>
+    <div id="contenedorPerfilUsuario" style="display: none"></div>
+  </header>
+
+  <div class="categoria-wrapper">
+    <div class="categoria-slider">
+      <a href="ropa.html" class="categoria-card">Ropa</a>
+      <a href="maquillaje.html" class="categoria-card">Maquillaje</a>
+      <a href="accesorios.html" class="categoria-card">Accesorios</a>
+      <a href="libros.html" class="categoria-card">Libros</a>
+      <a href="electronica.html" class="categoria-card">Electrónica</a>
     </div>
+  </div>
 
-    <main>
-      <section id="inicio">
-        <h2>Artículos de Accesorios</h2>
-        <p>...</p>
-        <div class="contenedor-padre fila-uno">
-          <div class="caja-izquierda">
-            <div class="producto-mitad imagen-mitad">
-              <img src="/frontend/imgProductos/RELOJ.JPG" alt="accesorio1" />      
-            </div>
+  <main>
+    <section id="inicio">
+      <h2>Artículos de Accesorios</h2>
+      <p>Explora nuestra variedad de relojes, lentes y carteras.</p>
 
-            <div class="producto-mitad info-mitad">
-              <h3>Reloj Deportivo Digital</h3>
+      <div class="productos-grid">
 
-              <p class="precio">$750.00</p>
-
-              <p>Resistente al agua con cronómetro</p>
-            </div>
+        <div class="producto-card" id="accesorio-1">
+          <div class="imagen-contenedor">
+            <img src="/frontend/imgProductos/RELOJ.JPG" alt="Reloj Deportivo Digital" />
           </div>
 
-          <div class="caja-centro">
-            <div class="producto-mitad imagen-mitad">
-              <img src="/frontend/imgProductos/LENTES.JPG" alt="accesorio2" />
-            </div>
-
-            <div class="producto-mitad info-mitad">
-              <h3>Lentes de Sol Polarizados</h3>
-
-              <p class="precio">$399.00</p>
-
-              <p>Estilo aviador con protección UV</p>
-            </div>
-          </div>
-
-          <div class="caja-derecha">
-            <div class="producto-mitad imagen-mitad">
-              <img src="/frontend/imgProductos/CARTERAS.JPG" alt="accesorio3" />        
-            </div>
-
-            <div class="producto-mitad info-mitad">
-              <h3>Cartera de Piel Minimalista</h3>
-              <p class="precio">$420.00</p>
-              <p>Diseño delgado con bloqueo RFID</p>
-            </div>
+          <div class="info-contenedor">
+            <p class="descripcion">Resistente al agua con cronómetro</p>
+            <h3 class="titulo-producto">Reloj Deportivo Digital</h3>
+            <p class="precio">$750.00</p>
           </div>
         </div>
-      </section>
-    </main>
 
-    <footer>
-      <p>&copy; Teschi-Bazar</p>
-    </footer>
+        <div class="producto-card" id="accesorio-2">
+          <div class="imagen-contenedor">
+            <img src="/frontend/imgProductos/LENTES.JPG" alt="Lentes de Sol Polarizados" />
+          </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+          <div class="info-contenedor">
+            <p class="descripcion">Estilo aviador con protección UV</p>
+            <h3 class="titulo-producto">Lentes de Sol Polarizados</h3>
+            <p class="precio">$399.00</p>
+          </div>
+        </div>
 
-    <script src="../../backend/firebase-config.js"></script> 
-    
-    <script src="../../frontend/javascript/scriptIndex.js"></script>
-    
-    <script src="../../frontend/javascript/script.js"></script>
-  </body>
+        <div class="producto-card" id="accesorio-3">
+          <div class="imagen-contenedor">
+            <img src="/frontend/imgProductos/CARTERAS.JPG" alt="Cartera de Piel Minimalista" />
+          </div>
+
+          <div class="info-contenedor">
+            <p class="descripcion">Diseño delgado con bloqueo RFID</p>
+            <h3 class="titulo-producto">Cartera de Piel Minimalista</h3>
+            <p class="precio">$420.00</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; Teschi-Bazar</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <script src="../../backend/firebase-config.js"></script>
+
+  <script src="../../frontend/javascript/scriptIndex.js"></script>
+
+  <script src="../../frontend/javascript/script.js"></script>
+</body>
+
 </html>
