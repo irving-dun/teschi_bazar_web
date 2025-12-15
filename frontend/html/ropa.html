@@ -2,123 +2,61 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Teschi-Bazar - Ropa</title>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-
-    <link rel="stylesheet" href="/frontend/css/productos.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teschi-Bazar - Ropa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/frontend/css/productos.css" />
 </head>
 
 <body>
-    <header>
-        <h1>TESCHI-BAZAR</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Inicio</a></li>
-                <li><a href="">Acerca de</a></li>
-            </ul>
-        </nav>
-        <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
-            Iniciar Sesión
-        </button>
+    <header>
+        <h1>TESCHI-BAZAR</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="">Acerca de</a></li>
+            </ul>
+        </nav>
+        <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
+            Iniciar Sesión
+        </button>
 
-        <div id="contenedorPerfilUsuario" style="display: none"></div>
-    </header>
+        <div id="contenedorPerfilUsuario" style="display: none"></div>
+    </header>
 
-    <div class="categoria-wrapper">
-        <div class="categoria-slider">
-            <a href="ropa.html" class="categoria-card">Ropa</a>
-            <a href="maquillaje.html" class="categoria-card">Maquillaje</a>
-            <a href="accesorios.html" class="categoria-card">Accesorios</a>
-            <a href="libros.html" class="categoria-card">Libros</a>
-            <a href="electronica.html" class="categoria-card">Electrónica</a>
-        </div>
-    </div>
+    <div class="categoria-wrapper">
+        <div class="categoria-slider">
+            <a href="ropa.html" class="categoria-card">Ropa</a>
+            <a href="maquillaje.html" class="categoria-card">Maquillaje</a>
+            <a href="accesorios.html" class="categoria-card">Accesorios</a>
+            <a href="libros.html" class="categoria-card">Libros</a>
+            <a href="electronica.html" class="categoria-card">Electrónica</a>
+        </div>
+    </div>
 
-    <main>
-        <section id="inicio">
-            <h2>Artículos de Ropa</h2>
-            <p>Explora la mejor selección de moda y accesorios disponibles.</p>
+        <main data-categoria-id="1"> 
+        <section id="inicio">
+            <h2>Artículos de Ropa</h2>
+            <p>Explora la mejor selección de moda y accesorios disponibles.</p>
 
-            <div class="productos-grid">
+                        <div class="productos-grid" id="productos-contenedor-dinamico">
+                            </div>
+            </section>
+    </main>
+    <footer>
+        <p>&copy; Teschi-Bazar</p>
+    </footer>
 
-                <div class="producto-card" id="producto-1">
-                    <div class="imagen-contenedor">
-                        <img src="/frontend/imgProductos/NIKE.JPG" alt="Tenis Nike Initiator" />
-                    </div>
-                    <div class="info-contenedor">
-                        <h3 class="titulo-producto">Tenis Nike Initiator</h3>
-                        <p class="precio">$1899.00</p>
-                    </div>
-                </div>
+        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="../../backend/firebase-config.js"></script>
 
-                <div class="producto-card" id="producto-2">
-                    <div class="imagen-contenedor">
-                        <img src="/frontend/imgProductos/MOCHILA.JPG" alt="Mochila escolar" />
-                    </div>
-                    <div class="info-contenedor">
-                        <h3 class="titulo-producto">Mochila escolar</h3>
-                        <p class="precio">$599.00</p>
-                    </div>
-                </div>
-
-                <div class="producto-card" id="producto-3">
-                    <div class="imagen-contenedor">
-                        <img src="/frontend/imgProductos/CARGO.JPG" alt="Pantalones Cargo" />
-                    </div>
-                    <div class="info-contenedor">
-                        <h3 class="titulo-producto">Pantalones Cargo</h3>
-                        <p class="precio">$500.00</p>
-                    </div>
-                </div>
-
-                <div class="producto-card" id="producto-4">
-                    <div class="imagen-contenedor">
-                        <img src="/frontend/imgProductos/CHAMARRA.JPG" alt="Chamarra Deportiva" />
-                    </div>
-                    <div class="info-contenedor">
-                        <h3 class="titulo-producto">Chamarra Deportiva</h3>
-                        <p class="precio">$750.00</p>
-                    </div>
-                </div>
-
-                <div class="producto-card" id="producto-5">
-                    <div class="imagen-contenedor">
-                        <img src="/frontend/imgProductos/VESTIDO.JPG" alt="Vestido Casual" />
-                    </div>
-                    <div class="info-contenedor">
-                        <h3 class="titulo-producto">Vestido Casual</h3>
-                        <p class="precio">$400.00</p>
-                    </div>
-                </div>
-
-                <div class="producto-card" id="producto-6">
-                    <div class="imagen-contenedor">
-                        <img src="/frontend/imgProductos/CAPUCHA.JPG" alt="Sudadera con Capucha" />
-                    </div>
-                    <div class="info-contenedor">
-                        <h3 class="titulo-producto">Sudadera con Capucha</h3>
-                        <p class="precio">$650.00</p>
-                    </div>
-                </div>
-            
-            </div>
-            </section>
-    </main>
-    <footer>
-        <p>&copy; Teschi-Bazar</p>
-    </footer>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-    <script src="../../backend/firebase-config.js"></script>
-
-          <script src="../../frontend/js/scriptIndex.js"></script>
+        <script src="/frontend/js/productos.js"></script>
+    
+        <script src="../../frontend/js/scriptIndex.js"></script>
 </body>
 
 </html>
