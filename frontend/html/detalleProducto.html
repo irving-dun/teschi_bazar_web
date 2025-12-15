@@ -1,113 +1,103 @@
 <!DOCTYPE html>
 <html>
-  <html lang="es"></html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title id="tituloPagina">Detalle del Producto - TeschiBazar</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Anton&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/frontend/css/styles.css" />
-    <link rel="stylesheet" href="/frontend/css/producto.css" />
-  </head>
+<html lang="es">
 
-  <body>
-    <header>
-      <h1>TESCHI-BAZAR</h1>
-      <nav>
-        <ul>
-          <li><a href="index.html">Inicio</a></li>
-          <li><a href="">Acerca de</a></li>
-        </ul>
-      </nav>
-      <button
-        id="iniciaSesionButton"
-        onclick="window.location.href='login.html'"
-        class="btn-inicio-sesion"
-      >
-        Iniciar Sesión
-      </button>
-      <div id="contenedorPerfilUsuario" style="display: none"></div>
-    </header>
+</html>
 
-    <main class="product-detail-container">
-      <section class="product-grid">
-        <div class="product-images">
-          <div id="imagenPrincipal" class="main-image">
-            <img
-              src="placeholder_main.jpg"
-              alt="Imagen principal del producto"
-              id="mainProductImage"
-            />
-          </div>
-          <div id="galeriaMiniaturas" class="thumbnail-gallery"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="tituloPagina">Detalle del Producto - TeschiBazar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/frontend/css/styles.css" />
+  <link rel="stylesheet" href="/frontend/css/producto.css" />
+</head>
+
+<body>
+  <header>
+    <h1>TESCHI-BAZAR</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="">Acerca de</a></li>
+      </ul>
+    </nav>
+    <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
+      Iniciar Sesión
+    </button>
+    <div id="contenedorPerfilUsuario" style="display: none"></div>
+  </header>
+
+  <main class="product-detail-container">
+    <section class="product-grid">
+      <div class="product-images">
+        <div id="imagenPrincipal" class="main-image">
+          <img src="placeholder_main.jpg" alt="Imagen principal del producto" id="mainProductImage" />
+        </div>
+        <div id="galeriaMiniaturas" class="thumbnail-gallery"></div>
+      </div>
+
+      <div class="product-info-panel">
+        <div class="info-header">
+          <h2 id="nombreProducto">Nombre del Producto Cargando...</h2>
+          <p class="precio-final" id="precioProducto">$0.00 MXN</p>
         </div>
 
-        <div class="product-info-panel">
-          <div class="info-header">
-            <h2 id="nombreProducto">Nombre del Producto Cargando...</h2>
-            <p class="precio-final" id="precioProducto">$0.00 MXN</p>
-          </div>
-
-          <div class="detail-card info-section">
-            <h3>Detalles Rápidos</h3>
-            <p>
-              <strong>Categoría:</strong> <span id="detalleCategoria"></span>
-            </p>
-            <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
-            <p>
-              <strong>Disponibilidad:</strong>
-              <span id="detalleDisponibilidad"></span> unidades
-            </p>
-            <p>
-              <strong>Publicado:</strong>
-              <span id="detalleFechaPublicacion"></span>
-            </p>
-          </div>
-
-          <div class="detail-card info-section">
-            <h3>Información del Vendedor</h3>
-            <p>
-              <strong>Vendedor:</strong>
-              <span id="detalleNombreVendedor">Cargando...</span>
-            </p>
-            <p>
-              <strong>Ubicación de Entrega:</strong>
-              <span id="detalleUbicacionEntrega"></span>
-            </p>
-          </div>
-
-          <div class="description-section">
-            <h3>Descripción Detallada</h3>
-            <p id="detalleDescripcion">Cargando descripción...</p>
-          </div>
-
-          <div class="action-buttons-single">
-            <button class="btn-primary" id="botonComprar">Comprar Ahora</button>
-            <button class="btn-secondary" id="botonContactar">
-              Contactar Vendedor
-            </button>
-          </div>
+        <div class="detail-card info-section">
+          <h3>Detalles Rápidos</h3>
+          <p>
+            <strong>Categoría:</strong> <span id="detalleCategoria"></span>
+          </p>
+          <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
+          <p>
+            <strong>Disponibilidad:</strong>
+            <span id="detalleDisponibilidad"></span> unidades
+          </p>
+          <p>
+            <strong>Publicado:</strong>
+            <span id="detalleFechaPublicacion"></span>
+          </p>
         </div>
-      </section>
-    </main>
 
-    <footer>
-      <p>&copy; Teschi-Bazar</p>
-    </footer>
+        <div class="detail-card info-section">
+          <h3>Información del Vendedor</h3>
+          <p>
+            <strong>Vendedor:</strong>
+            <span id="detalleNombreVendedor">Cargando...</span>
+          </p>
+          <p>
+            <strong>Ubicación de Entrega:</strong>
+            <span id="detalleUbicacionEntrega"></span>
+          </p>
+        </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+        <div class="description-section">
+          <h3>Descripción Detallada</h3>
+          <p id="detalleDescripcion">Cargando descripción...</p>
+        </div>
 
-    <script src="firebase-config.js"></script>
-    <script src="scriptIndex.js"></script>
-    <script src="scriptDetalleProducto.js"></script>
-  </body>
+        <div class="action-buttons-single">
+          <button class="btn-primary" id="botonComprar">Comprar Ahora</button>
+          <button class="btn-secondary" id="botonContactar">
+            Contactar Vendedor
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; Teschi-Bazar</p>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <script src="firebase-config.js"></script>
+
+  <script src="../../frontend/js/scriptIndex.js"></script>
+</body>
+
 </html>
