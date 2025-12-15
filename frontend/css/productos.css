@@ -1,0 +1,356 @@
+/* ======================================================= */
+/* 1. Estilos Generales y Cuerpo del Documento             */
+/* ======================================================= */
+
+/* Asegura que la página tome el 100% de la altura y usa el Poppins como fuente base */
+body {
+    font-family: "Poppins", sans-serif;
+    /* Fondo blanco para que coincida con el diseño estilo Nike */
+    background-color: #ebeff0;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    padding-top: 55px; /* Espacio para el header fijo */
+}
+
+/* ======================================================= */
+/* 2. HEADER y Navegación (Conservados)                    */
+/* ======================================================= */
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    color: rgb(1, 10, 2);
+    padding: 0.5rem 1rem;
+    z-index: 100;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header h1 {
+    font-family: "Anton", sans-serif;
+    align-self: flex-start;
+    margin: 0;
+    padding: 0;
+    padding-left: 1rem;
+    flex-shrink: 0;
+    letter-spacing: 0.1rem;
+}
+
+header nav {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    padding-top: 15px;
+}
+
+/* Estilos de botones: Iniciar Sesión y Usuario Nombre (Conservados) */
+.btn-inicio-sesion,
+.btn-UsuarioNombre {
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid #235d25;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    flex-shrink: 0;
+    margin-left: 1rem;
+    transition: background-color 0.3s, color 0.3s;
+    margin-right: 2rem;
+}
+
+.btn-inicio-sesion:hover,
+.btn-UsuarioNombre:hover {
+    background-color: white;
+    color: #0ccc12;
+    cursor: pointer;
+    border-color: #0ccc12;
+}
+
+nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    width: auto;
+}
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: #000000;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    padding-bottom: 2px;
+    transition: transform 0.3s ease-in-out;
+}
+
+nav ul li a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 100%;
+    height: 2px;
+    background-color: #141313;
+    transition: transform 0.3s ease-in-out;
+}
+
+nav ul li a:hover {
+    transform: translateY(-5px);
+}
+
+nav ul li a:hover::after {
+    transform: translateY(3px);
+    bottom: 5px;
+}
+
+/* Estilos del Perfil Dropdown (Conservados, aunque no usados en esta vista) */
+.perfil-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    right: 0;
+    border-radius: 5px;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+    font-size: 15px;
+    font-family: "Poppins", sans-serif;
+    color: #4a004a;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.show {
+    display: block;
+}
+
+/* ======================================================= */
+/* 3. Categorías (Slider/Wrapper)                          */
+/* ======================================================= */
+
+.categoria-wrapper {
+    width: 100%;
+    margin: 1rem 0;
+    overflow: hidden;
+    text-align: center;
+}
+
+.categoria-slider {
+    display: inline-flex;
+    padding: 0 1rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: 10px;
+}
+
+.categoria-slider::-webkit-scrollbar {
+    display: none;
+}
+
+.categoria-card {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    display: block;
+    text-align: center;
+    padding: 10px 15px;
+    color: #090909;
+    text-decoration: none;
+    scroll-snap-align: start;
+    transition: color 0.3s;
+}
+
+/* ======================================================= */
+/* 4. MAIN y Sección de Productos (Ajustes de Diseño Nike) */
+/* ======================================================= */
+
+/* Ajuste del MAIN: Ocupa el 100% del ancho para eliminar el espacio verde */
+main {
+    padding: 0 20px; /* Padding horizontal para que el contenido no toque los bordes */
+    max-width: none; /* Quitamos el max-width */
+    margin: 0 auto;
+}
+
+/* Ajuste de la Sección: Quitamos el fondo y la sombra */
+#inicio {
+    background: transparent;
+    padding: 2rem 0; 
+    margin-bottom: 0;
+    box-shadow: none;
+}
+
+/* Estilos para el encabezado de la sección */
+#inicio h2,
+#inicio p {
+    padding: 0 5px; /* Pequeño padding para alinear con el grid */
+    margin-top: 0;
+}
+#inicio h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+#inicio p {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* ======================================================= */
+/* 5. Estilos de Cuadrícula (Grid) y Tarjetas de Producto  */
+/* ======================================================= */
+
+.productos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px; /* Espacio entre las tarjetas */
+    margin: 0 auto;
+    border: #000000;
+}
+
+.producto-card {
+    background-color: transparent;
+    border-radius: 15px;
+    border: black;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Contenedor de la Imagen: Fondo gris y proporción uniforme (cuadrada) */
+.imagen-contenedor {
+    background-color: white;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* CLAVE: Proporción 1:1 para que todas las imágenes sean perfectamente cuadradas */
+    aspect-ratio: 1 / 1; 
+    /* La altura será determinada por aspect-ratio */
+    height: auto; 
+    min-height: auto;
+    margin-bottom: 5px;
+    
+    /* Agregamos overflow: hidden para evitar que imágenes muy grandes se salgan del recuadro si no usan 'object-fit: contain' */
+    overflow: hidden; 
+
+    border-radius: 15px;
+    
+}
+
+.imagen-contenedor img {
+    /* Ajuste de imagen: siempre debe ser más pequeña que el 100% del contenedor */
+    max-width: 90%; 
+    max-height: 90%;
+    
+    /* Mantenemos object-fit: contain para asegurar que la imagen completa se vea */
+    object-fit: contain; 
+    
+    /* Aseguramos que se centre perfectamente dentro del fondo gris */
+    margin: auto; 
+    padding: 0;
+    display: block;
+    
+}
+
+
+/* Contenedor de la Información: Alineación a la izquierda */
+.info-contenedor {
+    padding: 0 5px;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.info-contenedor .titulo-producto {
+    font-size: 1rem;
+    margin: 0 0 2px 0;
+    font-weight: 600;
+    order: 2;
+}
+
+.info-contenedor .descripcion {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0 0 2px 0;
+    font-weight: 400;
+    order: 1;
+}
+
+.info-contenedor .precio {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111;
+    margin: 5px 0 0 0;
+    order: 3;
+}
+
+/* ======================================================= */
+/* 6. Pie de Página (Footer - Conservado)                  */
+/* ======================================================= */
+
+footer {
+    background-color: #235d25;
+    color: rgb(224, 221, 221);
+    padding: 10px;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* ======================================================= */
+/* 7. Media Queries (Responsivo)                           */
+/* ======================================================= */
+
+@media (max-width: 900px) {
+    .productos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .productos-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    main {
+        padding: 0 10px;
+    }
+}
