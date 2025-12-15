@@ -176,25 +176,25 @@ async function guardarMensaje(conversacionId, remitenteId, contenido) {
 
 // Obtiene el historial de mensajes para una conversación dada
 async function obtenerMensajesPorConversacion(conversacionId) {
-    const sql = `
-        SELECT 
-            id_mensaje, 
-            id_remitente, 
-            contenido, 
-            fecha_envio,
-            leido
-        FROM mensajes
-        WHERE id_conversacion = $1
-        ORDER BY fecha_envio ASC;
-    `;
-    
-    try {
-        const result = await pool.query(sql, [conversacionId]);
-        return result.rows;
-    } catch (error) {
-        console.error('Error al obtener mensajes:', error);
-        throw new Error('No se pudo cargar el historial de mensajes.');
-    }
+  const sql = `
+ SELECT 
+      id_mensaje, 
+      id_remitente, 
+      contenido, 
+      fecha_envio,
+      leido
+    FROM mensajes
+    WHERE id_conversacion = $1
+    ORDER BY fecha_envio ASC;
+  `;
+  
+  try {
+    const result = await pool.query(sql, [conversacionId]);
+    return result.rows;
+  } catch (error) {
+    console.error('Error al obtener mensajes:', error);
+    throw new Error('No se pudo cargar el historial de mensajes.');
+  }
 }
 
 
@@ -245,21 +245,21 @@ app.get('/api/productos', async (req, res) => {
 
 // 💬 RUTA 3: GET - Obtener historial de mensajes de una conversación
 app.get('/api/chat/:idConversacion', async (req, res) => {
-    const idConversacion = parseInt(req.params.idConversacion);
+  const idConversacion = parseInt(req.params.idConversacion);
 
-    if (isNaN(idConversacion)) {
-        return res.status(400).json({ error: 'El ID de la conversación debe ser un número válido.' });
-    }
+  if (isNaN(idConversacion)) {
+    return res.status(400).json({ error: 'El ID de la conversación debe ser un número válido.' });
+  }
 
-    try {
-        // Mejorar: Añadir verificación de que el usuario que solicita es parte de la conversación
-        const mensajes = await obtenerMensajesPorConversacion(idConversacion);
-        
-        res.json(mensajes);
-    } catch (err) {
-        console.error('Error al obtener historial de chat:', err.message);
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    // Mejorar: Añadir verificación de que el usuario que solicita es parte de la conversación
+    const mensajes = await obtenerMensajesPorConversacion(idConversacion);
+    
+    res.json(mensajes);
+  } catch (err) {
+    console.error('Error al obtener historial de chat:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 
