@@ -49,25 +49,44 @@ async function verificarTokenFirebase(idToken) {
 // CONFIGURACIÓN DE LA BASE DE DATOS (PostgreSQL para Render)
 // =======================================================
 
+// ⚠️ NOTA DE SEGURIDAD:
+// En producción (Render), se recomienda usar solo process.env.DATABASE_URL.
+// Para el desarrollo local, puedes definir las credenciales directamente aquí.
+
+// ----------------------------------------------------------------------------------------------------------------------------------------
+// CÓMO OBTENER TU CADENA DE CONEXIÓN:
+// 1. Ve a tu base de datos en Render.
+// 2. Copia la "External Connection String" (Cadena de Conexión Externa).
+//    Debe lucir algo así: postgresql://irving:TU_PASSWORD_SECRETA@dpg-d4vnjfhr0fns739p88l0-a.virginia-postgres.render.com:5432/teschibazar
+// ----------------------------------------------------------------------------------------------------------------------------------------
+const DATABASE_URL_LOCAL = "postgresql://irving:4jsZSjNG0ZaqCNw7zQQlvGjt7ibkbUMn@dpg-d4vnjfhr0fns739p88l0-a.virginia-postgres.render.com/teschibazar"; 
+// ^^^ REEMPLAZA ESTA CADENA CON LA CADENA DE CONEXIÓN EXTERNA COMPLETA DE RENDER ^^^
+
 const dbConfig = {
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+    // Si la variable de entorno existe (en Render), la usa; sino, usa la cadena local.
+    connectionString: process.env.DATABASE_URL || DATABASE_URL_LOCAL,
+    
+    // Configuración SSL requerida por Render
+    ssl: {
+        // Esto permite que el cliente de Node.js acepte la conexión cifrada de Render 
+        // sin fallar por problemas de certificado autofirmado.
+        rejectUnauthorized: false
+    }
 };
 
 let pool; 
 
 async function initializeDatabase() {
-  try {
-    pool = new Pool(dbConfig); 
-    const client = await pool.connect();
-    client.release(); 
-    console.log('✅ Conexión a PostgreSQL exitosa!');
-  } catch (err) {
-    console.error('❌ Error al conectar con PostgreSQL:', err.message);
-    process.exit(1); 
-  }
+    try {
+        pool = new Pool(dbConfig); 
+        const client = await pool.connect();
+        client.release(); 
+        console.log('✅ Conexión a PostgreSQL exitosa!');
+    } catch (err) {
+        // Ahora, si falla, es un error real de credenciales/conexión
+        console.error('❌ Error al conectar con PostgreSQL:', err.message);
+        process.exit(1); 
+    }
 }
 
 // --- Configuración de MULTER (Carga de Imágenes) ---
