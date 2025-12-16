@@ -14,10 +14,23 @@ const fs = require('fs');
 const app = express();
 const port = process.env.PORT || 3000; 
 
+// CÓDIGO A PEGAR (REEMPLAZANDO LAS LÍNEAS ANTERIORES)
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// --- Configuración de RUTAS DE ARCHIVOS ---
+// Definir la ruta fuera de 'backend' y dentro de 'sandbox/uploads'
+const UPLOADS_DIR = path.join(__dirname, '..', 'sandbox', 'uploads'); 
+
+// Asegurarse de que el directorio existe
+if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+// Middleware para servir las imágenes estáticas. La URL pública sigue siendo /uploads.
+app.use('/uploads', express.static(UPLOADS_DIR));
+
 
 // =======================================================
 // CONFIGURACIÓN DE FIREBASE ADMIN SDK
@@ -43,7 +56,6 @@ async function verificarTokenFirebase(idToken) {
   throw new Error("Token de autenticación inválido o expirado.");
  }
 }
-
 
 // =======================================================
 // CONFIGURACIÓN DE LA BASE DE DATOS (PostgreSQL para Render)
@@ -89,17 +101,24 @@ async function initializeDatabase() {
     }
 }
 
-// --- Configuración de MULTER (Carga de Imágenes) ---
+
+
+
 const storage = multer.diskStorage({
- destination: (req, file, cb) => {
-  cb(null, path.join(__dirname, 'uploads')); 
- },
- filename: (req, file, cb) => {
-  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-  cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
- }
+    destination: (req, file, cb) => {
+        cb(null, UPLOADS_DIR);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
 });
 const upload = multer({ storage: storage });
+
+
+
+
+
 
 // =================================================================
 // UTILIDADES DE CHAT (PERSISTENCIA PostgreSQL)
@@ -202,32 +221,86 @@ async function obtenerMensajesPorConversacion(conversacionId) {
 // RUTAS DE LA API (ADAPTADO A POSTGRESQL)
 // =================================================================
 
-// 🚀 RUTA 1: POST - Insertar un nuevo producto con imagen
+// CÓDIGO A PEGAR (REEMPLAZANDO LA RUTA 1 COMPLETA)
+// 🚀 RUTA 1: POST - Insertar un nuevo producto con imagen (Transaccional y seguro)
 app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) => {
- const { id_usuario_vendedor, nombre_producto, descripcion, precio, categoria_id, estado_producto } = req.body;
- const imagen_url = req.file ? '/uploads/' + req.file.filename : null; 
+    // Usamos los nombres de campos del HTML corregido: id_categoria, estado_producto, disponibilidad, ubicacion_entrega
+    const { 
+        id_usuario_vendedor, 
+        nombre_producto, 
+        descripcion, 
+        precio, 
+        id_categoria, 
+        estado_producto, 
+        disponibilidad, 
+        ubicacion_entrega 
+    } = req.body;
+    
+    // Obtener la URL pública de la imagen
+    const imagen_url = req.file ? '/uploads/' + req.file.filename : null; 
+    const client = await pool.connect();
 
- if (!id_usuario_vendedor || !nombre_producto || !precio || !imagen_url) {
-  return res.status(400).json({ mensaje: 'Faltan datos requeridos (incluyendo la imagen).' });
- }
+    // Validación de campos requeridos
+    if (!id_usuario_vendedor || !nombre_producto || !precio || !imagen_url || !id_categoria) {
+        if (req.file) {
+            fs.unlinkSync(req.file.path); 
+        }
+        return res.status(400).json({ mensaje: 'Faltan datos requeridos (usuario, nombre, precio, categoría o imagen).' });
+    }
 
- const sql = "INSERT INTO productos (id_usuario_vendedor, nombre_producto, descripcion, precio, categoria_id, estado_producto, imagen_url) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id_producto";
- 
- try {
-  const result = await pool.query(sql, [id_usuario_vendedor, nombre_producto, descripcion, precio, categoria_id, estado_producto, imagen_url]);
-  
-  res.status(201).json({ 
-   mensaje: 'Producto insertado con éxito', 
-   id_producto: result.rows[0].id_producto,
-   ruta_imagen: imagen_url
-  });
- } catch (err) {
-  console.error('Error al insertar producto:', err);
-  if (req.file) {
-   fs.unlinkSync(req.file.path); 
-  }
-  res.status(500).json({ error: 'Error interno del servidor al insertar producto.' });
- }
+    try {
+        await client.query('BEGIN'); // 1. Iniciar la transacción
+
+        // 2. Inserción en la tabla PRODUCTOS
+        const sqlProducto = `
+            INSERT INTO productos 
+            (id_usuario_vendedor, nombre_producto, descripcion, precio, id_categoria, estado_producto, disponibilidad, ubicacion_entrega) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+            RETURNING id_producto
+        `;
+        
+        const resultProducto = await client.query(sqlProducto, [
+            id_usuario_vendedor, 
+            nombre_producto, 
+            descripcion, 
+            parseFloat(precio), 
+            parseInt(id_categoria), 
+            estado_producto, 
+            parseInt(disponibilidad) || 1, 
+            ubicacion_entrega
+        ]);
+        
+        const id_producto = resultProducto.rows[0].id_producto;
+
+        // 3. Inserción en la tabla IMAGENES_PRODUCTO
+        const sqlImagen = `
+            INSERT INTO imagenes_producto (id_producto, url_imagen, orden) 
+            VALUES ($1, $2, 1)
+        `;
+        await client.query(sqlImagen, [id_producto, imagen_url]);
+
+        await client.query('COMMIT'); // 4. Confirmar la transacción
+
+        res.status(201).json({ 
+            mensaje: 'Producto e imagen insertados con éxito', 
+            id_producto: id_producto,
+            ruta_imagen: imagen_url
+        });
+
+    } catch (err) {
+        await client.query('ROLLBACK'); // 5. Revertir si hay error
+        
+        console.error('Error en la transacción al insertar producto:', err.message);
+        
+        // Si hay error, eliminar el archivo subido
+        if (req.file) {
+            fs.unlinkSync(req.file.path); 
+        }
+
+        res.status(500).json({ error: 'Error interno del servidor al insertar producto.', detail: err.message });
+    } finally {
+        client.release(); // 6. Liberar la conexión
+    }
 });
 
 // 📚 RUTA 2: GET - Obtener todos los productos
