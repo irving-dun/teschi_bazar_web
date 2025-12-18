@@ -2,61 +2,64 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Teschi-Bazar - Ropa</title>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/frontend/css/productos.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teschi-Bazar - Ropa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="/frontend/css/productos.css" />
 </head>
 
-<body>
-    <header>
-        <h1>TESCHI-BAZAR</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Inicio</a></li>
-                <li><a href="">Acerca de</a></li>
-            </ul>
-        </nav>
-        <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
-            Iniciar Sesión
-        </button>
+<body data-categoria="1">
+    <header>
+        <h1>TESCHI-BAZAR</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="">Acerca de</a></li>
+            </ul>
+        </nav>
+        <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
+            Iniciar Sesión
+        </button>
 
-        <div id="contenedorPerfilUsuario" style="display: none"></div>
-    </header>
+        <div id="contenedorPerfilUsuario" style="display: none"></div>
+    </header>
 
-    <div class="categoria-wrapper">
-        <div class="categoria-slider">
-            <a href="ropa.html" class="categoria-card">Ropa</a>
-            <a href="maquillaje.html" class="categoria-card">Maquillaje</a>
-            <a href="accesorios.html" class="categoria-card">Accesorios</a>
-            <a href="libros.html" class="categoria-card">Libros</a>
-            <a href="electronica.html" class="categoria-card">Electrónica</a>
-        </div>
-    </div>
+    <div class="categoria-wrapper">
+        <div class="categoria-slider">
+            <a href="ropa.html" class="categoria-card">Ropa</a>
+            <a href="maquillaje.html" class="categoria-card">Maquillaje</a>
+            <a href="accesorios.html" class="categoria-card">Accesorios</a>
+            <a href="libros.html" class="categoria-card">Libros</a>
+            <a href="electronica.html" class="categoria-card">Electrónica</a>
+        </div>
+    </div>
 
-        <main data-categoria-id="1"> 
-        <section id="inicio">
-            <h2>Artículos de Ropa</h2>
-            <p>Explora la mejor selección de moda y accesorios disponibles.</p>
+    <main>
+    <section id="inicio">
+        <h2>Artículos de Ropa</h2>
+        <p>Explora la mejor selección de moda y accesorios disponibles.</p>
 
-                        <div class="productos-grid" id="productos-contenedor-dinamico">
-                            </div>
-            </section>
-    </main>
-    <footer>
-        <p>&copy; Teschi-Bazar</p>
-    </footer>
+        <div class="productos-grid" id="contenedor-productos">
+            </div>
+    </section>
+</main>
 
-        <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="../../backend/firebase-config.js"></script>
+    <footer>
+        <p>&copy; Teschi-Bazar</p>
+    </footer>
 
-        <script src="/frontend/js/productos.js"></script>
-    
-        <script src="../../frontend/js/scriptIndex.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script src="../../backend/firebase-config.js"></script>
+
+          <script src="../../frontend/js/scriptIndex.js"></script>
+          <script src="../js/productos.js"></script>
 </body>
 
 </html>

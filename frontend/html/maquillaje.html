@@ -1,24 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Teschi-Bazar - Maquillaje</title>
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
-
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-
-  <link rel="stylesheet" href="/frontend/css/productos.css" />
+  <link rel="stylesheet" href="../css/productos.css" />
 </head>
 
-<body>
+<body data-categoria="2">
   <header>
     <h1>TESCHI-BAZAR</h1>
     <nav>
       <ul>
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="">Acerca de</a></li>
+        <li><a href="#">Acerca de</a></li>
       </ul>
     </nav>
     <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
@@ -43,45 +41,8 @@
       <h2>Artículos de Maquillaje</h2>
       <p>Descubre nuestra colección de cosméticos y belleza.</p>
 
-      <div class="productos-grid">
-
-        <div class="producto-card" id="maquillaje-1">
-          <div class="imagen-contenedor">
-            <img src="/frontend/imgProductos/BASE.JPG" alt="Base de Maquillaje HD" />
-          </div>
-
-          <div class="info-contenedor">
-            <p class="descripcion">Cobertura completa y acabado mate</p>
-            <h3 class="titulo-producto">Base de Maquillaje HD</h3>
-            <p class="precio">$349.50</p>
-          </div>
+      <div class="productos-grid" id="contenedor-productos">
         </div>
-
-        <div class="producto-card" id="maquillaje-2">
-          <div class="imagen-contenedor">
-            <img src="/frontend/imgProductos/PALETA.JPG" alt="Paleta de sombras Nude" />
-          </div>
-
-          <div class="info-contenedor">
-            <p class="descripcion">12 tonos neutros, mate y brillantes</p>
-            <h3 class="titulo-producto">Paleta de sombras Nude</h3>
-            <p class="precio">$285.00</p>
-          </div>
-        </div>
-
-        <div class="producto-card" id="maquillaje-3">
-          <div class="imagen-contenedor">
-            <img src="/frontend/imgProductos/LABIAL.JPG" alt="Labial liquido Mate" />
-          </div>
-
-          <div class="info-contenedor">
-            <p class="descripcion">Larga duración, color rojo intenso</p>
-            <h3 class="titulo-producto">Labial liquido Mate</h3>
-            <p class="precio">$125.99</p>
-          </div>
-        </div>
-
-      </div>
     </section>
   </main>
 
@@ -95,8 +56,9 @@
 
   <script src="../../backend/firebase-config.js"></script>
 
-
-          <script src="../../frontend/js/scriptIndex.js"></script>
+  <script src="../js/productos.js"></script>
+  
+  <script src="../js/scriptIndex.js"></script>
 </body>
 
 </html>

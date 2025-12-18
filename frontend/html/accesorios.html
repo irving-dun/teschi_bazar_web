@@ -1,34 +1,24 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Teschi-Bazar - Accesorios</title>
-
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
-
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-
-  <link rel="stylesheet" href="/frontend/css/productos.css" />
+  <link rel="stylesheet" href="../css/productos.css" />
 </head>
 
-<body>
+<body data-categoria="3">
   <header>
     <h1>TESCHI-BAZAR</h1>
     <nav>
       <ul>
         <li><a href="index.html">Inicio</a></li>
-
         <li><a href="">Acerca de</a></li>
       </ul>
     </nav>
-
-    <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
-      Iniciar Sesión
-    </button>
-
+    <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">Iniciar Sesión</button>
     <div id="contenedorPerfilUsuario" style="display: none"></div>
   </header>
 
@@ -46,62 +36,16 @@
     <section id="inicio">
       <h2>Artículos de Accesorios</h2>
       <p>Explora nuestra variedad de relojes, lentes y carteras.</p>
-
-      <div class="productos-grid">
-
-        <div class="producto-card" id="accesorio-1">
-          <div class="imagen-contenedor">
-            <img src="/frontend/imgProductos/RELOJ.JPG" alt="Reloj Deportivo Digital" />
-          </div>
-
-          <div class="info-contenedor">
-            <p class="descripcion">Resistente al agua con cronómetro</p>
-            <h3 class="titulo-producto">Reloj Deportivo Digital</h3>
-            <p class="precio">$750.00</p>
-          </div>
-        </div>
-
-        <div class="producto-card" id="accesorio-2">
-          <div class="imagen-contenedor">
-            <img src="/frontend/imgProductos/LENTES.JPG" alt="Lentes de Sol Polarizados" />
-          </div>
-
-          <div class="info-contenedor">
-            <p class="descripcion">Estilo aviador con protección UV</p>
-            <h3 class="titulo-producto">Lentes de Sol Polarizados</h3>
-            <p class="precio">$399.00</p>
-          </div>
-        </div>
-
-        <div class="producto-card" id="accesorio-3">
-          <div class="imagen-contenedor">
-            <img src="/frontend/imgProductos/CARTERAS.JPG" alt="Cartera de Piel Minimalista" />
-          </div>
-
-          <div class="info-contenedor">
-            <p class="descripcion">Diseño delgado con bloqueo RFID</p>
-            <h3 class="titulo-producto">Cartera de Piel Minimalista</h3>
-            <p class="precio">$420.00</p>
-          </div>
-        </div>
-
-      </div>
+      <div class="productos-grid" id="contenedor-productos"></div>
     </section>
   </main>
 
-  <footer>
-    <p>&copy; Teschi-Bazar</p>
-  </footer>
+  <footer><p>&copy; Teschi-Bazar</p></footer>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
   <script src="../../backend/firebase-config.js"></script>
-
-  <script src="../../frontend/js/scriptIndex.js"></script>
-
-  <script src="../../frontend/js/script.js"></script>
+  <script src="../js/productos.js"></script>
+  <script src="../js/scriptIndex.js"></script>
 </body>
-
 </html>
