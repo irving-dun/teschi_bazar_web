@@ -1,3 +1,6 @@
+
+
+
 // =======================================================
 // CONFIGURACIÓN DE DEPENDENCIAS Y MÓDULOS
 // =======================================================
@@ -15,7 +18,12 @@ const app = express();
 const port = process.env.PORT || 3000; 
 
 // Middleware
-app.use(cors());
+// Reemplaza app.use(cors()); por esto:
+app.use(cors({
+    origin: '*', // Permite que tu Live Server se conecte sin problemas
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // --- Configuración de RUTAS DE ARCHIVOS ---
@@ -35,14 +43,31 @@ admin.initializeApp({
 console.log('✅ Firebase Admin SDK inicializado.');
 
 // =======================================================
+// CONFIGURACIÓN DE MULTER (PROCESAMIENTO DE IMÁGENES)
+// =======================================================
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, UPLOADS_DIR); // Usa la variable UPLOADS_DIR definida arriba
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage: storage });
+
+// =======================================================
 // CONFIGURACIÓN DE LA BASE DE DATOS (PostgreSQL)
 // =======================================================
 const DATABASE_URL_LOCAL = "postgresql://irving:4jsZSjNG0ZaqCNw7zQQlvGjt7ibkbUMn@dpg-d4vnjfhr0fns739p88l0-a.virginia-postgres.render.com/teschibazar"; 
 
 const dbConfig = {
     connectionString: process.env.DATABASE_URL || DATABASE_URL_LOCAL,
-    ssl: { rejectUnauthorized: false },
-    connectionTimeoutMillis: 5000, 
+    // La propiedad 'ssl' corregida evita el error "does not support SSL connections"
+    ssl: { 
+        rejectUnauthorized: false 
+    },
+    connectionTimeoutMillis: 10000, 
     idleTimeoutMillis: 30000
 };
 
@@ -84,13 +109,15 @@ async function obtenerVendedor(idProducto) {
 // =================================================================
 
 // 🔍 RUTA: Obtener detalle de producto (Corregida para traer TODO, incluyendo fecha)
+// =================================================================
+// RUTAS DE LA API
+// =================================================================
+
+// 🔍 RUTA: Obtener detalle de producto
 app.get('/api/productos/:id', async (req, res) => {
     const idProducto = req.params.id;
     const sql = `
-        SELECT 
-            p.*, 
-            i.url_imagen, 
-            c.nombre_categoria 
+        SELECT p.*, i.url_imagen, c.nombre_categoria 
         FROM productos p
         LEFT JOIN imagenes_producto i ON p.id_producto = i.id_producto
         LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
@@ -100,11 +127,82 @@ app.get('/api/productos/:id', async (req, res) => {
     try {
         const result = await pool.query(sql, [idProducto]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'No existe' });
-        res.json(result.rows[0]); // Aquí va el campo fecha_publicacion
+        res.json(result.rows[0]);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+}); // <--- AQUÍ TERMINA LA RUTA DE DETALLE
+
+// 📤 RUTA: Insertar nuevo producto (AHORA FUERA Y BIEN UBICADA)
+app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) => {
+    console.log("-----------------------------------------");
+    console.log("📥 ¡Petición de registro recibida!");
+    console.log("📦 Datos:", req.body);
+    
+    const { 
+        nombre_producto, descripcion, id_categoria, 
+        estado_producto, disponibilidad, precio, 
+        id_usuario_vendedor, nombre_vendedor, ubicacion_entrega 
+    } = req.body;
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // CORRECCIÓN: Usar id_usuario en lugar de id
+        await client.query(
+            `INSERT INTO usuarios (id_usuario, nombre) 
+             VALUES ($1, $2) ON CONFLICT (id_usuario) DO NOTHING`, 
+            [id_usuario_vendedor, nombre_vendedor || "Usuario Sharon"]
+        );
+
+        const productQuery = `
+            INSERT INTO productos (
+                nombre_producto, descripcion, id_categoria, 
+                estado_producto, disponibilidad, precio, 
+                id_usuario_vendedor, ubicacion_entrega
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+            RETURNING id_producto
+        `;
+        
+        const resProd = await client.query(productQuery, [
+            nombre_producto, descripcion, id_categoria, 
+            estado_producto, disponibilidad, precio, 
+            id_usuario_vendedor, ubicacion_entrega
+        ]);
+
+        const id_producto = resProd.rows[0].id_producto;
+
+        if (req.file) {
+            const url_imagen = `/uploads/${req.file.filename}`;
+            await client.query(
+                'INSERT INTO imagenes_producto (id_producto, url_imagen) VALUES ($1, $2)',
+                [id_producto, url_imagen]
+            );
+        }
+await client.query('COMMIT');
+        console.log("✅ ¡Producto guardado con éxito!");
+
+        // ESTA LÍNEA ES VITAL:
+        // Debes enviar un status 200 y un JSON para que el fetch del frontend sepa que terminó
+        return res.status(200).json({ 
+            mensaje: "¡Éxito! Producto publicado.",
+            id: id_producto 
+        });
+
+    } catch (err) {
+        if (client) await client.query('ROLLBACK');
+        console.error("❌ Error al insertar:", err.message);
+        // Si hay error, también responde con JSON
+        return res.status(500).json({ error: err.message });
+    } finally {
+        if (client) client.release();
+    }
+
+
 });
+
+
 
 // 🛒 RUTA: Obtener productos por categoría
 app.get('/api/productos/categoria/:id', async (req, res) => {
@@ -124,8 +222,14 @@ app.get('/api/productos/categoria/:id', async (req, res) => {
     }
 });
 
+
+
 // 📚 RUTA: Obtener todos los productos
 app.get('/api/productos', async (req, res) => {
+     console.log("-----------------------------------------");
+    console.log("📥 ¡Petición de registro recibida!");
+    console.log("📦 Datos:", req.body);
+    console.log("-----------------------------------------");
     const sql = "SELECT * FROM productos ORDER BY fecha_publicacion DESC";
     try {
         const result = await pool.query(sql); 
