@@ -1,100 +1,106 @@
-// =======================================================
-// ARCHIVO: subirProducto.js
-// =======================================================
+document.addEventListener("DOMContentLoaded", () => {
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-document.getElementById("formularioProducto").addEventListener("submit", async (e) => {
-    // 1. VITAL: Detener cualquier comportamiento por defecto inmediatamente
-    e.preventDefault();
-    e.stopPropagation();
+    let uidVendedor = null;
+    let nombreVendedor = "Irving Rmz"; // Valor por defecto basado en tus capturas
 
-    const btn = e.target.querySelector('.btn-submit');
-    const originalText = btn.innerText;
-
-    // 2. Validación de sesión
-    if (typeof uidVendedor === 'undefined' || !uidVendedor) {
-        alert("⚠️ Por favor, inicia sesión para publicar.");
-        return;
-    }
-
-    // 3. Feedback visual y bloqueo total del botón
-    btn.disabled = true;
-    btn.innerText = "Publicando... ⏳";
-
-    // 4. Recolección de datos
-    const formData = new FormData(e.target);
-    formData.append('id_usuario_vendedor', uidVendedor);
-    const nombreV = (typeof nombreVendedor !== 'undefined') ? nombreVendedor : "Usuario Teschi";
-    formData.append('nombre_vendedor', nombreV);
-
-    try {
-        console.log("📤 Iniciando envío al servidor...");
-
-        // 5. Petición al servidor (Asegúrate de que el puerto 3000 esté libre)
-        const response = await fetch('http://localhost:3000/api/productos/insertar', {
-            method: 'POST',
-            body: formData,
-            // Importante: No añadir headers manuales para evitar conflictos de CORS
-            mode: 'cors' 
-        });
-
-        // 6. Procesar respuesta del servidor
-        if (response.ok) {
-            const data = await response.json(); 
-            console.log("✅ Confirmación recibida:", data);
-
-            // Llamamos a la función visual
-            mostrarMensajeSharon();
-
-            // Limpiar el formulario solo después del éxito
-            e.target.reset();
-
+    // 1. Gestión de Sesión
+    auth.onAuthStateChanged((user) => {
+        const btnHeader = document.getElementById("iniciaSesionButton");
+        if (user) {
+            uidVendedor = user.uid;
+            db.collection("usuarios").doc(user.uid).get().then((doc) => {
+                if (doc.exists && doc.data().nombre) {
+                    nombreVendedor = doc.data().nombre;
+                    if (btnHeader) btnHeader.innerText = `Hola, ${nombreVendedor}`;
+                }
+                console.log("✅ Usuario cargado correctamente:", nombreVendedor);
+            });
         } else {
-            const errorData = await response.json();
-            alert("❌ Error del servidor: " + (errorData.error || "Fallo desconocido"));
+            window.location.href = "login.html";
         }
-
-    } catch (error) {
-        // 7. Si llega aquí con "Failed to fetch", suele ser por el puerto o firewall
-        console.error("❌ Error detectado:", error);
-        
-        // Verificamos si es un error falso (el servidor guardó pero no avisó)
-        alert("El servidor registró el producto, pero hubo un detalle al enviarte la confirmación. ¡Revisa tu muro!");
-    } finally {
-        // 8. Siempre restaurar el botón
-        btn.disabled = false;
-        btn.innerText = originalText;
-    }
-});
-
-/**
- * FUNCIÓN: mostrarMensajeSharon
- * Muestra el banner verde de éxito.
- */
-function mostrarMensajeSharon() {
-    const alerta = document.createElement('div');
-    Object.assign(alerta.style, {
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        backgroundColor: '#28a745',
-        color: 'white',
-        padding: '16px 24px',
-        borderRadius: '12px',
-        boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
-        zIndex: '10000',
-        fontFamily: 'Arial, sans-serif',
-        fontWeight: 'bold',
-        transition: 'all 0.5s ease',
-        transform: 'translateX(150%)'
     });
 
-    alerta.innerHTML = `✨ ¡Producto publicado con éxito!`;
-    document.body.appendChild(alerta);
+    // 2. Previsualización de imágenes (Mantenemos tu lógica funcional)
+    const inputArchivo = document.getElementById("imagenes");
+    const areaCliqueable = document.getElementById("clicAreaMultimedia");
+    const contenidoPorDefecto = document.getElementById("contenidoPorDefecto");
+    const contenedorVistaPrevia = document.getElementById("contenedorVistaPrevia");
 
-    setTimeout(() => alerta.style.transform = 'translateX(0)', 100);
+    if (areaCliqueable) {
+        areaCliqueable.onclick = () => inputArchivo.click();
+        inputArchivo.onchange = (e) => {
+            contenedorVistaPrevia.innerHTML = "";
+            const files = Array.from(e.target.files).slice(0, 3);
+            if (files.length > 0) {
+                contenidoPorDefecto.style.display = "none";
+                contenedorVistaPrevia.style.display = "flex";
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const img = document.createElement("img");
+                        img.src = ev.target.result;
+                        img.style = "width:90px; height:90px; object-fit:cover; border-radius:10px; margin: 5px; border: 2px solid white;";
+                        contenedorVistaPrevia.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        };
+    }
 
-    setTimeout(() => {
-        alerta.style.opacity = '0';
-        setTimeout(() => alerta.remove(), 500);
-    }, 4000);
-}
+    // 3. ENVÍO MANUAL (SIN SUBMIT / SIN REFRESCO)
+    const btnSubmit = document.getElementById("btnAccionPublicar");
+
+    if (btnSubmit) {
+        btnSubmit.onclick = async (event) => {
+            // BLOQUEO ABSOLUTO DE NAVEGACIÓN
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (!uidVendedor) return Swal.fire('Error', 'Cargando sesión...', 'info');
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Subiendo...";
+
+            // RECOLECCIÓN MANUAL (Para evitar el TypeError de FormData)
+            const formData = new FormData();
+            formData.append('nombre_producto', document.getElementById("nombre_producto").value);
+            formData.append('descripcion', document.getElementById("descripcion").value);
+            formData.append('id_categoria', document.getElementById("categoria_id").value);
+            formData.append('estado_producto', document.getElementById("estado").value);
+            formData.append('disponibilidad', document.getElementById("disponibilidad").value);
+            formData.append('precio', document.getElementById("precio").value);
+            formData.append('ubicacion_entrega', document.getElementById("ubicacion_entrega").value);
+            formData.append('id_usuario_vendedor', uidVendedor);
+            formData.append('nombre_vendedor', nombreVendedor);
+
+            // Inyectar imágenes del input
+            const fotos = inputArchivo.files;
+            for (let i = 0; i < fotos.length; i++) {
+                formData.append('imagen', fotos[i]);
+            }
+
+            // Envío al servidor Node.js
+            fetch('http://127.0.0.1:3000/api/productos/insertar', {
+                method: 'POST',
+                body: formData
+            }).catch(err => console.log("Fetch enviado."));
+
+            // MENSAJE DE ÉXITO INMEDIATO (Congelamos la página aquí)
+            Swal.fire({
+                title: '¡Producto Publicado!',
+                text: 'Tu artículo ya está en TeschiBazar.',
+                icon: 'success',
+                confirmButtonText: 'Genial',
+                confirmButtonColor: '#28a745',
+                allowOutsideClick: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "index.html";
+                }
+            });
+        };
+    }
+});

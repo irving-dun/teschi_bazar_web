@@ -1,6 +1,3 @@
-
-
-
 // =======================================================
 // CONFIGURACIÓN DE DEPENDENCIAS Y MÓDULOS
 // =======================================================
@@ -18,9 +15,8 @@ const app = express();
 const port = process.env.PORT || 3000; 
 
 // Middleware
-// Reemplaza app.use(cors()); por esto:
 app.use(cors({
-    origin: '*', // Permite que tu Live Server se conecte sin problemas
+    origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -37,9 +33,11 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 // CONFIGURACIÓN DE FIREBASE ADMIN SDK
 // =======================================================
 const serviceAccount = require('./adminsdk.json'); 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+    });
+}
 console.log('✅ Firebase Admin SDK inicializado.');
 
 // =======================================================
@@ -47,7 +45,7 @@ console.log('✅ Firebase Admin SDK inicializado.');
 // =======================================================
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, UPLOADS_DIR); // Usa la variable UPLOADS_DIR definida arriba
+        cb(null, UPLOADS_DIR);
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -63,13 +61,10 @@ const DATABASE_URL_LOCAL = "postgresql://irving:4jsZSjNG0ZaqCNw7zQQlvGjt7ibkbUMn
 
 const dbConfig = {
     connectionString: process.env.DATABASE_URL || DATABASE_URL_LOCAL,
-    // La propiedad 'ssl' corregida evita el error "does not support SSL connections"
-    ssl: { 
-        rejectUnauthorized: false 
-    },
+    ssl: { rejectUnauthorized: false },
     connectionTimeoutMillis: 10000, 
     idleTimeoutMillis: 30000
-};
+};  
 
 let pool; 
 async function initializeDatabase() {
@@ -84,31 +79,6 @@ async function initializeDatabase() {
     }
 }
 
-// =======================================================
-// UTILIDADES (CHAT Y SEGURIDAD)
-// =======================================================
-async function verificarTokenFirebase(idToken) {
-    try {
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        return decodedToken.uid;
-    } catch (error) {
-        throw new Error("Token inválido.");
-    }
-}
-
-async function obtenerVendedor(idProducto) {
-    const result = await pool.query('SELECT id_usuario_vendedor FROM productos WHERE id_producto = $1', [idProducto]);
-    if (result.rows.length === 0) throw new Error("Producto no encontrado.");
-    return result.rows[0].id_usuario_vendedor;
-}
-
-// (Omití por brevedad guardarMensaje y obtenerOCrearConversacion para enfocarme en las rutas, pero mantenlas en tu archivo real)
-
-// =================================================================
-// RUTAS DE LA API
-// =================================================================
-
-// 🔍 RUTA: Obtener detalle de producto (Corregida para traer TODO, incluyendo fecha)
 // =================================================================
 // RUTAS DE LA API
 // =================================================================
@@ -123,7 +93,6 @@ app.get('/api/productos/:id', async (req, res) => {
         LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
         WHERE p.id_producto = $1
     `;
-    
     try {
         const result = await pool.query(sql, [idProducto]);
         if (result.rows.length === 0) return res.status(404).json({ error: 'No existe' });
@@ -131,14 +100,13 @@ app.get('/api/productos/:id', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-}); // <--- AQUÍ TERMINA LA RUTA DE DETALLE
+});
 
-// 📤 RUTA: Insertar nuevo producto (AHORA FUERA Y BIEN UBICADA)
+// 📤 RUTA: Insertar nuevo producto
 app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) => {
-    console.log("-----------------------------------------");
-    console.log("📥 ¡Petición de registro recibida!");
-    console.log("📦 Datos:", req.body);
-    
+    // 1. Agregamos un log para ver en la terminal que los datos llegaron
+    console.log("📥 Recibiendo producto:", req.body.nombre_producto);
+
     const { 
         nombre_producto, descripcion, id_categoria, 
         estado_producto, disponibilidad, precio, 
@@ -149,61 +117,43 @@ app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) =>
     try {
         await client.query('BEGIN');
 
-        // CORRECCIÓN: Usar id_usuario en lugar de id
+        // Registro de usuario (ON CONFLICT evita errores si ya existe)
         await client.query(
             `INSERT INTO usuarios (id_usuario, nombre) 
              VALUES ($1, $2) ON CONFLICT (id_usuario) DO NOTHING`, 
-            [id_usuario_vendedor, nombre_vendedor || "Usuario Sharon"]
+            [id_usuario_vendedor, nombre_vendedor || "Usuario"]
         );
 
-        const productQuery = `
-            INSERT INTO productos (
-                nombre_producto, descripcion, id_categoria, 
-                estado_producto, disponibilidad, precio, 
-                id_usuario_vendedor, ubicacion_entrega
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-            RETURNING id_producto
-        `;
-        
-        const resProd = await client.query(productQuery, [
-            nombre_producto, descripcion, id_categoria, 
-            estado_producto, disponibilidad, precio, 
-            id_usuario_vendedor, ubicacion_entrega
-        ]);
+        // Registro del producto
+        const resProd = await client.query(
+            `INSERT INTO productos (nombre_producto, descripcion, id_categoria, estado_producto, disponibilidad, precio, id_usuario_vendedor, ubicacion_entrega) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_producto`,
+            [nombre_producto, descripcion, id_categoria, estado_producto, disponibilidad, precio, id_usuario_vendedor, ubicacion_entrega]
+        );
 
         const id_producto = resProd.rows[0].id_producto;
 
+        // Registro de la imagen (si existe)
         if (req.file) {
-            const url_imagen = `/uploads/${req.file.filename}`;
-            await client.query(
-                'INSERT INTO imagenes_producto (id_producto, url_imagen) VALUES ($1, $2)',
-                [id_producto, url_imagen]
+            await client.query('INSERT INTO imagenes_producto (id_producto, url_imagen) VALUES ($1, $2)', 
+                [id_producto, `/uploads/${req.file.filename}`]
             );
         }
-await client.query('COMMIT');
-        console.log("✅ ¡Producto guardado con éxito!");
 
-        // ESTA LÍNEA ES VITAL:
-        // Debes enviar un status 200 y un JSON para que el fetch del frontend sepa que terminó
-        return res.status(200).json({ 
-            mensaje: "¡Éxito! Producto publicado.",
-            id: id_producto 
-        });
+        await client.query('COMMIT');
+        
+        // 2. Respuesta ultra-clara para el frontend
+        console.log("✅ Producto guardado con éxito:", id_producto);
+        return res.status(200).json({ success: true, mensaje: "¡Éxito!", id: id_producto });
 
     } catch (err) {
         if (client) await client.query('ROLLBACK');
-        console.error("❌ Error al insertar:", err.message);
-        // Si hay error, también responde con JSON
-        return res.status(500).json({ error: err.message });
+        console.error("❌ Error en el servidor:", err.message);
+        return res.status(500).json({ success: false, error: err.message });
     } finally {
         if (client) client.release();
     }
-
-
 });
-
-
-
 // 🛒 RUTA: Obtener productos por categoría
 app.get('/api/productos/categoria/:id', async (req, res) => {
     const idCategoria = req.params.id;
@@ -222,14 +172,9 @@ app.get('/api/productos/categoria/:id', async (req, res) => {
     }
 });
 
-
-
-// 📚 RUTA: Obtener todos los productos
+// 📚 RUTA: Obtener todos los productos (CORRECCIÓN VITAL AQUÍ)
 app.get('/api/productos', async (req, res) => {
-     console.log("-----------------------------------------");
-    console.log("📥 ¡Petición de registro recibida!");
-    console.log("📦 Datos:", req.body);
-    console.log("-----------------------------------------");
+    // ELIMINADO EL req.body QUE ROMPÍA LA CARGA
     const sql = "SELECT * FROM productos ORDER BY fecha_publicacion DESC";
     try {
         const result = await pool.query(sql); 
@@ -244,10 +189,6 @@ app.get('/api/productos', async (req, res) => {
 // =======================================================
 const server = http.createServer(app); 
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
-
-io.on('connection', (socket) => {
-    // ... Tu lógica de Socket.io (registrar_usuario, enviar_mensaje, etc.)
-});
 
 initializeDatabase().then(() => {
     server.listen(port, () => {

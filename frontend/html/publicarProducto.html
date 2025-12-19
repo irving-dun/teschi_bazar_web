@@ -1,270 +1,116 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
- <meta charset="UTF-8" />
- <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Subir Producto - TeschiBazar</title>
- <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
- <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-
- <link rel="stylesheet" href="/frontend/css/styles.css" />
- <link rel="stylesheet" href="/frontend/css/publiproducto.css" />
-
- <style>
-  /* Mensaje de éxito estilizado para Sharon */
-  .toast-success {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background-color: #ff0000; /* Rojo Teschi */
-    color: white;
-    padding: 18px 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    z-index: 9999;
-    border: 2px solid white;
-    animation: slideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  }
-
-  @keyframes slideIn {
-    from { transform: translateX(120%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
- </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subir Producto - TeschiBazar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/frontend/css/styles.css" />
+  <link rel="stylesheet" href="/frontend/css/publiproducto.css" />
 </head>
 
 <body>
- <header>
-  <h1>TESCHI-BAZAR</h1>
-  <nav>
-   <ul>
-    <li><a href="index.html">Inicio</a></li>
-    <li><a href="">Acerca de</a></li>
-   </ul>
-  </nav>
-  <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
-   Iniciar Sesión
-  </button>
-
-
- </header>
+  <header>
+    <h1>TESCHI-BAZAR</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="#">Acerca de</a></li>
+      </ul>
+    </nav>
+    <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
+      Iniciar Sesión
+    </button>
+  </header>
 
  <main class="container-form">
   <h2>Subir Nuevo Producto</h2>
 
-  <form id="formularioProducto" class="product-form" enctype="multipart/form-data">
-   
-   <div class="form-section">
-    <h3>1. Imagenes del Producto</h3>
-    <div class="multimedia-area" id="clicAreaMultimedia" style="cursor: pointer; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #ccc; border-radius: 15px;">
-     <div id="contenidoPorDefecto" style="text-align: center;">
-      <span style="font-size: 40px;">📸</span>
-      <p>Haz clic para subir fotos (Máximo 3)</p>
-     </div>
-     <div id="contenedorVistaPrevia" style="display: none; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; padding: 10px;"></div>
-     <input type="file" id="imagenes" name="imagen" accept="image/*" multiple required style="display: none;" />
+  <div id="contenedorPrincipalProducto" class="product-form">
+    <div class="form-section">
+      <h3>1. Imagenes del Producto</h3>
+      <div class="multimedia-area" id="clicAreaMultimedia" style="cursor: pointer; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #ccc; border-radius: 15px;">
+        <div id="contenidoPorDefecto" style="text-align: center;">
+          <span style="font-size: 40px;">📸</span>
+          <p>Haz clic para subir fotos (Máximo 3)</p>
+        </div>
+        <div id="contenedorVistaPrevia" style="display: none; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; padding: 10px;"></div>
+        <input type="file" id="imagenes" accept="image/*" multiple style="display: none;" />
+      </div>
     </div>
 
-   </div>
-
-   
-
-   <div class="form-section">
-    <h3>2. Información del Producto</h3>
-
-    <div class="form-group">
-     <label for="nombre_producto">Nombre del Producto</label>
-     <input type="text" id="nombre_producto" name="nombre_producto" required maxlength="100" placeholder="Ej: iPhone 14 Pro Max" />
+    <div class="form-section">
+      <h3>2. Información del Producto</h3>
+      <div class="form-group">
+        <label>Nombre del Producto</label>
+        <input type="text" id="nombre_producto" placeholder="Ej: iPhone 14 Pro Max" />
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea id="descripcion" rows="4" placeholder="Detalles del producto..."></textarea>
+      </div>
+      <div class="options-group" style="display: flex; gap: 20px;">
+        <div class="form-group" style="flex: 1">
+          <label>Categoría</label>
+          <select id="categoria_id">
+            <option value="1">Ropa</option>
+            <option value="2">Maquillaje</option>
+            <option value="3">Accesorios</option>
+            <option value="4">Libros</option>
+            <option value="5">Electrónica</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex: 1">
+          <label>Estado</label>
+          <select id="estado">
+            <option value="nuevo">Nuevo</option>
+            <option value="usado">Usado</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Unidades Disponibles</label>
+        <input type="number" id="disponibilidad" min="1" value="1" />
+      </div>
     </div>
 
-    <div class="form-group">
-
-     <label for="descripcion">Descripción</label>
-     <textarea id="descripcion" name="descripcion" rows="4" required maxlength="500" placeholder="Detalles del estado, color, etc."></textarea>
-    </div>
-    
-    <div class="options-group" style="display: flex; gap: 20px;">
-     <div class="form-group" style="flex: 1">
-      <label for="categoria_id">Categoría</label>
-      <select id="categoria_id" name="id_categoria" required> 
-       <option value="1">Ropa</option>
-       <option value="2">Maquillaje</option>
-       <option value="3">Accesorios</option>
-       <option value="4">Libros</option>
-       <option value="5">Electrónica</option>
-      </select>
-
-     </div>
-
-     <div class="form-group" style="flex: 1">
-      <label for="estado">Estado</label>
-      <select id="estado" name="estado_producto" required>
-       <option value="nuevo">Nuevo</option>
-       <option value="usado">Usado</option>
-
-      </select>
-
-     </div>
-    </div>
- <div class="form-group">
-  <label for="disponibilidad">Unidades Disponibles</label>
-  <input type="number" id="disponibilidad" name="disponibilidad" min="1" required />
-</div>
-
-   </div>
-
-   
-
-   <div class="form-section">
-    <h3>3. Precio y Logística</h3>
-
-    <div class="form-group">
-     <label for="precio">Precio (MXN)</label>
-     <input type="number" id="precio" name="precio" min="0" required />
-     
+    <div class="form-section">
+      <h3>3. Precio y Logística</h3>
+      <div class="form-group">
+        <label>Precio (MXN)</label>
+        <input type="number" id="precio" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Punto de Entrega</label>
+        <select id="ubicacion_entrega">
+          <option value="" disabled selected>Selecciona un edificio</option>
+          <option value="Edificio A">Edificio A</option>
+          <option value="Edificio B">Edificio B</option>
+          <option value="Edificio D">Edificio D</option>
+          <option value="Edificio E">Edificio E</option>
+          <option value="Edificio F">Edificio F</option>
+          <option value="Edificio G">Edificio G</option>
+          <option value="Edificio H">Edificio H</option>
+          <option value="Edificio I">Edificio I</option>
+          <option value="Edificio J">Edificio J</option>
+          <option value="Edificio K">Edificio K</option>
+          <option value="Edificio Q">Edificio Q</option>
+        </select>
+      </div>
     </div>
 
-    <div class="form-group">
-     <label for="ubicacion_entrega">Punto de Entrega (Edificios Teschi)</label>
-     <select id="ubicacion_entrega" name="ubicacion_entrega" required>
-      <option value="" disabled selected>Selecciona un edificio</option>
-     <option value="Edificio A">Edificio A</option>
-      <option value="Edificio B">Edificio B</option>
-      <option value="Edificio D">Edificio D</option>
-      <option value="Edificio E">Edificio E</option>
-      <option value="Edificio F">Edificio F</option>
-      <option value="Edificio G">Edificio G</option>
-      <option value="Edificio H">Edificio H</option>
-      <option value="Edificio I">Edificio I</option>
-      <option value="Edificio J">Edificio J</option>
-      <option value="Edificio K">Edificio K</option>
-      <option value="Edificio Q">Edificio Q</option>
-
-
-     </select>
+    <div class="action-buttons">
+      <button type="button" id="btnAccionPublicar" class="btn-submit">Publicar Artículo</button>
     </div>
-   </div>
+  </div>
+</main>
 
-   <div class="action-buttons">
-    <button type="submit" class="btn-submit">Publicar Artículo</button>
-
-   </div>
-  </form>
- </main>
-
-
- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
- <script src="../../backend/firebase-config.js"></script>
-
- <script>
-  // --- Lógica de Imágenes ---
-  const inputArchivo = document.getElementById("imagenes");
-  const areaCliqueable = document.getElementById("clicAreaMultimedia");
-  areaCliqueable.addEventListener("click", () => inputArchivo.click());
-
-  inputArchivo.addEventListener("change", (e) => {
-    const contenedor = document.getElementById("contenedorVistaPrevia");
-    contenedor.innerHTML = "";
-    if (e.target.files.length > 0) {
-
-
-      document.getElementById("contenidoPorDefecto").style.display = "none";
-      contenedor.style.display = "flex";
-      Array.from(e.target.files).slice(0, 3).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          const img = document.createElement("img");
-          img.src = ev.target.result;
-          img.style = "width:80px; height:80px; object-fit:cover; border-radius:8px;";
-          contenedor.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-  });
-
-  // --- Lógica de Sesión Sharon ---
-  let uidVendedor = null;
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      uidVendedor = user.uid;
-      document.getElementById("iniciaSesionButton").innerText = `Hola, ${user.displayName || 'Sharon'}`;
-    } else {
-      window.location.href = "login.html";
-    }
-  });
-
-  // --- Función Mensaje de Éxito ---
-  function mostrarMensajeSharon() {
-    const toast = document.createElement("div");
-    toast.className = "toast-success";
-    toast.innerHTML = `<span>🚀</span> ¡Excelente Sharon! Tu producto se publicó con éxito.`;
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-      window.location.href = "index.html"; 
-    }, 2500);
-  }
-
-
-
-  // --- Envío al Servidor ---
-document.getElementById("formularioProducto").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    
-    // Obtenemos al usuario actual de Firebase
-    const usuarioFirebase = auth.currentUser;
-    if (!usuarioFirebase) {
-        alert("Debes estar logueado para publicar.");
-        return;
-    }
-
-    const btn = e.target.querySelector('.btn-submit');
-    btn.disabled = true;
-    btn.innerText = "Subiendo...";
-
-    const formData = new FormData(e.target);
-    
-    // ENVIAMOS DATOS DINÁMICOS
-    // Usamos el UID y el Nombre real del usuario de Firebase
-    formData.append('id_usuario_vendedor', usuarioFirebase.uid);
-    formData.append('nombre_vendedor', usuarioFirebase.displayName || "Usuario Teschi");
-
-    // En tu archivo frontend (publicarProducto.html / js)
-try {
-    const response = await fetch('http://localhost:3000/api/productos/insertar', {
-        method: 'POST',
-        body: formData
-    });
-
-    if (response.ok) {
-        // Si entra aquí, el producto se guardó bien
-        console.log("¡Éxito en el servidor!");
-        
-        // Verifica que esta función exista y no tenga errores:
-        if (typeof mostrarMensajeSharon === "function") {
-            mostrarMensajeSharon();
-        } else {
-            alert("¡Producto publicado con éxito!");
-        }
-    } else {
-        const errorData = await response.json();
-        alert("Error del servidor: " + (errorData.error || "Desconocido"));
-    }
-} catch (error) {
-    // ESTO YA NO MENTIRÁ. Te dirá el error real en la consola (F12)
-    console.error("Error capturado en el frontend:", error);
-    alert("Hubo un problema: " + error.message);
-}
-});
- </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="../../backend/firebase-config.js"></script>
+  <script src="../js/scriptsubirProducto.js"></script>
 </body>
-
 </html>
