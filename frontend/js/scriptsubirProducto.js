@@ -2,25 +2,63 @@ document.addEventListener("DOMContentLoaded", () => {
     const db = firebase.firestore();
     const auth = firebase.auth();
 
+    // Variables globales para el envío del producto
     let uidVendedor = null;
-    let nombreVendedor = "Irving Rmz"; // Valor por defecto basado en tus capturas
+    let nombreVendedor = ""; 
 
-    // 1. Gestión de Sesión
-    auth.onAuthStateChanged((user) => {
-        const btnHeader = document.getElementById("iniciaSesionButton");
-        if (user) {
-            uidVendedor = user.uid;
-            db.collection("usuarios").doc(user.uid).get().then((doc) => {
-                if (doc.exists && doc.data().nombre) {
-                    nombreVendedor = doc.data().nombre;
-                    if (btnHeader) btnHeader.innerText = `Hola, ${nombreVendedor}`;
-                }
-                console.log("✅ Usuario cargado correctamente:", nombreVendedor);
+    const iniciaSesionBoton = document.getElementById("iniciaSesionButton");
+    const contenedorPerfilUsuario = document.getElementById("contenedorPerfilUsuario");
+
+    // === GESTIÓN DINÁMICA DE LA SESIÓN ===
+    auth.onAuthStateChanged((usuario) => {
+        if (usuario) {
+            uidVendedor = usuario.uid;
+            iniciaSesionBoton.style.display = "none";
+
+            // 1. Buscamos el nombre real en Firestore
+            db.collection("usuarios").doc(usuario.uid).get().then((doc) => {
+                const datosUsuarios = doc.exists ? doc.data() : {};
+                
+                // Si existe el nombre en la BD lo usa, si no, usa el correo (ej. miranda123)
+                nombreVendedor = datosUsuarios.nombre || usuario.email.split("@")[0];
+
+                // 2. Insertamos el HTML del menú desplegable (igual que en index)
+                contenedorPerfilUsuario.innerHTML = `
+                    <div class="perfil-dropdown">
+                        <button class="btn-UsuarioNombre" id="dropdownUserButton">
+                            Hola, ${nombreVendedor}
+                        </button>
+                        <div class="dropdown-content" id="userDropdownContent">
+                            <a href="perfil.html">✏️ Mi Perfil</a>
+                            <a href="publicarProducto.html">🛍️ Publicar</a>
+                            <a href="#" onclick="window.logoutFirebase()">🚪 Cerrar Sesión</a>
+                        </div>
+                    </div>`;
+                contenedorPerfilUsuario.style.display = "block";
+
+                // 3. Lógica del menú desplegable
+                const dropdownButton = document.getElementById("dropdownUserButton");
+                const dropdownContent = document.getElementById("userDropdownContent");
+
+                dropdownButton.addEventListener("click", () => {
+                    dropdownContent.classList.toggle("show");
+                });
             });
         } else {
+            // Si no hay sesión, protegemos la página y mandamos al login
             window.location.href = "login.html";
         }
     });
+
+    // === FUNCIÓN GLOBAL DE CIERRE DE SESIÓN ===
+    window.logoutFirebase = function () {
+        auth.signOut().then(() => {
+            window.location.href = "index.html";
+        });
+    };
+
+
+
 
     // 2. Previsualización de imágenes (Mantenemos tu lógica funcional)
     const inputArchivo = document.getElementById("imagenes");
