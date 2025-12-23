@@ -1,20 +1,26 @@
-// =======================================================
-// CONFIGURACIÓN DE DEPENDENCIAS Y MÓDULOS
-// =======================================================
+//------------ CONFIGURACIÓN DE DEPENDENCIAS Y MÓDULOS ------------
+    //  Base del servidor y seguridad  
 const express = require('express');
-const { Pool } = require('pg');
 const cors = require('cors');
+const http = require('http');
+
+    //  Base de datos y servicios externos
+const { Pool } = require('pg');
+const admin = require('firebase-admin');
+
+    //  Manejo de archivos y rutas
 const multer = require('multer');
 const path = require('path');
-const http = require('http');
-const { Server } = require('socket.io');
-const admin = require('firebase-admin');
 const fs = require('fs'); 
 
+    //  Comunicacion en tiempo real
+const { Server } = require('socket.io');
+
+    // Inicialización de la App
 const app = express();
 const port = process.env.PORT || 3000; 
 
-// Middleware
+    // Middleware
 app.use(cors({
     origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -22,27 +28,23 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// --- Configuración de RUTAS DE ARCHIVOS ---
+//------------ Configuración de RUTAS DE ARCHIVOS ------------
 const UPLOADS_DIR = path.join(__dirname, '..', 'sandbox', 'uploads'); 
 if (!fs.existsSync(UPLOADS_DIR)) {
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 app.use('/uploads', express.static(UPLOADS_DIR));
 
-// =======================================================
-// CONFIGURACIÓN DE FIREBASE ADMIN SDK
-// =======================================================
+//------------ CONFIGURACIÓN DE FIREBASE ADMIN SDK ------------
 const serviceAccount = require('./adminsdk.json'); 
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
     });
 }
-console.log('✅ Firebase Admin SDK inicializado.');
+console.log('Firebase Admin SDK inicializado.');
 
-// =======================================================
-// CONFIGURACIÓN DE MULTER (PROCESAMIENTO DE IMÁGENES)
-// =======================================================
+//------------ CONFIGURACIÓN DE MULTER (PROCESAMIENTO DE IMÁGENES) ------------
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, UPLOADS_DIR);
@@ -54,9 +56,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// =======================================================
-// CONFIGURACIÓN DE LA BASE DE DATOS (PostgreSQL)
-// =======================================================
+//------------ CONFIGURACIÓN DE LA BASE DE DATOS (PostgreSQL) ------------
 const DATABASE_URL_LOCAL = "postgresql://irving:4jsZSjNG0ZaqCNw7zQQlvGjt7ibkbUMn@dpg-d4vnjfhr0fns739p88l0-a.virginia-postgres.render.com/teschibazar"; 
 
 const dbConfig = {
@@ -74,16 +74,14 @@ async function initializeDatabase() {
         client.release(); 
         console.log('✅ Conexión a PostgreSQL exitosa!');
     } catch (err) {
-        console.error('❌ Error al conectar con PostgreSQL:', err.message);
+        console.error('Error al conectar con PostgreSQL:', err.message);
         process.exit(1); 
     }
 }
 
-// =================================================================
-// RUTAS DE LA API
-// =================================================================
+//------------ RUTAS DE LA API ------------
 
-// 🔍 RUTA: Obtener detalle de producto
+//  RUTA: Obtener detalle de producto
 app.get('/api/productos/:id', async (req, res) => {
     const idProducto = req.params.id;
     const sql = `
@@ -102,10 +100,10 @@ app.get('/api/productos/:id', async (req, res) => {
     }
 });
 
-// 📤 RUTA: Insertar nuevo producto
+//  RUTA: Insertar nuevo producto
 app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) => {
     // 1. Agregamos un log para ver en la terminal que los datos llegaron
-    console.log("📥 Recibiendo producto:", req.body.nombre_producto);
+    console.log("Recibiendo producto:", req.body.nombre_producto);
 
     const { 
         nombre_producto, descripcion, id_categoria, 
@@ -148,13 +146,13 @@ app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) =>
 
     } catch (err) {
         if (client) await client.query('ROLLBACK');
-        console.error("❌ Error en el servidor:", err.message);
+        console.error("Error en el servidor:", err.message);
         return res.status(500).json({ success: false, error: err.message });
     } finally {
         if (client) client.release();
     }
 });
-// 🛒 RUTA: Obtener productos por categoría
+//  RUTA: Obtener productos por categoría
 app.get('/api/productos/categoria/:id', async (req, res) => {
     const idCategoria = req.params.id;
     const sql = `
@@ -172,9 +170,9 @@ app.get('/api/productos/categoria/:id', async (req, res) => {
     }
 });
 
-// 📚 RUTA: Obtener todos los productos (CORRECCIÓN VITAL AQUÍ)
+//  RUTA: Obtener todos los productos 
 app.get('/api/productos', async (req, res) => {
-    // ELIMINADO EL req.body QUE ROMPÍA LA CARGA
+    
     const sql = "SELECT * FROM productos ORDER BY fecha_publicacion DESC";
     try {
         const result = await pool.query(sql); 
@@ -184,9 +182,7 @@ app.get('/api/productos', async (req, res) => {
     }
 });
 
-// =======================================================
-// SERVIDOR Y SOCKET.IO
-// =======================================================
+//------------ SERVIDOR Y SOCKET.IO------------
 const server = http.createServer(app); 
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
 
