@@ -1,117 +1,135 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Subir Producto - TeschiBazar</title>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/frontend/css/styles.css" />
-  <link rel="stylesheet" href="/frontend/css/publiproducto.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vender Producto - TeschiBazar</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="/frontend/css/index.css" />
+    <link rel="stylesheet" href="/frontend/css/publiproducto.css" />
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js" defer></script>
+    <script src="/backend/firebase-config.js" defer></script>
+    <script src="/frontend/js/scriptHeader.js" defer></script>
 </head>
-
 <body>
-  <header>
-    <h1>TESCHI-BAZAR</h1>
-    <nav>
-        <ul>
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="#">Acerca de</a></li>
-        </ul>
-    </nav>
-    <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
-        Iniciar Sesión
-    </button>
-    <div id="contenedorPerfilUsuario" style="display: none;"></div>
-</header>
-
- <main class="container-form">
-  <h2>Subir Nuevo Producto</h2>
-
-  <div id="contenedorPrincipalProducto" class="product-form">
-    <div class="form-section">
-      <h3>1. Imagenes del Producto</h3>
-      <div class="multimedia-area" id="clicAreaMultimedia" style="cursor: pointer; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed #ccc; border-radius: 15px;">
-        <div id="contenidoPorDefecto" style="text-align: center;">
-          <span style="font-size: 40px;">📸</span>
-          <p>Haz clic para subir fotos (Máximo 3)</p>
+    <header>
+        <h1>TESCHI-BAZAR</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="#">Acerca de</a></li>
+            </ul>
+        </nav>
+        <div id="auth-wrapper">
+            <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion" style="display: none;">
+                Iniciar Sesión
+            </button>
+            <div id="contenedorPerfilUsuario" style="display: none"></div>
         </div>
-        <div id="contenedorVistaPrevia" style="display: none; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; padding: 10px;"></div>
-        <input type="file" id="imagenes" accept="image/*" multiple style="display: none;" />
-      </div>
-    </div>
+    </header>
 
-    <div class="form-section">
-      <h3>2. Información del Producto</h3>
-      <div class="form-group">
-        <label>Nombre del Producto</label>
-        <input type="text" id="nombre_producto" placeholder="Ej: iPhone 14 Pro Max" />
-      </div>
-      <div class="form-group">
-        <label>Descripción</label>
-        <textarea id="descripcion" rows="4" placeholder="Detalles del producto..."></textarea>
-      </div>
-      <div class="options-group" style="display: flex; gap: 20px;">
-        <div class="form-group" style="flex: 1">
-          <label>Categoría</label>
-          <select id="categoria_id">
-            <option value="1">Ropa</option>
-            <option value="2">Maquillaje</option>
-            <option value="3">Accesorios</option>
-            <option value="4">Libros</option>
-            <option value="5">Electrónica</option>
-          </select>
+    <main class="container-form">
+        <div class="header-text">
+            <h2>Publicar nuevo producto</h2>
+            <p>Completa los detalles para que otros estudiantes puedan ver tu artículo.</p>
         </div>
-        <div class="form-group" style="flex: 1">
-          <label>Estado</label>
-          <select id="estado">
-            <option value="nuevo">Nuevo</option>
-            <option value="usado">Usado</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Unidades Disponibles</label>
-        <input type="number" id="disponibilidad" min="1" value="1" />
-      </div>
-    </div>
 
-    <div class="form-section">
-      <h3>3. Precio y Logística</h3>
-      <div class="form-group">
-        <label>Precio (MXN)</label>
-        <input type="number" id="precio" min="0" />
-      </div>
-      <div class="form-group">
-        <label>Punto de Entrega</label>
-        <select id="ubicacion_entrega">
-          <option value="" disabled selected>Selecciona un edificio</option>
-          <option value="Edificio A">Edificio A</option>
-          <option value="Edificio B">Edificio B</option>
-          <option value="Edificio D">Edificio D</option>
-          <option value="Edificio E">Edificio E</option>
-          <option value="Edificio F">Edificio F</option>
-          <option value="Edificio G">Edificio G</option>
-          <option value="Edificio H">Edificio H</option>
-          <option value="Edificio I">Edificio I</option>
-          <option value="Edificio J">Edificio J</option>
-          <option value="Edificio K">Edificio K</option>
-          <option value="Edificio Q">Edificio Q</option>
-        </select>
-      </div>
-    </div>
+        <form id="formPublicar" class="product-form">
+            <div class="form-section">
+                <h3><span>📸</span> 1. Imágenes del Producto</h3>
+                <div class="multimedia-area" id="clicAreaMultimedia">
+                    <div id="contenidoPorDefecto">
+                        <div class="icon-upload">➕</div>
+                        <p>Haz clic para subir fotos</p>
+                        <small>Máximo 3 imágenes (JPG, PNG)</small>
+                    </div>
+                    <div id="contenedorVistaPrevia" class="preview-grid" style="display: none;"></div>
+                    <input type="file" id="imagenes" accept="image/*" multiple style="display: none;" />
+                </div>
+            </div>
 
-    <div class="action-buttons">
-      <button type="button" id="btnAccionPublicar" class="btn-submit">Publicar Artículo</button>
-    </div>
-  </div>
-</main>
+            <div class="form-section">
+                <h3><span>📝</span> 2. Detalles del Artículo</h3>
+                <div class="form-group">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="nombre_producto" placeholder="Ej: Calculadora científica Casio" required />
+                </div>
+                
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="descripcion" rows="4" placeholder="Describe el estado, marca o detalles importantes..." required></textarea>
+                </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="../../backend/firebase-config.js"></script>
-  <script src="../js/scriptsubirProducto.js"></script>
+                <div class="grid-inputs">
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select id="categoria_id">
+                            <option value="1">Ropa</option>
+                            <option value="2">Maquillaje</option>
+                            <option value="3">Accesorios</option>
+                            <option value="4">Libros</option>
+                            <option value="5">Electrónica</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select id="estado">
+                            <option value="nuevo">Nuevo</option>
+                            <option value="detalles">Usado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Unidades Disponibles</label>
+                    <input type="number" id="disponibilidad" min="1" value="1" required />
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><span>📍</span> 3. Precio y Entrega</h3>
+                <div class="form-group">
+                    <label>Precio (MXN)</label>
+                    <div class="price-input">
+                        <span>$</span>
+                        <input type="number" id="precio" placeholder="0" min="1" required />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Punto de Entrega (Edificio)</label>
+                    <select id="ubicacion_entrega" required>
+                        <option value="" disabled selected>Selecciona dónde entregas...</option>
+                        <option value="Edificio A">Edificio A</option>
+                        <option value="Edificio B">Edificio B</option>
+                        <option value="Edificio D">Edificio D</option>
+                        <option value="Edificio E">Edificio E</option>
+                        <option value="Edificio F">Edificio F</option>
+                        <option value="Edificio G">Edificio G</option>
+                        <option value="Edificio H">Edificio H</option>
+                        <option value="Edificio I">Edificio I</option>
+                        <option value="Edificio J">Edificio J</option>
+                        <option value="Edificio K">Edificio K</option>
+                        <option value="Edificio Q">Edificio Q</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button type="submit" id="btnAccionPublicar" class="btn-submit">
+                    Listar Producto Ahora
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/frontend/js/scriptsubirProducto.js" defer></script>
 </body>
 </html>

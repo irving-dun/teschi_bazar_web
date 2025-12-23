@@ -1,0 +1,130 @@
+/* RESET GLOBAL: Clave para que nada se desborde */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  padding-top: 75px; /* Espacio para que el contenido no quede oculto */
+}
+
+/* CONTENEDOR HEADER */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px; /* Altura fija para evitar brincos */
+  background-color: white;
+  color: rgb(1, 10, 2);
+  padding: 0 2rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+header h1 {
+  font-family: "Anton", sans-serif;
+  margin: 0;
+  flex-shrink: 0;
+  letter-spacing: 0.1rem;
+  font-size: 1.6rem;
+}
+
+header nav {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: 25px; /* Espacio entre botones del menú */
+}
+
+nav ul li a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+  color: #0ccc12;
+}
+
+/* CONTENEDOR DE BOTONES DE USUARIO */
+#auth-wrapper {
+  width: 190px; /* Espacio reservado constante */
+  height: 40px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.btn-inicio-sesion,
+.btn-UsuarioNombre {
+  width: 175px;
+  height: 40px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  color: #000;
+  text-decoration: none;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  padding: 0 15px;
+}
+
+.btn-inicio-sesion:hover,
+.btn-UsuarioNombre:hover {
+  color: #0ccc12;
+  border-color: #0ccc12;
+}
+
+/* MENU DESPLEGABLE */
+.perfil-dropdown {
+  position: relative;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+  z-index: 1100;
+  right: 0;
+  top: 100%;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.dropdown-content a {
+  color: #4a004a;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  font-size: 14px;
+}
+
+.dropdown-content a:hover { background-color: #eee; }
+
+.show { display: block; }

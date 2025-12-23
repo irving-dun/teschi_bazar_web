@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,8 +19,14 @@
         <li><a href="">Acerca de</a></li>
       </ul>
     </nav>
-    <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">Iniciar Sesión</button>
-    <div id="contenedorPerfilUsuario" style="display: none"></div>
+
+    <div id="auth-wrapper">
+      <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion"
+        style="display: none;">
+        Iniciar Sesión
+      </button>
+      <div id="contenedorPerfilUsuario" style="display: none"></div>
+    </div>
   </header>
 
   <div class="categoria-wrapper">
@@ -40,7 +47,9 @@
     </section>
   </main>
 
-  <footer><p>&copy; Teschi-Bazar</p></footer>
+  <footer>
+    <p>&copy; Teschi-Bazar</p>
+  </footer>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -48,4 +57,5 @@
   <script src="../js/productos.js"></script>
   <script src="../js/scriptIndex.js"></script>
 </body>
+
 </html>

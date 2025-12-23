@@ -49,23 +49,44 @@ header nav {
     padding-top: 15px;
 }
 
-/* Estilos de botones: Iniciar Sesión y Usuario Nombre (Conservados) */
+
+/* Agrega o reemplaza esto en tu productos.css */
+
+#auth-wrapper {
+    width: 180px;          /* Espacio reservado */
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: 1.5rem;  /*  crea el espacio a la derecha del botón */
+}
 .btn-inicio-sesion,
 .btn-UsuarioNombre {
+    width: 170px;          /* Ancho bloqueado */
+    height: 40px;          /* Altura bloqueada */
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box; 
+    padding: 0 10px;       /* Padding interno sin afectar el ancho total */
+    margin: 0;             /* Eliminamos márgenes que puedan causar saltos */
+    
+    /* Tu diseño original */
     background-color: #ffffff;
     color: rgb(0, 0, 0);
     text-decoration: none;
-    padding: 8px 15px;
     border-radius: 20px;
-    border: 1px solid #235d25;
+    border: 1px solid #ccc;
     font-family: "Poppins", sans-serif;
     font-weight: 600;
-    font-size: 15px;
-    flex-shrink: 0;
-    margin-left: 1rem;
-    transition: background-color 0.3s, color 0.3s;
-    margin-right: 2rem;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
+
 
 .btn-inicio-sesion:hover,
 .btn-UsuarioNombre:hover {

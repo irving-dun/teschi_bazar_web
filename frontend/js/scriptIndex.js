@@ -1,102 +1,86 @@
-// ===============================================
-// === MANEJO DE LA SESIÓN EN EL MENÚ PRINCIPAL ===
-// ===============================================
-
 document.addEventListener("DOMContentLoaded", () => {
-  const iniciaSesionBoton = document.getElementById("iniciaSesionButton");
-  const contenedorPerfilUsuario = document.getElementById(
-    "contenedorPerfilUsuario"
-  );
+    const btnLogin = document.getElementById("iniciaSesionButton");
+    const divUser = document.getElementById("contenedorPerfilUsuario");
 
-  if (!iniciaSesionBoton || !contenedorPerfilUsuario) {
-    console.error(
-      "Error: los contenedores 'inicaSesion' o 'contenedorPerfilUsuario' no se encontraron en index.html"
-    );
-    return;
-  }
+    if (!btnLogin || !divUser) return;
 
-  contenedorPerfilUsuario.style.display = "none";
-
-  // === ESTADO DE LA SESIÓN ===
-  firebase.auth().onAuthStateChanged((usuario) => {
-    if (usuario) {
-      iniciaSesionBoton.style.display = "none";
-
-      // 2. Leemos los datos adicionales del usuario de Firestore
-      db.collection("usuarios")
-        .doc(usuario.uid)
-        .get()
-        .then((doc) => {
-          const datosUsuarios = doc.exists ? doc.data() : {};
-          const nombreUsuario =
-            datosUsuarios.nombre || usuario.email.split("@")[0];
-
-          // INICIO DE LA ESTRUCTURA DEL MENÚ DESPLEGABLE
-          contenedorPerfilUsuario.innerHTML = `
-              <div class="perfil-dropdown">
-                  <button class="btn-UsuarioNombre" id="dropdownUserButton">
-                      Hola, ${nombreUsuario}
-                  </button>
-                  <div class="dropdown-content" id="userDropdownContent">
-                      <a href="perfil.html">✏️ Mi Perfil</a>
-                      <a href="publicarProducto.html"> 🛍️ Publicar</a>
-                      <a href="#" onclick="window.logoutFirebase()">🚪 Cerrar Sesión</a>
-                      
-                  </div>
-              </div>
-              `;
-          contenedorPerfilUsuario.style.display = "block";
-
-          // LÓGICA PARA MOSTRAR/OCULTAR EL MENÚ DESPLEGABLE
-          const dropdownButton = document.getElementById("dropdownUserButton");
-          const dropdownContent = document.getElementById(
-            "userDropdownContent"
-          );
-
-          if (dropdownButton && dropdownContent) {
-            dropdownButton.addEventListener("click", () => {
-              dropdownContent.classList.toggle("show");
-            });
-
-            // Se cierra el menú si se hace click fuera
-            window.addEventListener("click", (event) => {
-              if (!event.target.matches("#dropdownUserButton")) {
-                if (dropdownContent.classList.contains("show")) {
-                  dropdownContent.classList.remove("show");
-                }
-              }
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("Error al obtener datos de FireStore: ", error);
-          contenedorPerfilUsuario.innerHTML = `<button class="btn-UsuarioNombre" onclick ="window.logoutFirebase()"> Hola, ${
-            usuario.email.split("@")[0]
-          }</button>`;
-          contenedorPerfilUsuario.style.display = "block";
-        });
+    // --- 1. LÓGICA DE CARGA INSTANTÁNEA ---
+    const nombreCache = localStorage.getItem("usuario_nombre");
+    
+    // Si hay caché, mostramos el menú de inmediato y nos aseguramos que el login esté oculto
+    if (nombreCache) {
+        mostrarMenuUsuario(nombreCache);
+        btnLogin.style.display = "none"; 
     } else {
-      // SI NO HAY SESION
-      iniciaSesionBoton.style.display = "block";
-      contenedorPerfilUsuario.style.display = "none";
-      contenedorPerfilUsuario.innerHTML = "";
+        // Si no hay caché, mostramos login, pero solo si Firebase no dice lo contrario luego
+        btnLogin.style.display = "inline-flex";
     }
-  });
+
+    // --- 2. VERIFICACIÓN REAL CON FIREBASE ---
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            db.collection("usuarios").doc(user.uid).get().then((doc) => {
+                const nombreReal = doc.exists ? (doc.data().nombre || user.email.split("@")[0]) : user.email.split("@")[0];
+                
+                // Solo actualizamos el DOM si el nombre cambió o no había caché
+                if (localStorage.getItem("usuario_nombre") !== nombreReal) {
+                    localStorage.setItem("usuario_nombre", nombreReal);
+                    mostrarMenuUsuario(nombreReal);
+                }
+            });
+        } else {
+            // Limpieza total si no hay usuario
+            localStorage.removeItem("usuario_nombre");
+            btnLogin.style.display = "inline-flex";
+            divUser.style.display = "none";
+            divUser.innerHTML = "";
+        }
+    });
+
+    // --- 3. FUNCIÓN PARA DIBUJAR EL MENÚ ---
+    function mostrarMenuUsuario(nombre) {
+        divUser.innerHTML = `
+            <div class="perfil-dropdown">
+                <button class="btn-UsuarioNombre" id="dropdownUserButton">
+                    Hola, ${nombre}
+                </button>
+                <div class="dropdown-content" id="userDropdownContent">
+                    <a href="perfil.html">✏️ Mi Perfil</a>
+                    <a href="publicarProducto.html">🛍️ Publicar</a>
+                    <a href="#" id="logoutLink">🚪 Cerrar Sesión</a>
+                </div>
+            </div>`;
+        divUser.style.display = "block";
+        btnLogin.style.display = "none";
+    }
+
+    // --- 4. MANEJO DE CLICS ---
+    document.addEventListener("click", (e) => {
+        const dropdownContent = document.getElementById("userDropdownContent");
+        
+        // Botón de Usuario
+        if (e.target.closest("#dropdownUserButton")) {
+            e.preventDefault();
+            if (dropdownContent) dropdownContent.classList.toggle("show");
+        } 
+        // Cerrar Sesión
+        else if (e.target.closest("#logoutLink")) {
+            e.preventDefault();
+            window.logoutFirebase();
+        }
+        // Cerrar al hacer clic fuera
+        else {
+            if (dropdownContent && dropdownContent.classList.contains("show")) {
+                dropdownContent.classList.remove("show");
+            }
+        }
+    });
 });
 
-// =FUNCIÓN PARA CERRAR SESIÓN =
-window.logoutFirebase = function () {
-  firebase
-    .auth()
-    .signOut()
-    .then(() => {
-      console.log("Sesion cerrada exitosamente");
-      window.location.href = "index.html";
-    })
-    .catch((error) => {
-      console.error("Error al cerrar sesion", error);
-      alert(
-        "Hubo un problema al intentar cerrar la sesion. Intentalo mas tarde"
-      );
-    });
+// Logout Global
+window.logoutFirebase = function() {
+    firebase.auth().signOut().then(() => {
+        localStorage.removeItem("usuario_nombre");
+        window.location.href = "index.html";
+    }).catch(error => console.error("Error al cerrar sesión:", error));
 };

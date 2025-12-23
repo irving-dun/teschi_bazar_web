@@ -1,281 +1,189 @@
-/* --- Variables CSS para reusabilidad --- */
+/* --- Reset y Corrección de Box Model --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 :root {
-  --color-principal: #0fb515; /* Azul primario (para fondo de sección y botones) */
-  --color-secundario: #dc3545; /* Rojo/Naranja (para botones de acción) */
-  --color-fondo-claro: #f4f7f6; /* Fondo general de la página */
-  --color-sombra-tarjeta: rgba(0, 0, 0, 0.1);
-  --ancho-maximo-formulario: 700px;
+    --color-principal: #0fb515;
+    --color-gradiente-final: #0072ff;
+    --color-fondo: #d4fed8;
+    --radio-card: 20px;
+    --sombra-suave: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-/* --- Estilos del Contenedor Principal del Formulario --- */
-/* --- Estilos del Contenedor Principal del Formulario (MODIFICADO) --- */
+body {
+    background-color: #f7f5f5;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* --- Contenedor Principal --- */
 .container-form {
-  /* Mantiene el centrado horizontal y el padding */
-  display: flex;
-  flex-direction: column; /* Nuevo: Apila los elementos verticalmente (h2 y form) */
-  align-items: center; /* Nuevo: Centra los elementos (h2 y form) horizontalmente */
-  padding: 40px 20px;
-  background-color: var(--color-fondo-claro);
-  min-height: 100vh;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* Nuevo Estilo para el Título (h2) */
-.container-form h2 {
-  /* Estilo para el título "Subir Nuevo Producto" */
-  width: 100%;
-  max-width: var(--ancho-maximo-formulario); /* Mismo ancho que el formulario */
-  text-align: left; /* Alineado a la izquierda (como en tu imagen) */
-  font-size: 1.8em;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 20px; /* Espacio entre el título y la tarjeta */
-  padding-left: 5px; /* Pequeño ajuste para que no se pegue al borde */
+.header-text {
+    width: 100%;
+    max-width: 750px;
+    margin-bottom: 25px;
+    text-align: left;
 }
 
-/* --- Estilos del Formulario (Tarjeta Blanca) --- */
+.header-text h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+/* --- Tarjeta Blanca (El "molde" del formulario) --- */
 .product-form {
-  width: 100%;
-  max-width: var(
-    --ancho-maximo-formulario
-  ); /* Es crucial que este max-width coincida con el del h2 */
-  background: white;
-  padding: 0;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px var(--color-sombra-tarjeta);
+    width: 100%;
+    max-width: 750px;
+    background: white;
+    border-radius: var(--radio-card);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    padding: 15px; /* Espacio para que las secciones no toquen el borde */
 }
 
-/* El resto de tu CSS (form-section, form-group, etc.) queda igual... */
-
-/* --- Estilos de las Secciones del Formulario (Tarjetas Azules) --- */
+/* --- Secciones con Gradiente (Azul/Verde) --- */
 .form-section {
-  padding: 25px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  background: linear-gradient(
-    145deg,
-    var(--color-principal),
-    #0056b3
-  ); /* Gradiente azul profundo */
-  color: white; /* Texto blanco dentro de la tarjeta */
-  box-shadow: 0 6px 15px rgba(0, 50, 100, 0.2);
+    padding: 30px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-gradiente-final) 100%);
+    color: white;
+    border: none;
 }
 
 .form-section h3 {
-  font-size: 1.3em;
-  margin-top: 0;
-  margin-bottom: 20px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-  padding-bottom: 10px;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 12px;
 }
 
-/* --- Estilos de los Grupos de Campos (Inputs, Textareas, Selects) --- */
+/* --- ZONA MULTIMEDIA (CORREGIDA) --- */
+.multimedia-area {
+    margin-top: 10px;
+    padding: 40px 20px;
+    border: 3px dashed rgba(255, 255, 255, 0.5); /* Borde punteado elegante */
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1); /* Fondo sutil */
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.multimedia-area:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: white;
+    transform: translateY(-3px);
+}
+
+.icon-upload {
+    font-size: 2rem;
+    background: white;
+    color: var(--color-principal);
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* --- CAMPOS DE ENTRADA (SIN BORDES NEGROS) --- */
 .form-group {
-  margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
-.form-section .form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 5px;
-  color: rgba(255, 255, 255, 0.9);
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
 }
 
-.form-section input[type="text"],
-.form-section input[type="number"],
-.form-section textarea,
-.form-section select {
-  width: 100%;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 6px;
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.9
-  ); /* Fondo blanco semitransparente */
-  color: #333;
-  font-size: 1em;
-  box-sizing: border-box;
-  transition: background-color 0.2s;
+.form-section input, 
+.form-section select, 
+.form-section textarea {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid #eee; /* Borde casi invisible */
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    color: #333;
+    background-color: white;
+    outline: none;
+    box-shadow: var(--sombra-suave);
+    transition: all 0.3s ease;
+}
+
+/* Elimina el borde negro al escribir */
+.form-section input:focus, 
+.form-section textarea:focus, 
+.form-section select:focus {
+    border-color: #ffd600;
+    box-shadow: 0 0 12px rgba(255, 214, 0, 0.4);
+    transform: translateY(-2px);
 }
 
 .form-section textarea {
-  resize: vertical;
+    resize: none; /* Evita que el usuario deforme el diseño */
 }
 
-.form-section input:focus,
-.form-section textarea:focus,
-.form-section select:focus {
-  background-color: white;
-  outline: 2px solid #5fa8ff; /* Borde azul claro al enfocar */
+/* Grid de Categoría y Estado */
+.grid-inputs {
+    display: flex;
+    gap: 15px;
 }
 
-/* --- Estilos Específicos para Multimedia (Sección 1) --- */
-.multimedia-area {
-  text-align: center;
-  padding: 30px;
-  border: 2px dashed rgba(255, 255, 255, 0.6);
-  border-radius: 8px;
-  margin-bottom: 20px;
-  cursor: pointer;
+.grid-inputs .form-group {
+    flex: 1;
 }
 
-.multimedia-area .icon-camera {
-  font-size: 3em;
-  margin-bottom: 10px;
-}
-
-/* Ocultar el input de archivo estándar y dejar solo el área de drag-and-drop */
-#imagenes {
-  display: none;
-}
-
-/* --- Estilos para los botones de Acción (Publicar y Guardar) --- */
+/* --- BOTÓN DE PUBLICAR --- */
 .action-buttons {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  padding: 25px; /* Padding adicional en la base */
-  background: white; /* Base blanca del formulario */
-  border-bottom-left-radius: 12px;
-  border-bottom-right-radius: 12px;
-}
-
-.btn-submit,
-.btn-save-draft {
-  flex-grow: 1;
-  padding: 15px;
-  font-size: 1.1em;
-  font-weight: 700;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
+    padding: 20px 0 10px;
+    display: flex;
+    justify-content: center;
 }
 
 .btn-submit {
-  /* Botón Publicar Artículo */
-  background-color: var(--color-secundario);
-  color: white;
+    width: 100%;
+    max-width: 400px;
+    padding: 16px;
+    border: none;
+    border-radius: 30px;
+    background: var(--color-principal);
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(15, 181, 21, 0.3);
+    transition: all 0.3s ease;
 }
 
 .btn-submit:hover {
-  background-color: #c82333;
-  transform: translateY(-2px);
+    background: #0a8a10;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(15, 181, 21, 0.4);
 }
 
-.btn-save-draft {
-  /* Botón Guardar Borrador (el azul claro en la imagen) */
-  background-color: #5fa8ff;
-  color: white;
-}
-
-.btn-save-draft:hover {
-  background-color: #4a90e2;
-  transform: translateY(-2px);
-}
-
-/* --- Estilos para Radio Buttons y Toggle Switches (Opción Múltiple/Logística) --- */
-/* Estructura para mostrar opciones en línea */
-.options-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 10px;
-}
-
-.option-item {
-  background-color: rgba(255, 255, 255, 0.15);
-  padding: 10px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  flex-grow: 1;
-  min-width: 150px;
-  text-align: center;
-}
-
-.option-item input[type="radio"],
-.option-item input[type="checkbox"] {
-  display: none; /* Ocultar el input nativo */
-}
-
-.option-item label {
-  margin: 0;
-  cursor: pointer;
-  font-weight: 400;
-}
-
-/* Estilo para opción seleccionada */
-.option-item input:checked + label {
-  font-weight: 700;
-  color: var(
-    --color-principal
-  ); /* El color del checkmark no se aplica fácilmente aquí */
-}
-
-/* Estilos de Switch (Toggle) - Ejemplo para Logística */
-.toggle-switch-group {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 15px;
-}
-
-.toggle-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 10px 15px;
-  border-radius: 8px;
-}
-
-/* CSS para el interruptor real */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 45px; /* Ancho del interruptor */
-  height: 25px; /* Alto del interruptor */
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.3);
-  transition: 0.4s;
-  border-radius: 25px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: 0.4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: var(
-    --color-secundario
-  ); /* Rojo/Naranja cuando está activo */
-}
-
-input:checked + .slider:before {
-  transform: translateX(18px);
+/* Adaptación para móviles */
+@media (max-width: 600px) {
+    .grid-inputs {
+        flex-direction: column;
+        gap: 0;
+    }
 }

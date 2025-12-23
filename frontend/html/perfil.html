@@ -1,71 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Editar Perfil | TeschiBazar</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Anton&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/frontend/css/styles.css" />
-  </head>
-  <body>
-    <header>
-      <h1>TESCHI-BAZAR</h1>
-      <nav>
-        <ul>
-          <li><a href="index.html">Inicio</a></li>
-          <li><a href="">Acerca de</a></li>
-        </ul>
-      </nav>
-    </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Perfil | TeschiBazar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/frontend/css/encabezado.css" />
+  <link rel="stylesheet" href="/frontend/css/perfil.css" />
+</head>
 
-    <main>
-      <section class="container-perfil">
-        <h2>✏️ Editar Mi Perfil</h2>
+<body>
+  <header class="main-header">
+    <div class="logo">TESCHI-BAZAR</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="#">Acerca de</a></li>
+      </ul>
+    </nav>
+    <div id="auth-wrapper">
+      <div id="contenedorPerfilUsuario"></div>
+    </div>
+  </header>
 
-        <form id="perfilForm">
-          <label for="nombre">Nombre:</label>
-          <input type="text" id="nombre" required />
+  <main class="profile-main">
+    <div class="profile-grid">
+      
+      <aside class="profile-sidebar card"> 
+        <div class="avatar-container">
+          <img src="https://via.placeholder.com/150" alt="Foto de perfil" id="user-avatar">
+          <div class="online-badge"></div>
+        </div>
+        <h2 id="display-name">Nombre de Usuario</h2>
+        <p id="display-email">correo@teschi.edu.mx</p>
+        <hr>
+        <nav class="side-menu">
+          <a href="#" class="active">⚙️ Ajustes de Cuenta</a>
+          <a href="#">📦 Mis Publicaciones</a>
+          <a href="#">💳 Mis Compras</a>
+          
+          <button id="btnCerrarSesion" class="btn-logout">Cerrar Sesión</button>
+        </nav>
+      </aside>
 
-          <label for="email">Email:</label>
-          <input type="email" id="email" required />
+      <section class="profile-content card">
+        <div class="content-header">
+          <h3>Información Personal</h3>
+          <p>Actualiza tus datos para mantener tu cuenta segura.</p>
+        </div>
 
-          <label for="telefono">Teléfono:</label>
-          <input type="text" id="telefono" />
+        <form id="perfilForm" class="styled-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nombre">Nombre Completo</label>
+              <input type="text" id="nombre" placeholder="Tu nombre" required />
+            </div>
+            <div class="form-group">
+              <label for="telefono">Teléfono</label>
+              <input type="text" id="telefono" placeholder="55 0000 0000" />
+            </div>
+          </div>
 
-          <label for="password"
-            >Contraseña (dejar vacío para no cambiar):</label
-          >
-          <input
-            type="password"
-            id="password"
-            placeholder="Mínimo 6 caracteres"
-            minlength="6"
-          />
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <input type="email" id="email" readonly class="input-readonly" />
+            <small>El correo no puede ser modificado.</small>
+          </div>
 
-          <p id="mensajeError" style="color: red"></p>
-          <p id="mensajeExito" style="color: green"></p>
+          <div class="form-group">
+            <label for="password">Nueva Contraseña</label>
+            <input type="password" id="password" placeholder="Mínimo 6 caracteres" minlength="6" />
+              <small>ℹ️ Escribe una nueva contraseña para cambiarla</small>
+          </div>
 
-          <button type="submit">Guardar Cambios</button>
+          <div class="messages">
+            <p id="mensajeError" class="msg error"></p>
+            <p id="mensajeExito" class="msg success"></p>
+          </div>
+
+          <button type="submit" class="btn-save">Guardar Cambios</button>
         </form>
       </section>
-    </main>
+      
+    </div>
+  </main>
 
-    <footer>
-      <p>&copy; Teschi-Bazar</p>
-    </footer>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-    <script src="/backend/firebase-config.js"></script>
-    <script src="/frontend/js/scriptPerfil.js"></script>
-  </body>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="/backend/firebase-config.js"></script>
+  <script src="/frontend/js/scriptPerfil.js"></script>
+  <script src="/frontend/js/detallePerfil.js"></script>
+</body>
 </html>
