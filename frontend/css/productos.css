@@ -218,6 +218,17 @@ nav ul li a:hover::after {
     transition: color 0.3s;
 }
 
+.categoria-card:hover{
+  color: rgb(0, 0, 0);
+  transform: translateY(-3px);
+  transition: transform 0.4s ease-in-out;
+}
+
+.categoria-card:hover::after {
+  transform: translateY(3px);
+  bottom: 5px;
+}
+
 /* ======================================================= */
 /* 4. MAIN y Sección de Productos (Ajustes de Diseño Nike) */
 /* ======================================================= */
