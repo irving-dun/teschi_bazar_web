@@ -229,6 +229,76 @@ nav ul li a:hover::after {
   bottom: 5px;
 }
 
+/*****************************************
+/*********** ESTILO PARA BARRA DE BUSQUEDA
+/*****************************************/
+
+.search-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  position: relative;
+  padding: 0 15px;
+}
+
+.search-box {
+  display: flex;
+  background: white;
+  border-radius: 40px;
+  /* Estilo redondeado moderno */
+  padding: 5px 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  /* Sombra suave propuesta */
+  transition: all 0.3s ease;
+}
+
+.search-box:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(157, 254, 157, 0.592);
+  /* Resplandor verde al usarla */
+}
+
+.search-box input {
+  flex: 1;
+  border: none !important;
+  /* Eliminamos bordes rígidos */
+  padding: 12px 20px;
+  font-size: 1rem;
+  outline: none;
+  border-radius: 50px 0 0 50px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.search-btn {
+  background: var(--color-principal, white);
+  border: none;
+  color: white;
+  padding: 0 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.search-btn:hover {
+  background: #f2faf2;
+}
+
+/* Lista de sugerencias (aparece al escribir) */
+.suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 15px;
+  right: 15px;
+  background: white;
+  border-radius: 15px;
+  margin-top: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: none;
+  /* Se activa con JS */
+}
+
+
 /* ======================================================= */
 /* 4. MAIN y Sección de Productos (Ajustes de Diseño Nike) */
 /* ======================================================= */

@@ -32,6 +32,15 @@
         </div>
     </header>
 
+    <div class="search-container">
+    <form id="search-form" class="search-box">
+      <input type="text" id="search-input" placeholder="¿Qué estás buscando hoy?" autocomplete="off">
+      <button type="submit" class="search-btn">
+        <i>🔍</i> </button>
+    </form>
+    <div id="search-suggestions" class="suggestions-list"></div>
+  </div>
+
     <div class="categoria-wrapper">
         <div class="categoria-slider">
             <a href="ropa.html" class="categoria-card">Ropa</a>
@@ -59,9 +68,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
     <script src="../../backend/firebase-config.js"></script>
-
+    <script src="/frontend/js/scriptBusqueda.js"></script>
     <script src="../../frontend/js/scriptIndex.js"></script>
     <script src="../js/productos.js"></script>
 </body>

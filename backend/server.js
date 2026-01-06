@@ -182,6 +182,75 @@ app.get('/api/productos', async (req, res) => {
     }
 });
 
+
+// RUTA: Buscar productos por nombre o descripción
+app.get('/api/buscar', async (req, res) => {
+    const { q } = req.query; // 'q' es el término de búsqueda
+    console.log("🔍 Petición de búsqueda recibida para:", q);
+
+    if (!q) {
+        return res.status(400).json({ error: 'Debes proporcionar un término de búsqueda.' });
+    }
+
+    // Buscamos coincidencias en nombre o descripción
+    // El símbolo % es un comodín en SQL para buscar "cualquier texto"
+    const sql = `
+        SELECT p.*, i.url_imagen 
+        FROM productos p
+        LEFT JOIN imagenes_producto i ON p.id_producto = i.id_producto
+        WHERE p.nombre_producto ILIKE $1 OR p.descripcion ILIKE $1
+        ORDER BY p.fecha_publicacion DESC
+    `;
+    
+    try {
+        const searchTerm = `%${q}%`;
+        const result = await pool.query(sql, [searchTerm]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error en búsqueda:", err.message);
+        res.status(500).json({ error: 'Error al procesar la búsqueda.' });
+    }
+});
+
+
+// RUTA: Registrar un nuevo pedido basado en tu tabla existente
+app.post('/api/pedidos/crear', async (req, res) => {
+    const { id_comprador, id_vendedor, total_pedido, metodo_pago, id_producto } = req.body;
+
+    try {
+        // Ajustamos la consulta a los nombres de tus columnas según la imagen
+        const sql = `
+            INSERT INTO pedidos (id_comprador, id_vendedor, fecha_pedido, estado_pedido, total_pedido, metodo_pago)
+            VALUES ($1, $2, CURRENT_TIMESTAMP, 'pendiente', $3, $4)
+            RETURNING id_pedido
+        `;
+        
+        const result = await pool.query(sql, [id_comprador, id_vendedor, total_pedido, metodo_pago]);
+
+        // Opcional: Marcar el producto como no disponible para que ya no aparezca en las búsquedas
+        await pool.query('UPDATE productos SET disponibilidad = false WHERE id_producto = $1', [id_producto]);
+
+        res.json({ 
+            success: true, 
+            mensaje: "Pedido registrado en PostgreSQL", 
+            id_pedido: result.rows[0].id_pedido 
+        });
+    } catch (err) {
+        console.error("Error al registrar pedido:", err.message);
+        res.status(500).json({ error: "Error interno al crear el pedido" });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
 //------------ SERVIDOR Y SOCKET.IO------------
 const server = http.createServer(app); 
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });

@@ -29,6 +29,15 @@
     </div>
   </header>
 
+  <div class="search-container">
+    <form id="search-form" class="search-box">
+      <input type="text" id="search-input" placeholder="¿Qué estás buscando hoy?" autocomplete="off">
+      <button type="submit" class="search-btn">
+        <i>🔍</i> </button>
+    </form>
+    <div id="search-suggestions" class="suggestions-list"></div>
+  </div>
+
   <div class="categoria-wrapper">
     <div class="categoria-slider">
       <a href="ropa.html" class="categoria-card">Ropa</a>
@@ -62,6 +71,8 @@
   <script src="../js/productos.js"></script>
 
   <script src="../js/scriptIndex.js"></script>
+
+  <script src="/frontend/js/scriptBusqueda.js"></script>
 </body>
 
 </html>
