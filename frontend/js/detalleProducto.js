@@ -52,3 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert("No se pudo cargar la información del producto.");
     }
 });
+
+
+
+

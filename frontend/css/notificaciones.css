@@ -1,0 +1,112 @@
+
+
+/**************************
+CAMPANA DE NOTIFICACIONES
+**************************/
+
+/* Contenedor principal para posicionamiento */
+.notif-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* El botón de la campana */
+.bell-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #333;
+    cursor: pointer;
+    position: relative;
+    padding: 10px;
+    transition: color 0.3s;
+}
+
+.bell-btn:hover {
+    color: #0fb515; /* Color verde de tu marca */
+}
+
+/* El punto rojo de notificaciones nuevas */
+.badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #ff4d4d;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+    font-weight: bold;
+    border: 2px solid white;
+}
+
+/* El panel desplegable */
+.dropdown-content {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    width: 320px;
+    background-color: white;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border-radius: 12px;
+    z-index: 1000;
+    overflow: hidden;
+    margin-top: 10px;
+    border: 1px solid #eee;
+}
+
+.dropdown-header {
+    padding: 15px;
+    font-weight: bold;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #f9f9f9;
+    color: #444;
+}
+
+/* Lista de notificaciones */
+#notif-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Item individual de notificación */
+.notif-item {
+    padding: 15px;
+    border-bottom: 1px solid #f5f5f5;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.notif-item:hover {
+    background-color: #f0fff0; /* Verde muy clarito */
+}
+
+/* Estado: No leída (Nueva) */
+.notif-item.nueva {
+    background-color: #f0f7ff; /* Azul clarito para resaltar */
+    border-left: 4px solid #007bff;
+}
+
+/* Texto del mensaje */
+.notif-msg {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.4;
+}
+
+/* Tipo de notificación (VENTA, MENSAJE, etc.) */
+.notif-tipo {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #888;
+}
+
+/* Clase para ocultar elementos */
+.hidden {
+    display: none;
+}

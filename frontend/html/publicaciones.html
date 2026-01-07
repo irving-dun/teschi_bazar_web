@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Ventas | TeschiBazar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/frontend/css/encabezado.css">
+    <link rel="stylesheet" href="/frontend/css/perfil.css">
+    <link rel="stylesheet" href="/frontend/css/publicaciones.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="logo">TESCHI-BAZAR</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="perfil.html">Mi Perfil</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="ventas-container">
+        <h1>📦 Gestión de mis Productos y Ventas</h1>
+        <hr>
+
+        <section>
+            <h3>Pedidos Pendientes de Entrega</h3>
+            <p>Aquí aparecerán los alumnos que quieren comprar tus productos.</p>
+
+            <div id="lista-pedidos-pendientes" class="grid-ventas">
+                <p>Cargando pedidos...</p>
+            </div>
+        </section>
+        <br>
+        <hr><br>
+
+        <section id="seccion-confirmados">
+            <h3><i class="fas fa-check-circle" style="color: #0fb515;"></i> Entregas Agendadas</h3>
+            <div id="lista-pedidos-confirmados" class="grid-ventas">
+            </div>
+        </section>
+
+    </main>
+
+    <div id="modal-agendar" class="modal hidden">
+        <div class="modal-content">
+            <h3><i class="fas fa-calendar-day"></i> Agendar Entrega</h3>
+            <p id="info-pedido-txt" style="font-size: 0.9rem; color: #666;"></p>
+
+            <div class="form-group">
+                <label>Fecha de entrega:</label>
+                <input type="date" id="fecha-entrega">
+            </div>
+
+            <div class="form-group">
+                <label>Hora aproximada:</label>
+                <input type="time" id="hora-entrega">
+            </div>
+
+            <div class="form-group">
+                <label>Punto de encuentro (TESCHI):</label>
+                <select id="lugar-entrega">
+                    <option value="Biblioteca">Biblioteca</option>
+                    <option value="Cafetería">Cafetería</option>
+                    <option value="Canchas">Canchas</option>
+                    <option value="Edificio A">Edificio A</option>
+                    <option value="Explanada">Explanada Principal</option>
+                </select>
+            </div>
+
+            <button onclick="enviarPropuesta()" class="btn-confirmar">Enviar Propuesta al Comprador</button>
+            <button onclick="cerrarModal()" class="btn-cancelar">Cancelar</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script src="/backend/firebase-config.js"></script>
+    <script src="/frontend/js/scriptVendedor.js"></script>
+
+</body>
+
+</html>

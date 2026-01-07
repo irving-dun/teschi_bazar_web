@@ -10,8 +10,10 @@
   <title>TeschiBazar</title>
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
   <link rel="stylesheet" href="/frontend/css/index.css" />
+  <link rel="stylesheet" href="/frontend/css/notificaciones.css" />
 </head>
 
 <body>
@@ -23,6 +25,19 @@
         <li><a href="">Acerca de</a></li>
       </ul>
     </nav>
+
+    <div class="notif-container">
+    <button id="bell-button" class="bell-btn">
+        <i class="fas fa-bell"></i>
+        <span id="notif-badge" class="badge hidden">0</span>
+    </button>
+    
+    <div id="notif-dropdown" class="dropdown-content hidden">
+        <div class="dropdown-header">Notificaciones</div>
+        <div id="notif-list">
+            </div>
+    </div>
+</div>
 
     <div id="auth-wrapper">
       <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion"

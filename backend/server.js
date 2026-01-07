@@ -42,7 +42,7 @@ if (!admin.apps.length) {
         credential: admin.credential.cert(serviceAccount)
     });
 }
-console.log('Firebase Admin SDK inicializado.');
+console.log('✅Firebase Admin SDK inicializado.');
 
 //------------ CONFIGURACIÓN DE MULTER (PROCESAMIENTO DE IMÁGENES) ------------
 const storage = multer.diskStorage({
@@ -242,7 +242,139 @@ app.post('/api/pedidos/crear', async (req, res) => {
 });
 
 
+// RUTA: Obtener notificaciones de un usuario específico
+app.get('/api/notificaciones/:idUsuario', async (req, res) => {
+    const { idUsuario } = req.params;
+    try {
+        const sql = `
+            SELECT * FROM notificaciones 
+            WHERE id_usuario = $1 
+            ORDER BY fecha_creacion DESC 
+            LIMIT 10
+        `;
+        const result = await pool.query(sql, [idUsuario]);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: "Error al obtener notificaciones" });
+    }
+});
 
+// RUTA: Crear notificación (Se llama internamente al realizar un pedido)
+// Nota: Puedes integrarla dentro de tu ruta de /api/pedidos/crear
+async function crearNotificacion(idUsuario, tipo, mensaje, url) {
+    const sql = `
+        INSERT INTO notificaciones (id_usuario, tipo_notificacion, mensaje, url_destino, leida)
+        VALUES ($1, $2, $3, $4, false)
+    `;
+    await pool.query(sql, [idUsuario, tipo, mensaje, url]);
+}
+
+
+app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
+    const { idVendedor } = req.params;
+    try {
+        const sql = `
+            SELECT id_pedido, id_comprador, total_pedido, estado_pedido, 
+                   fecha_entrega, hora_entrega, lugar_entrega
+            FROM pedidos 
+            WHERE id_vendedor = $1
+            ORDER BY fecha_pedido DESC
+        `;
+        const result = await pool.query(sql, [idVendedor]);
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/pedidos/confirmar-cita', async (req, res) => {
+    const { id_pedido, fecha, hora, lugar } = req.body;
+    try {
+        // Actualizamos las columnas específicas de la entrega
+        const sql = `
+            UPDATE pedidos 
+            SET estado_pedido = 'confirmado', 
+                fecha_entrega = $1, 
+                hora_entrega = $2, 
+                lugar_entrega = $3
+            WHERE id_pedido = $4
+        `;
+        await pool.query(sql, [fecha, hora, lugar, id_pedido]);
+        res.json({ success: true, mensaje: "Cita confirmada en columnas específicas" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+app.put('/api/pedidos/finalizar/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query("UPDATE pedidos SET estado_pedido = 'entregado' WHERE id_pedido = $1", [id]);
+        res.json({ success: true, mensaje: "Venta finalizada con éxito" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// RUTA: Finalizar un pedido (Marcar como entregado)
+app.put('/api/pedidos/finalizar/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const sql = `
+            UPDATE pedidos 
+            SET estado_pedido = 'entregado' 
+            WHERE id_pedido = $1
+        `;
+        await pool.query(sql, [id]);
+        res.json({ success: true, mensaje: "¡Venta finalizada con éxito!" });
+    } catch (err) {
+        console.error("Error al finalizar pedido:", err.message);
+        res.status(500).json({ error: "No se pudo finalizar el pedido" });
+    }
+});
+
+// Endpoint para procesar la compra
+app.post('/api/pedidos/crear', async (req, res) => {
+    const { id_comprador, id_vendedor, id_producto, cantidad, total_pedido } = req.body;
+
+    const client = await pool.connect(); // Usando pg pool
+    try {
+        await client.query('BEGIN'); // Iniciar transacción
+
+        // 1. Verificar y Descontar Stock (Solo si hay suficiente)
+        const updateStockSql = `
+            UPDATE productos 
+            SET disponibilidad = disponibilidad - $1 
+            WHERE id_producto = $2 AND disponibilidad >= $1
+            RETURNING disponibilidad
+        `;
+        const resStock = await client.query(updateStockSql, [cantidad, id_producto]);
+
+        if (resStock.rowCount === 0) {
+            throw new Error("Stock insuficiente o el producto ya no existe.");
+        }
+
+        // 2. Insertar el pedido
+        const insertPedidoSql = `
+            INSERT INTO pedidos (id_comprador, id_vendedor, total_pedido, estado_pedido, fecha_pedido)
+            VALUES ($1, $2, $3, 'completado', CURRENT_TIMESTAMP)
+            RETURNING id_pedido
+        `;
+        await client.query(insertPedidoSql, [id_comprador, id_vendedor, total_pedido]);
+
+        await client.query('COMMIT'); // Guardar cambios
+        res.status(200).json({ success: true, mensaje: "Pedido procesado" });
+
+    } catch (error) {
+        await client.query('ROLLBACK'); // Cancelar todo si hay error
+        res.status(400).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+});
 
 
 

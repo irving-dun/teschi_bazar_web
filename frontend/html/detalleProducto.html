@@ -1,123 +1,105 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
- <meta charset="UTF-8" />
- <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title id="tituloPagina">Detalle del Producto - TeschiBazar</title>
- <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
- <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
- <link rel="stylesheet" href="/frontend/css/encabezado.css" />
- <link rel="stylesheet" href="/frontend/css/detalleProducto.css" />
- </head>
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title id="tituloPagina">Detalle del Producto - TeschiBazar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/frontend/css/encabezado.css" />
+    <link rel="stylesheet" href="/frontend/css/detalleProducto.css" />
+</head>
 <body>
- <header>
-  <h1>TESCHI-BAZAR</h1>
-  <nav>
-   <ul>
-    <li><a href="index.html">Inicio</a></li>
-    <li><a href="">Acerca de</a></li>
-   </ul>
-  </nav>
-  <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
-   Iniciar Sesión
-  </button>
-  <div id="contenedorPerfilUsuario" style="display: none"></div>
- </header>
+    <header>
+        <h1>TESCHI-BAZAR</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="">Acerca de</a></li>
+            </ul>
+        </nav>
+        <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
+            Iniciar Sesión
+        </button>
+        <div id="contenedorPerfilUsuario" style="display: none"></div>
+    </header>
 
- <main class="product-detail-container">
-  <section class="product-grid">
-   <div class="product-images">
-    <div id="imagenPrincipal" class="main-image">
-     <img src="placeholder_main.jpg" alt="Imagen principal del producto" id="mainProductImage" />
+    <main class="product-detail-container">
+        <section class="product-grid">
+            <div class="product-images">
+                <div id="imagenPrincipal" class="main-image">
+                    <img src="placeholder_main.jpg" alt="Imagen principal del producto" id="mainProductImage" />
+                </div>
+                <div id="galeriaMiniaturas" class="thumbnail-gallery"></div>
+            </div>
+
+            <div class="product-info-panel">
+                <div class="info-header">
+                    <h2 id="nombreProducto">Cargando...</h2>
+                    <p class="precio-final" id="precioProducto">$0.00 MXN</p>
+                </div>
+
+                <div class="detail-card info-section">
+                    <h3>Detalles Rápidos</h3>
+                    <p><strong>Categoría:</strong> <span id="detalleCategoria"></span></p>
+                    <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
+                    <p><strong>Disponibilidad:</strong> <span id="detalleDisponibilidad"></span></p>
+                    <p><strong>Publicado:</strong> <span id="detalleFechaPublicacion"></span></p>
+                </div>
+
+                <div class="detail-card info-section">
+                    <h3>Información del Vendedor</h3>
+                    <p><strong>Vendedor:</strong> <span id="detalleNombreVendedor">Cargando...</span></p>
+                    <p><strong>Ubicación de Entrega:</strong> <span id="detalleUbicacionEntrega"></span></p>
+                </div>
+
+                <div class="description-section">
+                    <h3>Descripción Detallada</h3>
+                    <p id="detalleDescripcion">Cargando descripción...</p>
+                </div>
+
+                <div class="action-buttons-single">
+                    <button class="btn-primary" id="botonComprar">Comprar Ahora</button>
+                    <button class="btn-secondary" id="botonContactar">Contactar Vendedor</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="modalCompra" class="modal">
+    <div class="modal-content">
+        <h2>Confirmar Compra</h2>
+        <p id="modalNombreProducto">Cargando...</p>
+        
+        <div class="selector-cantidad">
+            <label>¿Cuántas unidades deseas?</label>
+            <div class="control-unidades">
+                <button type="button" id="btnRestar">-</button>
+                <input type="number" id="cantidadCompra" value="1" readonly>
+                <button type="button" id="btnSumar">+</button>
+            </div>
+            <small id="modalStockDisponible">Disponibles: 0</small>
+        </div>
+
+        <div class="resumen-pago">
+            <p>Total a pagar: <strong id="modalTotalPagar">$0.00 MXN</strong></p>
+        </div>
+
+        <div class="modal-footer">
+            <button id="btnConfirmarPedido" class="btn-confirmar">Confirmar Pedido</button>
+            <button type="button" id="btnCancelarCompra" class="btn-cancelar">Cancelar</button>
+        </div>
     </div>
-    <div id="galeriaMiniaturas" class="thumbnail-gallery"></div>
-   </div>
-
-   <div class="product-info-panel">
-    <div class="info-header">
-     <h2 id="nombreProducto">Nombre del Producto Cargando...</h2>
-     <p class="precio-final" id="precioProducto">$0.00 MXN</p>
-    </div>
-
-    <div class="detail-card info-section">
-     <h3>Detalles Rápidos</h3>
-     <p>
-      <strong>Categoría:</strong> <span id="detalleCategoria"></span>
-     </p>
-     <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
-     <p>
-      <strong>Disponibilidad:</strong>
-      <span id="detalleDisponibilidad"></span> 
-     </p>
-    <p>
-  <strong>Publicado:</strong>
-  <span id="detalleFechaPublicacion"></span> </p>
-    </div>
-
-    <div class="detail-card info-section">
-     <h3>Información del Vendedor</h3>
-     <p>
-      <strong>Vendedor:</strong>
-      <span id="detalleNombreVendedor">Cargando...</span>
-     </p>
-     <p>
-      <strong>Ubicación de Entrega:</strong>
-      <span id="detalleUbicacionEntrega"></span>
-     </p>
-    </div>
-
-    <div class="description-section">
-     <h3>Descripción Detallada</h3>
-     <p id="detalleDescripcion">Cargando descripción...</p>
-    </div>
-
-    <div class="action-buttons-single">
-     <button class="btn-primary" id="botonComprar">Comprar Ahora</button>
-     <button class="btn-secondary" id="botonContactar">
-      Contactar Vendedor
-     </button>
-    </div>
-   </div>
-  </section>
- </main>
-
- <footer>
-  <p>&copy; Teschi-Bazar</p>
- </footer>
-
-    <div id="chat-container" class="chat-oculto">
-   
-    <div id="chat-header">
-    <h3 id="chat-producto-nombre">Chat sobre Producto</h3>
-    <p id="chat-vendedor-info">Vendedor: Cargando...</p>
-    <button id="cerrar-chat-btn">X</button>
-  </div>
-
-    <div id="chat-body">
-        <div id="loading-indicator" class="loading-visible">
-      Conectando al servidor de chat...
-    </div>
-      </div>
-
-    <div id="chat-footer">
-    <textarea id="chat-input" placeholder="Escribe tu mensaje..." rows="1"></textarea>
-    <button id="enviar-mensaje-btn" disabled>Enviar</button>
-  </div>
-
- </div>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
- <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
- 
-  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
-
- <script src="firebase-config.js"></script>
- <script src="../../frontend/js/scriptIndex.js"></script>
- 
-  <script src="../../frontend/js/scriptChat.js"></script> 
-  <script src="../../frontend/js/detalleProducto.js"></script> 
+</div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    
+    
+    <script src="/backend/firebase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
+    <script src="../../frontend/js/scriptIndex.js"></script>
+    <script src="../../frontend/js/detalleProducto.js"></script> 
+    <script src="../../frontend/js/scriptCompra.js"></script>
 </body>
-
 </html>
