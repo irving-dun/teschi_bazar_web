@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vender Producto - TeschiBazar</title>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
@@ -17,6 +18,7 @@
     <script src="/backend/firebase-config.js" defer></script>
     <script src="/frontend/js/scriptHeader.js" defer></script>
 </head>
+
 <body>
     <header>
         <h1>TESCHI-BAZAR</h1>
@@ -26,8 +28,41 @@
                 <li><a href="#">Acerca de</a></li>
             </ul>
         </nav>
+
+        <div class="notificaciones-container" style="position: relative; display: inline-block;">
+            <button id="btnCampana" style="background: none; border: none; cursor: pointer; font-size: 24px;">
+                🔔 <span id="contadorNotificaciones" style="display: none; 
+          position: absolute; 
+          top: -5px; 
+          right: -5px; 
+          background: red; 
+          color: white; 
+          border-radius: 50%; 
+          padding: 2px 6px; 
+          font-size: 12px;">0</span>
+            </button>
+
+            <div id="menuNotificaciones" style="display: none; 
+        position: absolute; 
+        right: 0; 
+        top: 40px; 
+        width: 250px; 
+        background: white; 
+        border: 1px solid #ccc; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+        z-index: 1000; border-radius: 8px;">
+
+                <div style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Notificaciones</div>
+                <div id="listaNotificaciones" style="max-height: 300px; overflow-y: auto;">
+                    <p style="padding: 10px; font-size: 14px; color: #666;">No tienes notificaciones</p>
+                </div>
+            </div>
+        </div>
+
+
         <div id="auth-wrapper">
-            <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion" style="display: none;">
+            <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion"
+                style="display: none;">
                 Iniciar Sesión
             </button>
             <div id="contenedorPerfilUsuario" style="display: none"></div>
@@ -60,10 +95,11 @@
                     <label>Nombre del Producto</label>
                     <input type="text" id="nombre_producto" placeholder="Ej: Calculadora científica Casio" required />
                 </div>
-                
+
                 <div class="form-group">
                     <label>Descripción</label>
-                    <textarea id="descripcion" rows="4" placeholder="Describe el estado, marca o detalles importantes..." required></textarea>
+                    <textarea id="descripcion" rows="4"
+                        placeholder="Describe el estado, marca o detalles importantes..." required></textarea>
                 </div>
 
                 <div class="grid-inputs">
@@ -129,7 +165,13 @@
         </form>
     </main>
 
+    
+
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script src="/frontend/js/notificaciones.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/frontend/js/scriptsubirProducto.js" defer></script>
 </body>
+
 </html>

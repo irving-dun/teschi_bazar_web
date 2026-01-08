@@ -23,23 +23,26 @@ async function obtenerPedidosDelVendedor(idVendedor) {
         contenedorConfirmados.innerHTML = "";
 
         for (const p of pedidos) {
-            // Buscamos el nombre en Firebase como ya lo hacíamos
+            // Intentamos obtener el nombre real de Firebase
             let nombreReal = "Cargando...";
             try {
                 const userDoc = await firebase.firestore().collection('usuarios').doc(p.id_comprador).get();
                 nombreReal = userDoc.exists ? userDoc.data().nombre : "Usuario Desconocido";
-            } catch (e) { nombreReal = "Error de nombre"; }
+            } catch (e) { 
+                nombreReal = "Error de conexión"; 
+            }
 
             const div = document.createElement('div');
             div.className = 'tarjeta-pedido';
 
             if (p.estado_pedido === 'pendiente') {
-                // DISEÑO PARA PENDIENTES
                 div.innerHTML = `
                     <div class="info-principal">
                         <h4>Pedido #${p.id_pedido}</h4>
-                        <p>Comprador: <strong>${nombreReal}</strong></p>
-                        <p>Monto: <strong>$${p.total_pedido}</strong></p>
+                        <p><strong>🛍️ Producto:</strong> ${p.nombre_producto}</p>
+                        <p><strong>🔢 Unidades:</strong> ${p.cantidad}</p>
+                        <p><strong>👤 Comprador:</strong> ${nombreReal}</p>
+                        <p><strong>💰 Monto Total:</strong> $${p.total_pedido}</p>
                     </div>
                     <div class="acciones">
                         <button class="btn-agendar-cita" onclick="abrirModalAgendar(${p.id_pedido}, '${nombreReal}')">
@@ -51,24 +54,26 @@ async function obtenerPedidosDelVendedor(idVendedor) {
             } else if (p.estado_pedido === 'confirmado') {
                 div.style.borderLeft = "6px solid #2196F3";
                 div.innerHTML = `
-        <div class="info-principal">
-            <h4>Pedido #${p.id_pedido} ✅</h4>
-            <p>Entregar a: <strong>${nombreReal}</strong></p>
-            <p>📍 Punto: <strong>${p.lugar_entrega}</strong></p>
-            <p>⏰ Fecha: <strong>${p.fecha_entrega.split('T')[0]}</strong> a las <strong>${p.hora_entrega}</strong></p>
-        </div>
-        <div class="acciones">
-            <button class="btn-finalizar" onclick="finalizarPedido(${p.id_pedido})" 
-                style="background-color: #0fb515; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
-                📦 Marcar como Entregado
-            </button>
-        </div>
-    `;
+                    <div class="info-principal">
+                        <h4>Pedido #${p.id_pedido} ✅</h4>
+                        <p><strong>📦 Entrega:</strong> ${p.nombre_producto} (${p.cantidad} pzs)</p>
+                        <p><strong>👤 Cliente:</strong> ${nombreReal}</p>
+                        <p><strong>📍 Punto:</strong> ${p.lugar_entrega}</p>
+                        <p><strong>⏰ Fecha:</strong> ${p.fecha_entrega.split('T')[0]} a las ${p.hora_entrega}</p>
+                        <p><strong>💵 Monto Total:</strong> $${p.total_pedido}</p>
+                    </div>
+                    <div class="acciones">
+                        <button class="btn-finalizar" onclick="finalizarPedido(${p.id_pedido})" 
+                            style="background-color: #0fb515; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+                            📦 Marcar como Entregado
+                        </button>
+                    </div>
+                `;
                 contenedorConfirmados.appendChild(div);
             }
         }
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error al cargar pedidos:", error);
     }
 }
 
