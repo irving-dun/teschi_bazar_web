@@ -431,7 +431,6 @@ app.get('/api/notificaciones/:idUsuario', async (req, res) => {
 });
 
 
-
 //------------ SERVIDOR Y SOCKET.IO------------
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
