@@ -1,32 +1,54 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mi Perfil | TeschiBazar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/frontend/css/encabezado.css" />
+  <link rel="stylesheet" href="/frontend/css/notificaciones.css" />
   <link rel="stylesheet" href="/frontend/css/perfil.css" />
 </head>
 
 <body>
-  <header class="main-header">
-    <div class="logo">TESCHI-BAZAR</div>
+  <header>
+    <h1>TESCHI-BAZAR</h1>
     <nav>
       <ul>
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="#">Acerca de</a></li>
+        <li><a href="">Acerca de</a></li>
       </ul>
     </nav>
+
+    <div class="notificaciones-wrapper">
+      <button id="btnCampana" class="btn-campana">
+        🔔 <span id="contadorNotificaciones" class="notif-badge">0</span>
+      </button>
+
+      <div id="menuNotificaciones" class="notif-menu">
+        <div class="notif-header">Notificaciones</div>
+        <div id="listaNotificaciones" class="notif-list">
+          <p class="notif-vacia">No tienes notificaciones</p>
+        </div>
+      </div>
+    </div>
+
+
     <div id="auth-wrapper">
-      <div id="contenedorPerfilUsuario"></div>
+      <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion"
+        style="display: none;">
+        Iniciar Sesión
+      </button>
+      <div id="contenedorPerfilUsuario" style="display: none"></div>
     </div>
   </header>
 
   <main class="profile-main">
     <div class="profile-grid">
-      
-      <aside class="profile-sidebar card"> 
+
+      <aside class="profile-sidebar card">
         <div class="avatar-container">
           <img src="https://via.placeholder.com/150" alt="Foto de perfil" id="user-avatar">
           <div class="online-badge"></div>
@@ -38,7 +60,7 @@
           <a href="#" class="active">⚙️ Ajustes de Cuenta</a>
           <a href="publicaciones.html" id="btnMisPublicaciones">📦 Mis Publicaciones</a>
           <a href="#">💳 Mis Compras</a>
-          
+
           <button id="btnCerrarSesion" class="btn-logout">Cerrar Sesión</button>
         </nav>
       </aside>
@@ -70,7 +92,7 @@
           <div class="form-group">
             <label for="password">Nueva Contraseña</label>
             <input type="password" id="password" placeholder="Mínimo 6 caracteres" minlength="6" />
-              <small>ℹ️ Escribe una nueva contraseña para cambiarla</small>
+            <small>ℹ️ Escribe una nueva contraseña para cambiarla</small>
           </div>
 
           <div class="messages">
@@ -81,18 +103,19 @@
           <button type="submit" class="btn-save">Guardar Cambios</button>
         </form>
       </section>
-      
+
     </div>
   </main>
 
-   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-   
-   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-   <script src="/backend/firebase-config.js"></script>
-   <script src="/frontend/js/notificaciones.js"></script>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="/backend/firebase-config.js"></script>
+  <script src="/frontend/js/notificaciones.js"></script>
   <script src="/frontend/js/scriptPerfil.js"></script>
   <script src="/frontend/js/detallePerfil.js"></script>
 </body>
+
 </html>

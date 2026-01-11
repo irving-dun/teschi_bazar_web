@@ -6,6 +6,21 @@
 }
 
 :root {
+    --gradiente: linear-gradient(135deg, #d4fed8 0%, #a8e6cf 50%, #d1e1ff 100%);
+    --color-principal: #0fb515;
+    --color-secundario: #0072ff;
+    --blanco: #ffffff;
+    --sombra: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: var(--gradiente);
+    min-height: 100vh;
+}
+
+:root {
     --color-principal: #0fb515;
     --color-gradiente-final: #0072ff;
     --color-fondo: #d4fed8;
@@ -13,10 +28,7 @@
     --sombra-suave: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-body {
-    background-color: #f7f5f5;
-    font-family: 'Poppins', sans-serif;
-}
+
 
 /* --- Contenedor Principal --- */
 .container-form {

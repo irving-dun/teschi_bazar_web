@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+  
   <link rel="stylesheet" href="/frontend/css/index.css" />
   <link rel="stylesheet" href="/frontend/css/notificaciones.css" />
 </head>
@@ -23,45 +22,24 @@
       </ul>
     </nav>
 
-    <div class="notificaciones-container" style="position: relative; display: inline-block;">
-      <button id="btnCampana" style="background: none; border: none; cursor: pointer; font-size: 24px;">
-        🔔 <span id="contadorNotificaciones"
-          style="display: none; 
-          position: absolute; 
-          top: -5px; 
-          right: -5px; 
-          background: red; 
-          color: white; 
-          border-radius: 50%; 
-          padding: 2px 6px; 
-          font-size: 12px;">0</span>
+    <div class="notificaciones-wrapper">
+      <button id="btnCampana" class="btn-campana">
+        🔔 <span id="contadorNotificaciones" class="notif-badge">0</span>
       </button>
 
-      <div id="menuNotificaciones"
-        style="display: none; 
-        position: absolute; 
-        right: 0; 
-        top: 40px; 
-        width: 250px; 
-        background: white; 
-        border: 1px solid #ccc; 
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-        z-index: 1000; border-radius: 8px;">
-
-        <div style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Notificaciones</div>
-        <div id="listaNotificaciones" style="max-height: 300px; overflow-y: auto;">
-          <p style="padding: 10px; font-size: 14px; color: #666;">No tienes notificaciones</p>
+      <div id="menuNotificaciones" class="notif-menu">
+        <div class="notif-header">Notificaciones</div>
+        <div id="listaNotificaciones" class="notif-list">
+          <p class="notif-vacia">No tienes notificaciones</p>
         </div>
       </div>
     </div>
 
-
     <div id="auth-wrapper">
-      <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion"
-        style="display: none;">
+      <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
         Iniciar Sesión
       </button>
-      <div id="contenedorPerfilUsuario" style="display: none"></div>
+      <div id="contenedorPerfilUsuario" class="perfil-usuario-hidden"></div>
     </div>
   </header>
 
@@ -70,14 +48,16 @@
     <button id="nextBtn" class="slider-btn next">&gt;</button>
     <div class="slide-wrapper">
       <div class="slider">
-        <img id="slide-1" src="/frontend/carrusel/C1.JPG" />
+        <img id="slide-1" src="/frontend/carrusel/carrusel_sudadera.png" />
         <img id="slide-2" src="/frontend/carrusel/C2.JPG" />
         <img id="slide-3" src="/frontend/carrusel/C4.JPG" />
+        <img id="slide-4" src="/frontend/carrusel/C1.JPG" />
       </div>
       <div class="slider-nav">
         <a href="#slide-1"></a>
         <a href="#slide-2"></a>
         <a href="#slide-3"></a>
+        <a href="#slide-4"></a>
       </div>
     </div>
   </section>
@@ -85,8 +65,7 @@
   <div class="search-container">
     <form id="search-form" class="search-box">
       <input type="text" id="search-input" placeholder="¿Qué estás buscando hoy?" autocomplete="off">
-      <button type="submit" class="search-btn">
-        <i>🔍</i> </button>
+      <button type="submit" class="search-btn"><i>🔍</i></button>
     </form>
     <div id="search-suggestions" class="suggestions-list"></div>
   </div>
@@ -104,14 +83,9 @@
   <main>
     <section id="inicio">
       <h2>Productos Destacados</h2>
-
       <div class="productos-grid">
-
         <div class="producto-card" id="electronica-2">
-          <div class="imagen-contenedor">
-            <img src="/frontend/imgProductos/ELECTRONICA2.JPG" alt="Cámara digital compacta 4k" />
-          </div>
-
+          <div class="imagen-contenedor"><img src="/frontend/imgProductos/ELECTRONICA2.JPG" alt="Cámara" /></div>
           <div class="info-contenedor">
             <p class="descripcion">Sensor 20MP, grabación Ultra HD</p>
             <h3 class="titulo-producto">Cámara digital compacta 4k</h3>
@@ -120,9 +94,7 @@
         </div>
 
         <div class="producto-card" id="ropa-4">
-          <div class="imagen-contenedor">
-            <img src="/frontend/imgProductos/CHAMARRA.JPG" alt="Chamarra Deportiva" />
-          </div>
+          <div class="imagen-contenedor"><img src="/frontend/imgProductos/CHAMARRA.JPG" alt="Chamarra" /></div>
           <div class="info-contenedor">
             <p class="descripcion">Talla grande, color azul.</p>
             <h3 class="titulo-producto">Chamarra Deportiva</h3>
@@ -131,17 +103,13 @@
         </div>
 
         <div class="producto-card" id="accesorio-1">
-          <div class="imagen-contenedor">
-            <img src="/frontend/imgProductos/RELOJ.JPG" alt="Reloj Deportivo Digital" />
-          </div>
-
+          <div class="imagen-contenedor"><img src="/frontend/imgProductos/RELOJ.JPG" alt="Reloj" /></div>
           <div class="info-contenedor">
             <p class="descripcion">Resistente al agua con cronómetro</p>
             <h3 class="titulo-producto">Reloj Deportivo Digital</h3>
             <p class="precio">$750.00</p>
           </div>
         </div>
-
       </div>
     </section>
   </main>
@@ -151,18 +119,13 @@
   </footer>
 
   <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
   <script src="/backend/firebase-config.js"></script>
   <script src="/frontend/js/notificaciones.js"></script>
-
   <script src="/frontend/js/scriptIndex.js"></script>
   <script src="/frontend/js/scriptBusqueda.js"></script>
-
   <script src="/frontend/js/scriptCarrusel.js"></script>
 </body>
-
 </html>

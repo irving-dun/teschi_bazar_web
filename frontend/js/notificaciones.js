@@ -89,7 +89,7 @@ async function cargarNotificacionesEnMenu(uid) {
         lista.innerHTML = ''; 
 
         if (!notificaciones || notificaciones.length === 0) {
-            lista.innerHTML = '<p style="padding: 10px; font-size: 14px; color: #666;">No hay notificaciones</p>';
+            lista.innerHTML = '<p style="padding: 10px; font-size: 14px; color: #e03b3bff;">No hay notificaciones</p>';
             return;
         }
 
@@ -97,15 +97,15 @@ async function cargarNotificacionesEnMenu(uid) {
             const item = document.createElement('div');
             item.style.cssText = `
                 padding: 12px; 
-                border-bottom: 1px solid #eee; 
+                border-bottom: 1px solid #2b2a2aff; 
                 cursor: pointer; 
                 background: ${notif.leida ? 'white' : '#f8f9fa'};
                 transition: background 0.3s;
             `;
             item.innerHTML = `
-                <strong style="font-size: 12px; color: #333;">NUEVA PETICIÓN</strong>
-                <p style="margin: 0; font-size: 13px; color: #555;">${notif.mensaje}</p>
-                <small style="font-size: 10px; color: #999;">${new Date(notif.fecha_creacion).toLocaleString()}</small>
+                <strong style="font-size: 12px; color: #1b8b44ff;">NUEVA PETICIÓN</strong>
+                <p style="margin: 0; font-size: 13px; color: #0c0c0cff;">${notif.mensaje}</p>
+                <small style="font-size: 10px; color: #a01515ff;">${new Date(notif.fecha_creacion).toLocaleString()}</small>
             `;
             
             item.onmouseover = () => item.style.background = "#e9ecef";
