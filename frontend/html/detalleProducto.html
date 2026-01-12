@@ -7,9 +7,10 @@
     <title id="tituloPagina">Detalle del Producto - TeschiBazar</title>
     <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    
     <link rel="stylesheet" href="/frontend/css/encabezado.css" />
     <link rel="stylesheet" href="/frontend/css/detalleProducto.css" />
-</head>
+    </head>
 
 <body>
     <header>
@@ -23,34 +24,16 @@
 
         <div class="notificaciones-container" style="position: relative; display: inline-block;">
             <button id="btnCampana" style="background: none; border: none; cursor: pointer; font-size: 24px;">
-                🔔 <span id="contadorNotificaciones" style="display: none; 
-          position: absolute; 
-          top: -5px; 
-          right: -5px; 
-          background: red; 
-          color: white; 
-          border-radius: 50%; 
-          padding: 2px 6px; 
-          font-size: 12px;">0</span>
+                🔔 <span id="contadorNotificaciones" style="display: none; position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px;">0</span>
             </button>
 
-            <div id="menuNotificaciones" style="display: none; 
-        position: absolute; 
-        right: 0; 
-        top: 40px; 
-        width: 250px; 
-        background: white; 
-        border: 1px solid #ccc; 
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
-        z-index: 1000; border-radius: 8px;">
-
+            <div id="menuNotificaciones" style="display: none; position: absolute; right: 0; top: 40px; width: 250px; background: white; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 1000; border-radius: 8px;">
                 <div style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Notificaciones</div>
                 <div id="listaNotificaciones" style="max-height: 300px; overflow-y: auto;">
                     <p style="padding: 10px; font-size: 14px; color: #666;">No tienes notificaciones</p>
                 </div>
             </div>
         </div>
-
 
         <button id="iniciaSesionButton" onclick="window.location.href='login.html'" class="btn-inicio-sesion">
             Iniciar Sesión
@@ -84,8 +67,7 @@
                 <div class="detail-card info-section">
                     <h3>Información del Vendedor</h3>
                     <p><strong>Vendedor:</strong> <span id="detalleNombreVendedor">Cargando...</span></p>
-                    <p><strong>Ubicación de Entrega (sujeto a cambios):</strong> <span
-                            id="detalleUbicacionEntrega"></span></p>
+                    <p><strong>Ubicación de Entrega:</strong> <span id="detalleUbicacionEntrega"></span></p>
                 </div>
 
                 <div class="description-section">
@@ -105,7 +87,6 @@
         <div class="modal-content">
             <h2>Confirmar Compra</h2>
             <p id="modalNombreProducto">Cargando...</p>
-
             <div class="selector-cantidad">
                 <label>¿Cuántas unidades deseas?</label>
                 <div class="control-unidades">
@@ -115,16 +96,13 @@
                 </div>
                 <small id="modalStockDisponible">Disponibles: 0</small>
             </div>
-
             <div class="resumen-pago">
                 <p>Total a pagar: <strong id="modalTotalPagar">$0.00 MXN</strong></p>
             </div>
-
             <div class="info-entrega-vendedor">
                 <h4>Punto de Encuentro Establecido:</h4>
                 <p>📍 <span id="modalLugarReferencia">Cargando...</span></p>
             </div>
-
             <div class="campo-pago">
                 <label for="modalMetodoPago">Método de Pago:</label>
                 <select id="modalMetodoPago">
@@ -132,29 +110,49 @@
                     <option value="Transferencia">Transferencia</option>
                 </select>
             </div>
-
             <div class="modal-footer">
                 <button id="btnConfirmarPedido" class="btn-confirmar">Confirmar Pedido</button>
                 <button type="button" id="btnCancelarCompra" class="btn-cancelar">Cancelar</button>
             </div>
-
-
         </div>
     </div>
 
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <div id="chat-container" class="chat-oculto">
+        <div id="chat-header">
+            <div>
+                <h3 id="chat-producto-nombre">Chat de Producto</h3>
+                <p id="chat-vendedor-info">Cargando vendedor...</p>
+            </div>
+            <button id="cerrar-chat-btn">X</button>
+        </div>
+        <div id="chat-body">
+            <div id="loading-indicator" style="display: none; text-align: center; padding: 10px;">
+                Cargando mensajes...
+            </div>
+            </div>
+        <div id="chat-footer">
+            <textarea id="chat-input" placeholder="Escribe un mensaje..." rows="1"></textarea>
+            <button id="enviar-mensaje-btn" disabled>Enviar</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; Teschi-Bazar</p>
+    </footer>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
 
     <script src="/backend/firebase-config.js"></script>
     <script src="/frontend/js/notificaciones.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
     <script src="../../frontend/js/scriptIndex.js"></script>
     <script src="../../frontend/js/detalleProducto.js"></script>
     <script src="../../frontend/js/scriptCompra.js"></script>
+    
+    <script src="../../frontend/js/scriptChat.js"></script>
 </body>
 
 </html>

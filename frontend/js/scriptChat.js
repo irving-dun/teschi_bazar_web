@@ -2,7 +2,7 @@
 // CONFIGURACIÓN Y VARIABLES GLOBALES DEL CHAT
 // =======================================================
 const servidorUrl = "https://tu-app-en-render.onrender.com"; // ⚠️ CAMBIA ESTO POR TU URL DE RENDER
-let socket;
+let socketChat;
 let idConversacionActual = null;
 
 // Elementos del DOM
@@ -28,28 +28,28 @@ function obtenerUsuarioFirebase() {
 }
 
 // =======================================================
-// 2. LÓGICA DE CONEXIÓN Y REGISTRO (Socket.IO)
+// 2. LÓGICA DE CONEXIÓN Y REGISTRO (socketChat.IO)
 // =======================================================
 
 async function conectarChat(userId, idToken, idProducto) {
-    // Inicializar socket si no existe
-    if (!socket) {
-        socket = io(servidorUrl);
+    // Inicializar socketChat si no existe
+    if (!socketChat) {
+        socketChat = io(servidorUrl);
 
         // Escuchar errores de autenticación
-        socket.on('server:auth_error', (msg) => {
+        socketChat.on('server:auth_error', (msg) => {
             alert(msg);
             cerrarChat();
         });
 
         // Escuchar nuevos mensajes en tiempo real
-        socket.on('server:nuevo_mensaje', (mensaje) => {
+        socketChat.on('server:nuevo_mensaje', (mensaje) => {
             renderizarMensaje(mensaje, userId);
         });
     }
 
     // Registrar al usuario en el servidor
-    socket.emit('client:registrar_usuario', { idToken, userId });
+    socketChat.emit('client:registrar_usuario', { idToken, userId });
 }
 
 // =======================================================
@@ -146,7 +146,7 @@ async function enviarMensaje() {
         contenido: contenido
     };
 
-    socket.emit('client:enviar_mensaje', data);
+    socketChat.emit('client:enviar_mensaje', data);
     chatInput.value = ''; // Limpiar input
 }
 
