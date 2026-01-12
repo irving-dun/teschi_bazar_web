@@ -318,19 +318,58 @@ app.put('/api/pedidos/confirmar-cita', async (req, res) => {
 });
 
 // RUTA: Finalizar un pedido (Marcar como entregado)
+// RUTA: Finalizar un pedido (Marcar como entregado y descontar stock)
 app.put('/api/pedidos/finalizar/:id', async (req, res) => {
     const { id } = req.params;
+    const client = await pool.connect(); // Usamos un cliente para manejar la transacción
+
     try {
-        const sql = `
+        await client.query('BEGIN'); // Iniciamos la transacción
+
+        // 1. Obtener los productos y cantidades asociados a este pedido
+        const detalleRes = await client.query(
+            'SELECT id_producto, cantidad FROM detalle_pedido WHERE id_pedido = $1',
+            [id]
+        );
+
+        if (detalleRes.rows.length === 0) {
+            throw new Error("No se encontró el detalle del pedido para descontar stock.");
+        }
+
+        // 2. Descontar las unidades de la tabla 'productos' para cada artículo del pedido
+        for (const item of detalleRes.rows) {
+            const updateStockSql = `
+                UPDATE productos 
+                SET disponibilidad = disponibilidad - $1 
+                WHERE id_producto = $2 AND disponibilidad >= $1
+            `;
+            const stockResult = await client.query(updateStockSql, [item.cantidad, item.id_producto]);
+            
+            // Verificamos si realmente se actualizó (por si alguien compró lo último al mismo tiempo)
+            if (stockResult.rowCount === 0) {
+                throw new Error(`Stock insuficiente para el producto ID: ${item.id_producto}`);
+            }
+        }
+
+        // 3. Marcar el pedido como 'entregado'
+        const finalizarPedidoSql = `
             UPDATE pedidos 
             SET estado_pedido = 'entregado' 
             WHERE id_pedido = $1
         `;
-        await pool.query(sql, [id]);
-        res.json({ success: true, mensaje: "¡Venta finalizada con éxito!" });
+        await client.query(finalizarPedidoSql, [id]);
+
+        await client.query('COMMIT'); // Guardamos todos los cambios permanentemente
+        
+        console.log(`✅ Pedido ${id} finalizado y stock actualizado.`);
+        res.json({ success: true, mensaje: "¡Venta finalizada y stock actualizado con éxito!" });
+
     } catch (err) {
-        console.error("Error al finalizar pedido:", err.message);
-        res.status(500).json({ error: "No se pudo finalizar el pedido" });
+        await client.query('ROLLBACK'); // Si algo falla (ej. no hay stock), deshacemos todo
+        console.error("Error al finalizar pedido y descontar stock:", err.message);
+        res.status(500).json({ error: err.message || "No se pudo finalizar el pedido" });
+    } finally {
+        client.release(); // Liberamos el cliente de la base de datos
     }
 });
 
