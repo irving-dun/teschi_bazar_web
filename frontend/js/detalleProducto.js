@@ -23,19 +23,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('detalleEstado').textContent = producto.estado_producto;
         document.getElementById('detalleDisponibilidad').textContent = `${producto.disponibilidad} unidades`;
         document.getElementById('detalleUbicacionEntrega').textContent = producto.ubicacion_entrega;
-        document.getElementById('detalleNombreVendedor').textContent = producto.id_usuario_vendedor;
 
-        // 2. AQUÍ AGREGAS EL FORMATEO DE FECHA
+        // --- CORRECCIÓN AQUÍ: Obtener nombre desde Firebase ---
+        const idVendedor = producto.id_usuario_vendedor;
+        if (idVendedor) {
+            // Llamamos a la función para buscar el nombre real
+            obtenerNombreVendedor(idVendedor);
+        } else {
+            document.getElementById('detalleNombreVendedor').textContent = "Vendedor no especificado";
+        }
+
+        // 2. FORMATEO DE FECHA
         if (producto.fecha_publicacion) {
             const fecha = new Date(producto.fecha_publicacion);
-            
-            // Configuración para que diga: "17 de diciembre de 2025"
             const opciones = { 
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric' 
             };
-            
             const fechaFormateada = fecha.toLocaleDateString('es-ES', opciones);
             document.getElementById('detalleFechaPublicacion').textContent = fechaFormateada;
         } else {
@@ -53,6 +58,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+/**
+ * Función para obtener el nombre del usuario desde Firebase Firestore
+ */
+async function obtenerNombreVendedor(uid) {
+    const spanVendedor = document.getElementById('detalleNombreVendedor');
+    const chatVendedorInfo = document.getElementById('chat-vendedor-info');
 
+    try {
+        // Accedemos a la colección 'usuarios' (ajusta el nombre si en tu Firebase es diferente)
+        const userDoc = await firebase.firestore().collection('usuarios').doc(uid).get();
 
+        if (userDoc.exists) {
+            const datosUsuario = userDoc.data();
+            // Usamos 'nombre' (asegúrate que así se llame el campo en tu Firebase)
+            const nombreReal = datosUsuario.nombre || "Usuario sin nombre";
+            
+            spanVendedor.textContent = nombreReal;
 
+            // También actualizamos el nombre en la ventana del chat si existe
+            if (chatVendedorInfo) {
+                chatVendedorInfo.textContent = `Vendedor: ${nombreReal}`;
+            }
+        } else {
+            spanVendedor.textContent = "Vendedor no encontrado";
+            console.warn("No se encontró el documento del usuario en Firebase con UID:", uid);
+        }
+    } catch (error) {
+        console.error("Error al obtener datos del vendedor en Firebase:", error);
+        spanVendedor.textContent = "Error al cargar nombre";
+    }
+}
