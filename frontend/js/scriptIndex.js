@@ -84,3 +84,68 @@ window.logoutFirebase = function() {
         window.location.href = "index.html";
     }).catch(error => console.error("Error al cerrar sesión:", error));
 };
+async function cargarDestacadosDesdeDB() {
+    const servidorUrl = "http://localhost:3000";
+    const contenedor = document.getElementById("contenedorProductosDestacados");
+    
+    if (!contenedor) return;
+
+    try {
+        const respuesta = await fetch(`${servidorUrl}/api/productos-destacados`);
+        const productos = await respuesta.json();
+
+        if (productos.length === 0) {
+            contenedor.innerHTML = "<p>Aún no hay productos destacados.</p>";
+            return;
+        }
+
+        contenedor.innerHTML = "";
+
+        productos.forEach(prod => {
+            const card = document.createElement("div");
+            card.className = "producto-card";
+            
+            // Guardamos el ID en un atributo personalizado
+            card.setAttribute("data-id", prod.id_producto);
+            card.style.cursor = "pointer";
+
+            const etiquetaVentas = prod.ventas > 0 
+                ? `<div class="etiqueta-ventas"><span>🔥 ${prod.ventas} vendidos</span></div>` 
+                : "";
+
+            card.innerHTML = `
+                <div class="imagen-contenedor">
+                    <img src="${prod.url_imagen ? servidorUrl + prod.url_imagen : '/frontend/img/placeholder.png'}" alt="${prod.nombre_producto}" />
+                </div>
+                <div class="info-contenedor">
+                    ${etiquetaVentas}
+                    <p class="descripcion">${prod.descripcion || 'Sin descripción'}</p>
+                    <h3 class="titulo-producto">${prod.nombre_producto}</h3>
+                    <p class="precio">$${parseFloat(prod.precio).toFixed(2)}</p>
+                </div>
+            `;
+            contenedor.appendChild(card);
+        });
+
+        // --- SOLUCIÓN AL CLIC: Delegación de eventos ---
+        contenedor.addEventListener("click", (e) => {
+            // Buscamos la tarjeta (card) más cercana al lugar donde se hizo clic
+            const card = e.target.closest(".producto-card");
+            if (card) {
+                const id = card.getAttribute("data-id");
+                if (id) {
+                    window.location.href = `detalleProducto.html?id=${id}`;
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error("Error cargando productos:", error);
+    }
+}
+
+// Asegúrate de que esto se ejecute al cargar el DOM
+document.addEventListener("DOMContentLoaded", cargarDestacadosDesdeDB);
+
+// Iniciar la carga cuando la página esté lista
+document.addEventListener("DOMContentLoaded", cargarDestacadosDesdeDB);

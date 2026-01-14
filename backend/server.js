@@ -459,8 +459,32 @@ app.get('/api/notificaciones/:idUsuario', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
-
+app.get('/api/productos-destacados', async (req, res) => {
+    const sql = `
+        SELECT 
+            p.id_producto, 
+            p.nombre_producto, 
+            p.precio, 
+            p.descripcion,
+            i.url_imagen,
+            COUNT(ped.id_pedido) as ventas -- Contamos solo los pedidos que cumplen el WHERE
+        FROM productos p
+        INNER JOIN imagenes_producto i ON p.id_producto = i.id_producto
+        INNER JOIN detalle_pedido dp ON p.id_producto = dp.id_producto
+        INNER JOIN pedidos ped ON dp.id_pedido = ped.id_pedido
+        WHERE ped.estado_pedido = 'entregado' 
+        GROUP BY p.id_producto, i.url_imagen
+        ORDER BY ventas DESC
+        LIMIT 12
+    `;
+    try {
+        const result = await pool.query(sql);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error en destacados:", err.message);
+        res.status(500).json({ error: 'Error al obtener destacados.' });
+    }
+});
 //------------ SERVIDOR Y SOCKET.IO------------
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });

@@ -444,3 +444,18 @@ body.modal-open {
     border-bottom-left-radius: 5px; /* Esquina más cerrada */
     border-top-left-radius: 15px;
 }
+/* --- Única modificación para el Footer --- */
+footer {
+    background-color: #000000 !important; /* Fondo negro sólido */
+    color: #ffffff !important;            /* Texto blanco */
+    text-align: center;
+    padding: 20px 0;        
+    width: 100%;
+    margin-top: 50px;                     /* Espacio respecto al producto */
+}
+
+footer p {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+}
