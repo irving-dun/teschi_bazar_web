@@ -2,7 +2,7 @@
 document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'botonComprar') {
         const usuarioLogueado = firebase.auth().currentUser;
-        
+
         // 1. Verificación de sesión
         if (!usuarioLogueado) {
             alert("Inicia sesión para comprar.");
@@ -127,24 +127,23 @@ document.getElementById('btnConfirmarPedido').onclick = async () => {
         total: parseFloat(document.getElementById('modalTotalPagar').textContent.replace(/[^0-9.-]+/g, "")),
         metodo_pago: document.getElementById('modalMetodoPago').value,
         lugar_entrega: document.getElementById('modalLugarReferencia').textContent,
-        estado_pedido: 'pendiente' 
+        estado_pedido: 'pendiente'
     };
 
     try {
-        // 4. Enviar al servidor (Puerto 3000 para evitar el error 404 del Live Server)
-        const res = await fetch('http://localhost:3000/api/pedidos/crear-peticion', {
+        const res = await fetch('https://teschi-bazar-web.onrender.com/api/pedidos/crear-peticion', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(peticion)
         });
 
-        // 5. Manejo de la respuesta
+        // 5. Manejo de la respuesta 
         if (res.ok) {
             const data = await res.json();
             console.log("Pedido creado con ID:", data.id_pedido); // Confirmación en consola
-            
+
             alert("Petición enviada. Espera a que el vendedor confirme la fecha.");
-            
+
             // Función para cerrar el modal (asegúrate de que exista en tu script)
             if (typeof cerrarModal === 'function') {
                 cerrarModal();

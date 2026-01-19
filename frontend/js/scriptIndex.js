@@ -1,18 +1,18 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // --- CONFIGURACIÓN DE URL ---
+    const servidorUrl = "https://teschi-bazar-web.onrender.com";
+
     const btnLogin = document.getElementById("iniciaSesionButton");
     const divUser = document.getElementById("contenedorPerfilUsuario");
 
     if (!btnLogin || !divUser) return;
 
-    // --- 1. LÓGICA DE CARGA INSTANTÁNEA ---
+    // --- 1. LÓGICA DE CARGA INSTANTÁNEA (Caché) ---
     const nombreCache = localStorage.getItem("usuario_nombre");
-    
-    // Si hay caché, mostramos el menú de inmediato y nos aseguramos que el login esté oculto
     if (nombreCache) {
         mostrarMenuUsuario(nombreCache);
         btnLogin.style.display = "none"; 
     } else {
-        // Si no hay caché, mostramos login, pero solo si Firebase no dice lo contrario luego
         btnLogin.style.display = "inline-flex";
     }
 
@@ -21,15 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (user) {
             db.collection("usuarios").doc(user.uid).get().then((doc) => {
                 const nombreReal = doc.exists ? (doc.data().nombre || user.email.split("@")[0]) : user.email.split("@")[0];
-                
-                // Solo actualizamos el DOM si el nombre cambió o no había caché
                 if (localStorage.getItem("usuario_nombre") !== nombreReal) {
                     localStorage.setItem("usuario_nombre", nombreReal);
                     mostrarMenuUsuario(nombreReal);
                 }
             });
         } else {
-            // Limpieza total si no hay usuario
             localStorage.removeItem("usuario_nombre");
             btnLogin.style.display = "inline-flex";
             divUser.style.display = "none";
@@ -37,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // --- 3. FUNCIÓN PARA DIBUJAR EL MENÚ ---
     function mostrarMenuUsuario(nombre) {
         divUser.innerHTML = `
             <div class="perfil-dropdown">
@@ -54,21 +50,17 @@ document.addEventListener("DOMContentLoaded", () => {
         btnLogin.style.display = "none";
     }
 
-    // --- 4. MANEJO DE CLICS ---
+    // --- 3. MANEJO DE CLICS ---
     document.addEventListener("click", (e) => {
         const dropdownContent = document.getElementById("userDropdownContent");
-        
-        // Botón de Usuario
         if (e.target.closest("#dropdownUserButton")) {
             e.preventDefault();
             if (dropdownContent) dropdownContent.classList.toggle("show");
         } 
-        // Cerrar Sesión
         else if (e.target.closest("#logoutLink")) {
             e.preventDefault();
             window.logoutFirebase();
         }
-        // Cerrar al hacer clic fuera
         else {
             if (dropdownContent && dropdownContent.classList.contains("show")) {
                 dropdownContent.classList.remove("show");
@@ -84,8 +76,11 @@ window.logoutFirebase = function() {
         window.location.href = "index.html";
     }).catch(error => console.error("Error al cerrar sesión:", error));
 };
+
+// --- 4. CARGA DE PRODUCTOS DESDE RENDER ---
 async function cargarDestacadosDesdeDB() {
-    const servidorUrl = "http://localhost:3000";
+    // CAMBIO: URL de Render
+    const servidorUrl = "https://teschi-bazar-web.onrender.com";
     const contenedor = document.getElementById("contenedorProductosDestacados");
     
     if (!contenedor) return;
@@ -104,8 +99,6 @@ async function cargarDestacadosDesdeDB() {
         productos.forEach(prod => {
             const card = document.createElement("div");
             card.className = "producto-card";
-            
-            // Guardamos el ID en un atributo personalizado
             card.setAttribute("data-id", prod.id_producto);
             card.style.cursor = "pointer";
 
@@ -113,9 +106,19 @@ async function cargarDestacadosDesdeDB() {
                 ? `<div class="etiqueta-ventas"><span>🔥 ${prod.ventas} vendidos</span></div>` 
                 : "";
 
+            // --- IMPORTANTE: LÓGICA DE IMÁGENES ---
+            // Si la imagen ya es una URL de Cloudinary (empieza con http), la usamos directo.
+            // Si es una ruta relativa, le pegamos el servidorUrl.
+            let urlImagenFinal = '/frontend/img/placeholder.png';
+            if (prod.url_imagen) {
+                urlImagenFinal = prod.url_imagen.startsWith('http') 
+                    ? prod.url_imagen 
+                    : servidorUrl + prod.url_imagen;
+            }
+
             card.innerHTML = `
                 <div class="imagen-contenedor">
-                    <img src="${prod.url_imagen ? servidorUrl + prod.url_imagen : '/frontend/img/placeholder.png'}" alt="${prod.nombre_producto}" />
+                    <img src="${urlImagenFinal}" alt="${prod.nombre_producto}" />
                 </div>
                 <div class="info-contenedor">
                     ${etiquetaVentas}
@@ -127,25 +130,20 @@ async function cargarDestacadosDesdeDB() {
             contenedor.appendChild(card);
         });
 
-        // --- SOLUCIÓN AL CLIC: Delegación de eventos ---
-        contenedor.addEventListener("click", (e) => {
-            // Buscamos la tarjeta (card) más cercana al lugar donde se hizo clic
+        // Delegación de eventos para el clic
+        contenedor.onclick = (e) => {
             const card = e.target.closest(".producto-card");
             if (card) {
                 const id = card.getAttribute("data-id");
-                if (id) {
-                    window.location.href = `detalleProducto.html?id=${id}`;
-                }
+                if (id) window.location.href = `detalleProducto.html?id=${id}`;
             }
-        });
+        };
 
     } catch (error) {
         console.error("Error cargando productos:", error);
+        contenedor.innerHTML = "<p>Error al conectar con el servidor.</p>";
     }
 }
 
-// Asegúrate de que esto se ejecute al cargar el DOM
-document.addEventListener("DOMContentLoaded", cargarDestacadosDesdeDB);
-
-// Iniciar la carga cuando la página esté lista
+// Ejecutar carga al iniciar
 document.addEventListener("DOMContentLoaded", cargarDestacadosDesdeDB);

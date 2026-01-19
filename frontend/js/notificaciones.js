@@ -1,5 +1,7 @@
 // 1. Inicialización de Socket.io
-const socket = io('http://localhost:3000');
+const SERVER_URL = "https://teschi-bazar-web.onrender.com";
+const socket = io(SERVER_URL); 
+
 let contadorLocal = 0;
 
 // 2. Observador de estado de Firebase
@@ -9,11 +11,10 @@ firebase.auth().onAuthStateChanged((user) => {
 
         // --- ESCUCHAR NOTIFICACIONES EN TIEMPO REAL ---
         socket.on(`notificacion_${user.uid}`, (data) => {
-            mostrarAlertaVisual(data.mensaje); // El recuadro verde
+            mostrarAlertaVisual(data.mensaje); 
             incrementarContador();
-            // Si el menú está abierto, lo actualizamos de una vez
             const menu = document.getElementById('menuNotificaciones');
-            if (menu.style.display === 'block') {
+            if (menu && menu.style.display === 'block') {
                 cargarNotificacionesEnMenu(user.uid);
             }
         });
@@ -22,18 +23,18 @@ firebase.auth().onAuthStateChanged((user) => {
         const btnCampana = document.getElementById('btnCampana');
         const menu = document.getElementById('menuNotificaciones');
 
-        btnCampana.onclick = (e) => {
-            e.stopPropagation();
-            const isVisible = menu.style.display === 'block';
-            menu.style.display = isVisible ? 'none' : 'block';
-            
-            if (!isVisible) {
-                cargarNotificacionesEnMenu(user.uid);
-                resetearContador(); // Limpia el círculo rojo al leer
-            }
-        };
-
-        // Cargar contador inicial (opcional: podrías pedir al server las no leídas)
+        if (btnCampana && menu) {
+            btnCampana.onclick = (e) => {
+                e.stopPropagation();
+                const isVisible = menu.style.display === 'block';
+                menu.style.display = isVisible ? 'none' : 'block';
+                
+                if (!isVisible) {
+                    cargarNotificacionesEnMenu(user.uid);
+                    resetearContador(); 
+                }
+            };
+        }
     } else {
         console.log("Sistema de notificaciones en espera: Usuario no autenticado.");
     }
@@ -82,10 +83,13 @@ function resetearContador() {
 
 async function cargarNotificacionesEnMenu(uid) {
     try {
-        const res = await fetch(`http://localhost:3000/api/notificaciones/${uid}`);
+        // CAMBIADO: Usamos la URL de Render + /api/notificaciones/
+        const res = await fetch(`${SERVER_URL}/api/notificaciones/${uid}`);
         const notificaciones = await res.json();
         
         const lista = document.getElementById('listaNotificaciones');
+        if (!lista) return;
+        
         lista.innerHTML = ''; 
 
         if (!notificaciones || notificaciones.length === 0) {
@@ -121,7 +125,6 @@ async function cargarNotificacionesEnMenu(uid) {
         console.error("Error al cargar menú:", error);
     }
 }
-
 // Cerrar menú al hacer clic en cualquier otra parte
 window.addEventListener('click', () => {
     const menu = document.getElementById('menuNotificaciones');

@@ -119,26 +119,39 @@ document.addEventListener("DOMContentLoaded", () => {
             for (let i = 0; i < fotos.length; i++) {
                 formData.append('imagen', fotos[i]);
             }
+            try {
+                const response = await fetch('https://teschi-bazar-web.onrender.com/api/productos/insertar', {
+                    method: 'POST',
+                    body: formData
+                });
 
-            // Envío al servidor Node.js
-            fetch('http://127.0.0.1:3000/api/productos/insertar', {
-                method: 'POST',
-                body: formData
-            }).catch(err => console.log("Fetch enviado."));
-
-            // MENSAJE DE ÉXITO INMEDIATO (Congelamos la página aquí)
-            Swal.fire({
-                title: '¡Producto Publicado!',
-                text: 'Tu artículo ya está en TeschiBazar.',
-                icon: 'success',
-                confirmButtonText: 'Genial',
-                confirmButtonColor: '#28a745',
-                allowOutsideClick: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "index.html";
+                if (!response.ok) {
+                    throw new Error('Error en el servidor al publicar');
                 }
-            });
+                
+                const resultado = await response.json();
+                console.log("Producto insertado:", resultado);
+
+                // MENSAJE DE ÉXITO (Solo si el servidor respondió bien)
+                Swal.fire({
+                    title: '¡Producto Publicado!',
+                    text: 'Tu artículo ya está en TeschiBazar.',
+                    icon: 'success',
+                    confirmButtonText: 'Genial',
+                    confirmButtonColor: '#28a745',
+                    allowOutsideClick: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "index.html";
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error en la conexión:", error);
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Publicar Producto";
+            }
         };
     }
 });
