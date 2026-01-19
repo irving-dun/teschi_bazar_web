@@ -53,14 +53,30 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 app.use('/uploads', express.static(UPLOADS_DIR));
 
 //------------ CONFIGURACIÓN DE FIREBASE ADMIN SDK ------------
-const serviceAccount = require('./adminsdk.json');
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-    });
-}
-console.log('✅Firebase Admin SDK inicializado.');
+// 1. Importar el módulo de administración de Firebase
+const admin = require("firebase-admin");
 
+// 2. Configuración de Firebase usando Variables de Entorno
+// Es vital usar .replace() para que los saltos de línea (\n) se interpreten correctamente
+const firebaseConfig = {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY 
+        ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
+        : undefined,
+};
+
+// 3. Inicializar Firebase solo si no se ha inicializado antes
+if (!admin.apps.length) {
+    try {
+        admin.initializeApp({
+            credential: admin.credential.cert(firebaseConfig),
+        });
+        console.log("✅ Firebase inicializado correctamente desde variables de entorno");
+    } catch (error) {
+        console.error("❌ Error al inicializar Firebase:", error.message);
+    }
+}
 //------------ CONFIGURACIÓN DE MULTER (PROCESAMIENTO EN MEMORIA) ------------
 // Ya no usamos UPLOADS_DIR porque guardamos en la RAM temporalmente para enviarlo a Cloudinary
 const storage = multer.memoryStorage(); 
