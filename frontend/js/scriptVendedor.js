@@ -28,8 +28,8 @@ async function obtenerPedidosDelVendedor(idVendedor) {
             try {
                 const userDoc = await firebase.firestore().collection('usuarios').doc(p.id_comprador).get();
                 nombreReal = userDoc.exists ? userDoc.data().nombre : "Usuario Desconocido";
-            } catch (e) { 
-                nombreReal = "Error de conexión"; 
+            } catch (e) {
+                nombreReal = "Error de conexión";
             }
 
             const div = document.createElement('div');
@@ -77,24 +77,20 @@ async function obtenerPedidosDelVendedor(idVendedor) {
     }
 }
 
-
 async function finalizarPedido(idPedido) {
-    if (!confirm("¿Confirmas que ya entregaste el producto y recibiste el pago?")) return;
-
     try {
-        const res = await fetch(`http://localhost:3000/api/pedidos/finalizar/${idPedido}`, {
-            method: 'PUT'
+        const response = await fetch(`http://localhost:3000/api/pedidos/finalizar/${idPedido}`, {
+            method: 'PUT', // ¡Debe ser PUT!
+            headers: { 'Content-Type': 'application/json' }
         });
 
-        if (res.ok) {
-            alert("✅ ¡Venta completada! El pedido se moverá a tu historial.");
-            location.reload(); // Refresca para actualizar las listas
-        } else {
-            alert("Error al finalizar el pedido.");
+        const data = await response.json();
+        if (data.success) {
+            alert("Venta finalizada y stock actualizado");
+            location.reload(); // Para ver los cambios
         }
     } catch (error) {
-        console.error("Error:", error);
-        alert("No se pudo conectar con el servidor.");
+        console.error("Error al conectar con el servidor:", error);
     }
 }
 // ------------ 3. LÓGICA DEL MODAL (VENTANA EMERGENTE) ------------

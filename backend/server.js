@@ -346,59 +346,50 @@ app.put('/api/pedidos/confirmar-cita', async (req, res) => {
     }
 });
 
-// RUTA: Finalizar un pedido (Marcar como entregado)
-// RUTA: Finalizar un pedido (Marcar como entregado y descontar stock)
 app.put('/api/pedidos/finalizar/:id', async (req, res) => {
-    const { id } = req.params;
-    const client = await pool.connect(); // Usamos un cliente para manejar la transacción
+    const idPedido = req.params.id;
+    const client = await pool.connect();
 
     try {
-        await client.query('BEGIN'); // Iniciamos la transacción
+        await client.query('BEGIN');
 
-        // 1. Obtener los productos y cantidades asociados a este pedido
-        const detalleRes = await client.query(
+        // 1. Buscamos qué hay que descontar en detalle_pedido
+        const detalle = await client.query(
             'SELECT id_producto, cantidad FROM detalle_pedido WHERE id_pedido = $1',
-            [id]
+            [idPedido]
         );
 
-        if (detalleRes.rows.length === 0) {
-            throw new Error("No se encontró el detalle del pedido para descontar stock.");
+        if (detalle.rows.length === 0) {
+            console.log("⚠️ No se encontró detalle para el pedido:", idPedido);
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: "Detalle no encontrado" });
         }
 
-        // 2. Descontar las unidades de la tabla 'productos' para cada artículo del pedido
-        for (const item of detalleRes.rows) {
-            const updateStockSql = `
-                UPDATE productos 
-                SET disponibilidad = disponibilidad - $1 
-                WHERE id_producto = $2 AND disponibilidad >= $1
-            `;
-            const stockResult = await client.query(updateStockSql, [item.cantidad, item.id_producto]);
+        // 2. Descontamos de la tabla productos usando 'disponibilidad'
+        for (const fila of detalle.rows) {
+            console.log(`📉 Descontando ${fila.cantidad} del producto ID: ${fila.id_producto}`);
             
-            // Verificamos si realmente se actualizó (por si alguien compró lo último al mismo tiempo)
-            if (stockResult.rowCount === 0) {
-                throw new Error(`Stock insuficiente para el producto ID: ${item.id_producto}`);
-            }
+            await client.query(
+                'UPDATE productos SET disponibilidad = disponibilidad - $1 WHERE id_producto = $2',
+                [fila.cantidad, fila.id_producto]
+            );
         }
 
-        // 3. Marcar el pedido como 'entregado'
-        const finalizarPedidoSql = `
-            UPDATE pedidos 
-            SET estado_pedido = 'entregado' 
-            WHERE id_pedido = $1
-        `;
-        await client.query(finalizarPedidoSql, [id]);
+        // 3. Actualizamos el estado del pedido
+        await client.query(
+            "UPDATE pedidos SET estado_pedido = 'entregado' WHERE id_pedido = $1",
+            [idPedido]
+        );
 
-        await client.query('COMMIT'); // Guardamos todos los cambios permanentemente
-        
-        console.log(`✅ Pedido ${id} finalizado y stock actualizado.`);
-        res.json({ success: true, mensaje: "¡Venta finalizada y stock actualizado con éxito!" });
+        await client.query('COMMIT');
+        res.json({ success: true, message: "Stock actualizado y pedido entregado." });
 
     } catch (err) {
-        await client.query('ROLLBACK'); // Si algo falla (ej. no hay stock), deshacemos todo
-        console.error("Error al finalizar pedido y descontar stock:", err.message);
-        res.status(500).json({ error: err.message || "No se pudo finalizar el pedido" });
+        await client.query('ROLLBACK');
+        console.error("❌ Error en servidor:", err.message);
+        res.status(500).json({ error: err.message });
     } finally {
-        client.release(); // Liberamos el cliente de la base de datos
+        client.release();
     }
 });
 
@@ -497,8 +488,32 @@ app.get('/api/notificaciones/:idUsuario', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
-
+app.get('/api/productos-destacados', async (req, res) => {
+    const sql = `
+        SELECT 
+            p.id_producto, 
+            p.nombre_producto, 
+            p.precio, 
+            p.descripcion,
+            i.url_imagen,
+            COUNT(ped.id_pedido) as ventas -- Contamos solo los pedidos que cumplen el WHERE
+        FROM productos p
+        INNER JOIN imagenes_producto i ON p.id_producto = i.id_producto
+        INNER JOIN detalle_pedido dp ON p.id_producto = dp.id_producto
+        INNER JOIN pedidos ped ON dp.id_pedido = ped.id_pedido
+        WHERE ped.estado_pedido = 'entregado' 
+        GROUP BY p.id_producto, i.url_imagen
+        ORDER BY ventas DESC
+        LIMIT 12
+    `;
+    try {
+        const result = await pool.query(sql);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error en destacados:", err.message);
+        res.status(500).json({ error: 'Error al obtener destacados.' });
+    }
+});
 //------------ SERVIDOR Y SOCKET.IO------------
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });

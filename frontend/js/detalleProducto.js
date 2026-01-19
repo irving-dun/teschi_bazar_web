@@ -23,19 +23,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('detalleEstado').textContent = producto.estado_producto;
         document.getElementById('detalleDisponibilidad').textContent = `${producto.disponibilidad} unidades`;
         document.getElementById('detalleUbicacionEntrega').textContent = producto.ubicacion_entrega;
-        document.getElementById('detalleNombreVendedor').textContent = producto.id_usuario_vendedor;
+        
+        // --- CAMBIO AQUÍ: No ponemos el ID, llamamos a la función que busca el nombre ---
+        if (producto.id_usuario_vendedor) {
+            obtenerNombreVendedor(producto.id_usuario_vendedor);
+        } else {
+            document.getElementById('detalleNombreVendedor').textContent = "Vendedor no especificado";
+        }
 
         // 2. AQUÍ AGREGAS EL FORMATEO DE FECHA
         if (producto.fecha_publicacion) {
             const fecha = new Date(producto.fecha_publicacion);
-            
-            // Configuración para que diga: "17 de diciembre de 2025"
             const opciones = { 
                 year: 'numeric', 
                 month: 'long', 
                 day: 'numeric' 
             };
-            
             const fechaFormateada = fecha.toLocaleDateString('es-ES', opciones);
             document.getElementById('detalleFechaPublicacion').textContent = fechaFormateada;
         } else {
@@ -53,6 +56,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-
-
-
+// --- NUEVA FUNCIÓN: Busca el nombre en Firebase sin afectar lo demás ---
+async function obtenerNombreVendedor(uid) {
+    try {
+        const userDoc = await firebase.firestore().collection('usuarios').doc(uid).get();
+        if (userDoc.exists) {
+            const nombreReal = userDoc.data().nombre;
+            document.getElementById('detalleNombreVendedor').textContent = nombreReal || "Usuario sin nombre";
+        } else {
+            document.getElementById('detalleNombreVendedor').textContent = "Vendedor no encontrado";
+        }
+    } catch (error) {
+        console.error("Error al obtener nombre:", error);
+        document.getElementById('detalleNombreVendedor').textContent = "Error al cargar nombre";
+    }
+}

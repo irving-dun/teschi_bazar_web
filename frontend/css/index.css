@@ -571,6 +571,21 @@ footer {
     padding: 0 10px;
   }
 }
+/* Estilo para la etiqueta de vendidos */
+.etiqueta-ventas {
+    background-color: #e3f2fd; /* Azul claro */
+    border: 1px solid #90caf9; /* Borde azul */
+    border-radius: 15px;       /* Forma redonda */
+    padding: 2px 10px;
+    display: inline-block;
+    margin-bottom: 5px;
+}
 
+.etiqueta-ventas span {
+    color: #1565c0;            /* Azul oscuro */
+    font-size: 12px;
+    font-weight: bold;
+    font-family: 'Poppins', sans-serif;
+}
 
 
