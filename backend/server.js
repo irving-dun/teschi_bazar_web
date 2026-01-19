@@ -53,9 +53,6 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 app.use('/uploads', express.static(UPLOADS_DIR));
 
 //------------ CONFIGURACIÓN DE FIREBASE ADMIN SDK ------------
-// 1. Importar el módulo de administración de Firebase
-const admin = require("firebase-admin");
-
 // 2. Configuración de Firebase usando Variables de Entorno
 // Es vital usar .replace() para que los saltos de línea (\n) se interpreten correctamente
 const firebaseConfig = {
