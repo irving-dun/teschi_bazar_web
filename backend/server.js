@@ -1,4 +1,21 @@
 //------------ CONFIGURACIÓN DE DEPENDENCIAS Y MÓDULOS ------------
+// Storage
+require('dotenv').config(); // Carga las variables del archivo .env
+const cloudinary = require('cloudinary').v2; // Importa Cloudinary
+
+// Configuración de Cloudinary usando tus variables del .env
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// CÓDIGO TEMPORAL DE PRUEBA 
+console.log("--- Verificando Configuración ---");
+console.log("Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
+console.log("DB URL existe:", process.env.DATABASE_URL ? "SÍ" : "NO");
+console.log("---------------------------------");
+
 //  Base del servidor y seguridad  
 const express = require('express');
 const cors = require('cors');
@@ -44,20 +61,16 @@ if (!admin.apps.length) {
 }
 console.log('✅Firebase Admin SDK inicializado.');
 
-//------------ CONFIGURACIÓN DE MULTER (PROCESAMIENTO DE IMÁGENES) ------------
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, UPLOADS_DIR);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
+//------------ CONFIGURACIÓN DE MULTER (PROCESAMIENTO EN MEMORIA) ------------
+// Ya no usamos UPLOADS_DIR porque guardamos en la RAM temporalmente para enviarlo a Cloudinary
+const storage = multer.memoryStorage(); 
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // Límite de 5MB por imagen
 });
-const upload = multer({ storage: storage });
 
 //------------ CONFIGURACIÓN DE LA BASE DE DATOS (PostgreSQL) ------------
-const DATABASE_URL_LOCAL = "postgresql://irving:4jsZSjNG0ZaqCNw7zQQlvGjt7ibkbUMn@dpg-d4vnjfhr0fns739p88l0-a.virginia-postgres.render.com/teschibazar";
+const DATABASE_URL_LOCAL = "postgresql://irving:yXev9G4u5zJjlXflwDddN9e4jM7kKot8@dpg-d5lg2bfgi27c738salog-a.virginia-postgres.render.com/teschibazar_ic6m";
 
 const dbConfig = {
     connectionString: process.env.DATABASE_URL || DATABASE_URL_LOCAL,
@@ -102,7 +115,6 @@ app.get('/api/productos/:id', async (req, res) => {
 
 //  RUTA: Insertar nuevo producto
 app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) => {
-    // 1. Agregamos un log para ver en la terminal que los datos llegaron
     console.log("Recibiendo producto:", req.body.nombre_producto);
 
     const {
@@ -112,6 +124,7 @@ app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) =>
     } = req.body;
 
     const client = await pool.connect();
+    
     try {
         await client.query('BEGIN');
 
@@ -131,22 +144,38 @@ app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) =>
 
         const id_producto = resProd.rows[0].id_producto;
 
-        // Registro de la imagen (si existe)
+        // --- LÓGICA DE CLOUDINARY ---
         if (req.file) {
-            await client.query('INSERT INTO imagenes_producto (id_producto, url_imagen) VALUES ($1, $2)',
-                [id_producto, `/uploads/${req.file.filename}`]
+            // Creamos una promesa para manejar la subida asíncrona de Cloudinary
+            const uploadToCloudinary = () => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                        { folder: 'teschibazar_productos' },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result.secure_url);
+                        }
+                    );
+                    stream.end(req.file.buffer);
+                });
+            };
+
+            const url_imagen_cloudinary = await uploadToCloudinary();
+
+            // Guardamos la URL de Cloudinary en la base de datos
+            await client.query(
+                'INSERT INTO imagenes_producto (id_producto, url_imagen) VALUES ($1, $2)',
+                [id_producto, url_imagen_cloudinary]
             );
         }
 
         await client.query('COMMIT');
-
-        // 2. Respuesta ultra-clara para el frontend
-        console.log("✅ Producto guardado con éxito:", id_producto);
-        return res.status(200).json({ success: true, mensaje: "¡Éxito!", id: id_producto });
+        console.log("✅ Producto e imagen guardados con éxito.");
+        return res.status(200).json({ success: true, id: id_producto });
 
     } catch (err) {
         if (client) await client.query('ROLLBACK');
-        console.error("Error en el servidor:", err.message);
+        console.error("Error al insertar producto:", err.message);
         return res.status(500).json({ success: false, error: err.message });
     } finally {
         if (client) client.release();
