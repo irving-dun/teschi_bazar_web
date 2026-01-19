@@ -1,11 +1,13 @@
+// --- CONFIGURACIÓN GLOBAL ---
+// Definimos la URL de Render una sola vez para facilitar cambios futuros
+const API_URL = "https://teschi-bazar-web.onrender.com/api";
+
 // ------------ 1. OBSERVADOR DE SESIÓN (FIREBASE) ------------
-// Detecta quién es el usuario logueado y carga sus ventas
 firebase.auth().onAuthStateChanged(user => {
     if (user) {
         console.log("Usuario autenticado:", user.uid);
         obtenerPedidosDelVendedor(user.uid);
     } else {
-        // Si no hay sesión, redirigir al login
         window.location.href = "login.html";
     }
 });
@@ -16,14 +18,14 @@ async function obtenerPedidosDelVendedor(idVendedor) {
     const contenedorConfirmados = document.getElementById('lista-pedidos-confirmados');
 
     try {
-        const response = await fetch(`http://localhost:3000/api/vendedor/pedidos/todos/${idVendedor}`);
+        // ACTUALIZADO: Cambiamos localhost por la URL de Render
+        const response = await fetch(`${API_URL}/vendedor/pedidos/todos/${idVendedor}`);
         const pedidos = await response.json();
 
         contenedorPendientes.innerHTML = "";
         contenedorConfirmados.innerHTML = "";
 
         for (const p of pedidos) {
-            // Intentamos obtener el nombre real de Firebase
             let nombreReal = "Cargando...";
             try {
                 const userDoc = await firebase.firestore().collection('usuarios').doc(p.id_comprador).get();
@@ -79,76 +81,65 @@ async function obtenerPedidosDelVendedor(idVendedor) {
 
 async function finalizarPedido(idPedido) {
     try {
-        const response = await fetch(`http://localhost:3000/api/pedidos/finalizar/${idPedido}`, {
-            method: 'PUT', // ¡Debe ser PUT!
+        // ACTUALIZADO: Cambiamos localhost por la URL de Render
+        const response = await fetch(`${API_URL}/pedidos/finalizar/${idPedido}`, {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' }
         });
 
         const data = await response.json();
         if (data.success) {
             alert("Venta finalizada y stock actualizado");
-            location.reload(); // Para ver los cambios
+            location.reload();
         }
     } catch (error) {
         console.error("Error al conectar con el servidor:", error);
     }
 }
-// ------------ 3. LÓGICA DEL MODAL (VENTANA EMERGENTE) ------------
 
-// Abre el modal y guarda el ID del pedido para saber a cuál ponerle fecha
+// ------------ 3. LÓGICA DEL MODAL ------------
 function abrirModalAgendar(idPedido, nombreComprador) {
     const modal = document.getElementById('modal-agendar');
     const infoTxt = document.getElementById('info-pedido-txt');
 
-    if (!modal) return console.error("Error: No se encontró el modal con ID 'modal-agendar' en el HTML.");
+    if (!modal) return console.error("Error: No se encontró el modal.");
 
-    // Guardar el ID en el dataset del modal para recuperarlo después
     modal.dataset.idPedido = idPedido;
     infoTxt.innerText = `Define la cita de entrega para: ${nombreComprador}`;
-
     modal.classList.remove('hidden');
 }
 
-// Cierra el modal sin guardar cambios
 function cerrarModal() {
     const modal = document.getElementById('modal-agendar');
     modal.classList.add('hidden');
 }
 
-// ------------ 4. ENVIAR PROPUESTA AL SERVIDOR (BOTÓN GUARDAR) ------------
+// ------------ 4. ENVIAR PROPUESTA (BOTÓN GUARDAR) ------------
 async function enviarPropuesta() {
     const modal = document.getElementById('modal-agendar');
     const idPedido = modal.dataset.idPedido;
-
     const fecha = document.getElementById('fecha-entrega').value;
     const hora = document.getElementById('hora-entrega').value;
     const lugar = document.getElementById('lugar-entrega').value;
 
-    // Validación extra por seguridad
     if (!fecha || !hora || !lugar) {
         alert("Por favor, completa todos los campos de la cita.");
         return;
     }
 
-    const datosCita = {
-        id_pedido: idPedido,
-        fecha: fecha,
-        hora: hora,
-        lugar: lugar
-    };
+    const datosCita = { id_pedido: idPedido, fecha, hora, lugar };
 
     try {
-        const res = await fetch('http://localhost:3000/api/pedidos/confirmar-cita', {
+        // ACTUALIZADO: Cambiamos localhost por la URL de Render
+        const res = await fetch(`${API_URL}/pedidos/confirmar-cita`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datosCita)
         });
 
         if (res.ok) {
-            alert(`¡Cita agendada! Se ha enviado la propuesta para el día ${fecha} a las ${hora} en ${lugar}.`);
+            alert(`¡Cita agendada para el día ${fecha} a las ${hora} en ${lugar}.`);
             cerrarModal();
-            // Recargamos la lista para que el pedido "pendiente" desaparezca 
-            // ya que ahora su estado será 'confirmado'
             location.reload();
         } else {
             const error = await res.json();
@@ -160,21 +151,14 @@ async function enviarPropuesta() {
     }
 }
 
-// Ejecutar cuando cargue la página para configurar el mínimo del calendario
 document.addEventListener('DOMContentLoaded', () => {
     const inputFecha = document.getElementById('fecha-entrega');
     if (inputFecha) {
         const hoy = new Date();
         const yyyy = hoy.getFullYear();
-        let mm = hoy.getMonth() + 1; // Enero es 0
-        let dd = hoy.getDate();
-
-        // Formatear a dos dígitos (06 en lugar de 6)
-        if (dd < 10) dd = '0' + dd;
-        if (mm < 10) mm = '0' + mm;
-
+        let mm = String(hoy.getMonth() + 1).padStart(2, '0');
+        let dd = String(hoy.getDate()).padStart(2, '0');
         const fechaMinima = `${yyyy}-${mm}-${dd}`;
         inputFecha.setAttribute('min', fechaMinima);
-        console.log("Fecha mínima establecida:", fechaMinima);
     }
 });
