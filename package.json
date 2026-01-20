@@ -27,5 +27,6 @@
   "bugs": {
     "url": "https://github.com/MarPardo31/teschi_bazar_web/issues"
   },
-  "homepage": "https://github.com/MarPardo31/teschi_bazar_web#readme"
+  "homepage": "https://github.com/MarPardo31/teschi_bazar_web#readme",
+  "devDependencies": {}
 }
