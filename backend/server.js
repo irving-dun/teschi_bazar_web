@@ -108,14 +108,21 @@ app.get('/api/productos/:id', async (req, res) => {
     }
 });
 
-// Insertar producto con imagen a Cloudinary
+// Insertar producto con imágenes a Cloudinary
 app.post('/api/productos/insertar', upload.array('imagen', 3), async (req, res) => {
     const { nombre_producto, descripcion, id_categoria, estado_producto, disponibilidad, precio, id_usuario_vendedor, nombre_vendedor, ubicacion_entrega } = req.body;
     const client = await pool.connect();
+    
     try {
         await client.query('BEGIN');
-        await client.query(`INSERT INTO usuarios (id_usuario, nombre) VALUES ($1, $2) ON CONFLICT (id_usuario) DO NOTHING`, [id_usuario_vendedor, nombre_vendedor || "Usuario"]);
+
+        // 1. Asegurar que el usuario existe
+        await client.query(
+            `INSERT INTO usuarios (id_usuario, nombre) VALUES ($1, $2) ON CONFLICT (id_usuario) DO NOTHING`, 
+            [id_usuario_vendedor, nombre_vendedor || "Usuario"]
+        );
         
+        // 2. Insertar el producto
         const resProd = await client.query(
             `INSERT INTO productos (nombre_producto, descripcion, id_categoria, estado_producto, disponibilidad, precio, id_usuario_vendedor, ubicacion_entrega) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_producto`,
@@ -123,13 +130,14 @@ app.post('/api/productos/insertar', upload.array('imagen', 3), async (req, res) 
         );
         const id_producto = resProd.rows[0].id_producto;
 
-        // 1. Cambiamos req.file por req.files para manejar el arreglo
+        // 3. PROCESAR MULTIPLES IMAGENES (Cambio clave aquí)
         if (req.files && req.files.length > 0) {
-            // Usamos un bucle for...of para procesar cada imagen enviada
+        
             for (const file of req.files) {
                 const uploadToCloudinary = () => {
+
                     return new Promise((resolve, reject) => {
-                        // Cambiamos req.file.buffer por file.buffer
+                        
                         const stream = cloudinary.uploader.upload_stream(
                             { folder: 'teschibazar_productos' }, 
                             (error, result) => {
@@ -137,25 +145,30 @@ app.post('/api/productos/insertar', upload.array('imagen', 3), async (req, res) 
                                 else resolve(result.secure_url);
                             }
                         );
-                        stream.end(file.buffer);
+                        stream.end(file.buffer); // Ahora usa el buffer de cada archivo individual
                     });
                 };
 
                 const url_imagen = await uploadToCloudinary();
                 
-                // Insertamos cada URL de imagen en la tabla correspondiente
+                // Guardar cada URL en la tabla de imágenes
                 await client.query(
                     'INSERT INTO imagenes_producto (id_producto, url_imagen) VALUES ($1, $2)', 
                     [id_producto, url_imagen]
                 );
             }
         }
+
         await client.query('COMMIT');
         res.status(200).json({ success: true, id: id_producto });
+
     } catch (err) {
         await client.query('ROLLBACK');
+        console.error("Error en servidor:", err.message); // Esto aparecerá en tus logs de Render
         res.status(500).json({ error: err.message });
-    } finally { client.release(); }
+    } finally {
+        client.release();
+    }
 });
 
 //------------ RUTAS DE PEDIDOS Y CITAS ------------
