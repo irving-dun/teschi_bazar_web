@@ -122,30 +122,30 @@ app.post('/api/productos/insertar', upload.array('imagen', 3), async (req, res) 
             [id_usuario_vendedor, nombre_vendedor || "Usuario"]
         );
         
-    // 2. Insertar el producto (Ajustado a tu script SQL)
-const resProd = await client.query(
-    `INSERT INTO productos (
-        id_usuario_vendedor, 
-        nombre_producto, 
-        descripcion, 
-        precio, 
-        id_categoria, 
-        estado_producto, 
-        disponibilidad, 
-        ubicacion_entrega
-    ) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_producto`,
-    [
-        id_usuario_vendedor,                    // $1 (VARCHAR 128)
-        nombre_producto,                        // $2 (VARCHAR 255)
-        descripcion,                            // $3 (TEXT)
-        parseFloat(precio),                     // $4 (NUMERIC 10,2)
-        parseInt(id_categoria),                 // $5 (INT)
-        estado_producto.toLowerCase().trim(),   // $6 (ENUM: nuevo, usado, reacondicionado)
-        parseInt(disponibilidad) || 1,          // $7 (INT)
-        ubicacion_entrega                       // $8 (VARCHAR 255)
-    ]
-);
+    // 2. Insertar el producto (AJUSTADO A TU SCRIPT SQL)
+        const resProd = await client.query(
+            `INSERT INTO productos (
+                id_usuario_vendedor, 
+                nombre_producto, 
+                descripcion, 
+                precio, 
+                id_categoria, 
+                estado_producto, 
+                disponibilidad, 
+                ubicacion_entrega
+            ) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_producto`,
+            [
+                id_usuario_vendedor,                     // $1 (UID de Firebase)
+                nombre_producto,                         // $2
+                descripcion,                             // $3
+                parseFloat(precio),                      // $4 (Aseguramos que sea número para NUMERIC)
+                parseInt(id_categoria),                  // $5 (Aseguramos que sea entero para INT)
+                estado_producto.toLowerCase().trim(),    // $6 (Forzamos minúsculas para el ENUM)
+                parseInt(disponibilidad) || 1,           // $7
+                ubicacion_entrega || 'No especificada'  // $8
+            ]
+        );
 
 
         const id_producto = resProd.rows[0].id_producto;
