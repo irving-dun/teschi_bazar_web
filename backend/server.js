@@ -122,12 +122,32 @@ app.post('/api/productos/insertar', upload.array('imagen', 3), async (req, res) 
             [id_usuario_vendedor, nombre_vendedor || "Usuario"]
         );
         
-        // 2. Insertar el producto
-        const resProd = await client.query(
-            `INSERT INTO productos (nombre_producto, descripcion, id_categoria, estado_producto, disponibilidad, precio, id_usuario_vendedor, ubicacion_entrega) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_producto`,
-            [nombre_producto, descripcion, id_categoria, estado_producto, disponibilidad, precio, id_usuario_vendedor, ubicacion_entrega]
-        );
+    // 2. Insertar el producto (Ajustado a tu script SQL)
+const resProd = await client.query(
+    `INSERT INTO productos (
+        id_usuario_vendedor, 
+        nombre_producto, 
+        descripcion, 
+        precio, 
+        id_categoria, 
+        estado_producto, 
+        disponibilidad, 
+        ubicacion_entrega
+    ) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_producto`,
+    [
+        id_usuario_vendedor,                    // $1 (VARCHAR 128)
+        nombre_producto,                        // $2 (VARCHAR 255)
+        descripcion,                            // $3 (TEXT)
+        parseFloat(precio),                     // $4 (NUMERIC 10,2)
+        parseInt(id_categoria),                 // $5 (INT)
+        estado_producto.toLowerCase().trim(),   // $6 (ENUM: nuevo, usado, reacondicionado)
+        parseInt(disponibilidad) || 1,          // $7 (INT)
+        ubicacion_entrega                       // $8 (VARCHAR 255)
+    ]
+);
+
+
         const id_producto = resProd.rows[0].id_producto;
 
         // 3. PROCESAR MULTIPLES IMAGENES (Cambio clave aquí)
@@ -137,7 +157,7 @@ app.post('/api/productos/insertar', upload.array('imagen', 3), async (req, res) 
                 const uploadToCloudinary = () => {
 
                     return new Promise((resolve, reject) => {
-                        
+
                         const stream = cloudinary.uploader.upload_stream(
                             { folder: 'teschibazar_productos' }, 
                             (error, result) => {
