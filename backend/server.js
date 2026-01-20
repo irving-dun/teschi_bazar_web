@@ -13,9 +13,9 @@ const { Server } = require('socket.io');
 
 // Configuración de Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
 const app = express();
@@ -34,8 +34,8 @@ app.use(express.json());
 const firebaseConfig = {
     projectId: process.env.FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY 
-        ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
+    privateKey: process.env.FIREBASE_PRIVATE_KEY
+        ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
         : undefined,
 };
 
@@ -49,10 +49,10 @@ if (!admin.apps.length) {
 }
 
 //------------ CONFIGURACIÓN DE MULTER (RAM) ------------
-const storage = multer.memoryStorage(); 
-const upload = multer({ 
+const storage = multer.memoryStorage();
+const upload = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 } 
+    limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 //------------ CONFIGURACIÓN DE BASE DE DATOS ------------
@@ -112,56 +112,58 @@ app.get('/api/productos/:id', async (req, res) => {
 app.post('/api/productos/insertar', upload.array('imagen', 3), async (req, res) => {
     const { nombre_producto, descripcion, id_categoria, estado_producto, disponibilidad, precio, id_usuario_vendedor, nombre_vendedor, ubicacion_entrega } = req.body;
     const client = await pool.connect();
-    
+
     try {
         await client.query('BEGIN');
 
         // 1. Asegurar que el usuario existe
         await client.query(
-            `INSERT INTO usuarios (id_usuario, nombre) VALUES ($1, $2) ON CONFLICT (id_usuario) DO NOTHING`, 
+            `INSERT INTO usuarios (id_usuario, nombre) VALUES ($1, $2) ON CONFLICT (id_usuario) DO NOTHING`,
             [id_usuario_vendedor, nombre_vendedor || "Usuario"]
         );
-        
-    // 2. Insertar el producto (AJUSTADO A TU SCRIPT SQL)
+
+        // 2. Insertar el producto (AJUSTADO A TU SCRIPT SQL)
+        // 2. Insertar el producto (CORREGIDO: 8 columnas = 8 valores)
         const resProd = await client.query(
             `INSERT INTO productos (
-                id_usuario_vendedor, 
-                nombre_producto, 
-                descripcion, 
-                precio, 
-                id_categoria, 
-                estado_producto, 
-                disponibilidad, 
-                ubicacion_entrega
-            ) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_producto`,
+        nombre_producto, 
+        descripcion, 
+        id_categoria, 
+        estado_producto, 
+        disponibilidad, 
+        precio, 
+        id_usuario_vendedor, 
+        ubicacion_entrega
+    ) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id_producto`,
             [
-                id_usuario_vendedor,                     // $1 (UID de Firebase)
-                nombre_producto,                         // $2
-                descripcion,                             // $3
-                parseFloat(precio),                      // $4 (Aseguramos que sea número para NUMERIC)
-                parseInt(id_categoria),                  // $5 (Aseguramos que sea entero para INT)
-                estado_producto.toLowerCase().trim(),    // $6 (Forzamos minúsculas para el ENUM)
-                parseInt(disponibilidad) || 1,           // $7
-                ubicacion_entrega || 'No especificada'  // $8
+                nombre_producto,                             // $1
+                descripcion,                                 // $2
+                parseInt(id_categoria),                      // $3 (Aseguramos que sea número)
+                estado_producto.toLowerCase().trim(),        // $4 (Forzamos minúsculas para el ENUM)
+                parseInt(disponibilidad) || 1,               // $5 (Aseguramos que sea número)
+                parseFloat(precio),                          // $6 (Aseguramos que sea decimal)
+                id_usuario_vendedor,                         // $7
+                ubicacion_entrega || 'No especificada'       // $8
             ]
         );
+        // 2. Insertar el producto (CORREGIDO: 8 columnas = 8 valores)
 
 
         const id_producto = resProd.rows[0].id_producto;
 
         // 3. PROCESAR MULTIPLES IMAGENES (Cambio clave aquí)
         if (req.files && req.files.length > 0) {
-        
+
             for (const file of req.files) {
                 const uploadToCloudinary = () => {
 
                     return new Promise((resolve, reject) => {
 
                         const stream = cloudinary.uploader.upload_stream(
-                            { folder: 'teschibazar_productos' }, 
+                            { folder: 'teschibazar_productos' },
                             (error, result) => {
-                                if (error) reject(error); 
+                                if (error) reject(error);
                                 else resolve(result.secure_url);
                             }
                         );
@@ -170,10 +172,10 @@ app.post('/api/productos/insertar', upload.array('imagen', 3), async (req, res) 
                 };
 
                 const url_imagen = await uploadToCloudinary();
-                
+
                 // Guardar cada URL en la tabla de imágenes
                 await client.query(
-                    'INSERT INTO imagenes_producto (id_producto, url_imagen) VALUES ($1, $2)', 
+                    'INSERT INTO imagenes_producto (id_producto, url_imagen) VALUES ($1, $2)',
                     [id_producto, url_imagen]
                 );
             }
@@ -209,10 +211,10 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
         const id_pedido = resPed.rows[0].id_pedido;
 
         await client.query(`INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario) VALUES ($1, $2, $3, $4)`, [id_pedido, id_producto, cantidad || 1, precio]);
-        
+
         const mensajeV = `¡Nueva petición! Quieren comprar tu ${nombre_producto}.`;
         await client.query('INSERT INTO notificaciones (id_usuario, tipo_notificacion, mensaje) VALUES ($1, $2, $3)', [id_usuario_vendedor, 'nuevo_pedido', mensajeV]);
-        
+
         await client.query('COMMIT');
         io.emit(`notificacion_${id_usuario_vendedor}`, { mensaje: mensajeV, id_pedido });
         res.status(201).json({ success: true, id_pedido });
@@ -229,10 +231,10 @@ app.put('/api/pedidos/confirmar-cita', async (req, res) => {
         const { id_comprador, nombre_producto } = det.rows[0];
 
         await pool.query(`UPDATE pedidos SET fecha_entrega=$1, hora_entrega=$2, lugar_entrega=$3, estado_pedido='confirmado' WHERE id_pedido=$4`, [fecha, hora, lugar, id_pedido]);
-        
+
         const mensajeC = `¡Cita agendada! Tu "${nombre_producto}" se entrega el ${fecha} a las ${hora} en ${lugar}.`;
         await pool.query('INSERT INTO notificaciones (id_usuario, tipo_notificacion, mensaje) VALUES ($1, $2, $3)', [id_comprador, 'cita_confirmada', mensajeC]);
-        
+
         io.emit(`notificacion_${id_comprador}`, { mensaje: mensajeC, id_pedido });
         res.json({ success: true });
     } catch (err) { res.status(500).json({ error: err.message }); }
