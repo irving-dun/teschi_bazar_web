@@ -109,7 +109,7 @@ async function cargarDestacadosDesdeDB() {
             // --- IMPORTANTE: LÓGICA DE IMÁGENES ---
             // Si la imagen ya es una URL de Cloudinary (empieza con http), la usamos directo.
             // Si es una ruta relativa, le pegamos el servidorUrl.
-            let urlImagenFinal = '/frontend/img/placeholder.png';
+            let urlImagenFinal = '../../frontend/img/placeholder.png';
             if (prod.url_imagen) {
                 urlImagenFinal = prod.url_imagen.startsWith('http') 
                     ? prod.url_imagen 
