@@ -109,7 +109,7 @@ app.get('/api/productos/:id', async (req, res) => {
 });
 
 // Insertar producto con imagen a Cloudinary
-app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) => {
+app.post('/api/productos/insertar', upload.array('imagen', 3), async (req, res) => {
     const { nombre_producto, descripcion, id_categoria, estado_producto, disponibilidad, precio, id_usuario_vendedor, nombre_vendedor, ubicacion_entrega } = req.body;
     const client = await pool.connect();
     try {
@@ -123,17 +123,32 @@ app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) =>
         );
         const id_producto = resProd.rows[0].id_producto;
 
-        if (req.file) {
-            const uploadToCloudinary = () => {
-                return new Promise((resolve, reject) => {
-                    const stream = cloudinary.uploader.upload_stream({ folder: 'teschibazar_productos' }, (error, result) => {
-                        if (error) reject(error); else resolve(result.secure_url);
+        // 1. Cambiamos req.file por req.files para manejar el arreglo
+        if (req.files && req.files.length > 0) {
+            // Usamos un bucle for...of para procesar cada imagen enviada
+            for (const file of req.files) {
+                const uploadToCloudinary = () => {
+                    return new Promise((resolve, reject) => {
+                        // Cambiamos req.file.buffer por file.buffer
+                        const stream = cloudinary.uploader.upload_stream(
+                            { folder: 'teschibazar_productos' }, 
+                            (error, result) => {
+                                if (error) reject(error); 
+                                else resolve(result.secure_url);
+                            }
+                        );
+                        stream.end(file.buffer);
                     });
-                    stream.end(req.file.buffer);
-                });
-            };
-            const url_imagen = await uploadToCloudinary();
-            await client.query('INSERT INTO imagenes_producto (id_producto, url_imagen) VALUES ($1, $2)', [id_producto, url_imagen]);
+                };
+
+                const url_imagen = await uploadToCloudinary();
+                
+                // Insertamos cada URL de imagen en la tabla correspondiente
+                await client.query(
+                    'INSERT INTO imagenes_producto (id_producto, url_imagen) VALUES ($1, $2)', 
+                    [id_producto, url_imagen]
+                );
+            }
         }
         await client.query('COMMIT');
         res.status(200).json({ success: true, id: id_producto });
