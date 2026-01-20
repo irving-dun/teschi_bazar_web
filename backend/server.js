@@ -15,11 +15,11 @@ console.log("--- Verificando Configuración ---");
 console.log("Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
 console.log("DB URL existe:", process.env.DATABASE_URL ? "SÍ" : "NO");
 console.log("---------------------------------");
-
 //  Base del servidor y seguridad  
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
+app.use(cors()); 
 
 //  Base de datos y servicios externos
 const { Pool } = require('pg');
