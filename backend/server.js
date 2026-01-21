@@ -263,63 +263,88 @@ app.get('/api/buscar', async (req, res) => {
 
 
 // RUTA: Obtener notificaciones de un usuario específico
-app.get('/api/notificaciones/:idUsuario', async (req, res) => {
-    const { idUsuario } = req.params;
+
+// RUTA: Crear petición de compra corregida
+app.post('/api/pedidos/crear-peticion', async (req, res) => {
+    const { id_comprador, id_producto, cantidad, total, metodo_pago, lugar_entrega } = req.body;
+
+    const client = await pool.connect();
+
     try {
-        const sql = `
-            SELECT * FROM notificaciones 
-            WHERE id_usuario = $1 
-            ORDER BY fecha_creacion DESC 
-            LIMIT 10
+        await client.query('BEGIN');
+
+        // 1. Obtener información del producto y el ID del vendedor
+        const productoInfo = await client.query(
+            'SELECT id_usuario_vendedor, precio, nombre_producto FROM productos WHERE id_producto = $1',
+            [id_producto]
+        );
+
+        if (productoInfo.rows.length === 0) {
+            throw new Error("Producto no encontrado");
+        }
+
+        const { id_usuario_vendedor, precio, nombre_producto } = productoInfo.rows[0];
+
+        // 2. INSERT en 'pedidos' siguiendo el orden de tu tabla:
+        // Columnas: id_comprador, id_vendedor, fecha_pedido, estado_pedido, total_pedido, metodo_pago, lugar_entrega
+        const queryPedido = `
+            INSERT INTO pedidos (
+                id_comprador, 
+                id_vendedor, 
+                fecha_pedido, 
+                estado_pedido, 
+                total_pedido, 
+                metodo_pago, 
+                lugar_entrega
+            ) VALUES ($1, $2, CURRENT_TIMESTAMP, 'pendiente', $3, $4, $5)
+            RETURNING id_pedido
         `;
-        const result = await pool.query(sql, [idUsuario]);
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: "Error al obtener notificaciones" });
-    }
-});
-
-// RUTA: Crear notificación (Se llama internamente al realizar un pedido)
-// Nota: Puedes integrarla dentro de tu ruta de /api/pedidos/crear
-async function crearNotificacion(idUsuario, tipo, mensaje, url) {
-    const sql = `
-        INSERT INTO notificaciones (id_usuario, tipo_notificacion, mensaje, url_destino, leida)
-        VALUES ($1, $2, $3, $4, false)
-    `;
-    await pool.query(sql, [idUsuario, tipo, mensaje, url]);
-}
-
-app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
-    try {
-        const idVendedor = req.params.idVendedor;
         
-        // Esta consulta obtiene los datos del pedido, el nombre del producto y la cantidad
-        const query = `
-            SELECT 
-                p.id_pedido, 
-                p.id_comprador, 
-                p.total_pedido, 
-                p.estado_pedido, 
-                p.fecha_entrega, 
-                p.hora_entrega, 
-                p.lugar_entrega,
-                pr.nombre_producto,
-                dp.cantidad
-            FROM pedidos p
-            JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
-            JOIN productos pr ON dp.id_producto = pr.id_producto
-            WHERE pr.id_usuario_vendedor = $1
-            ORDER BY p.id_pedido DESC
+        const resPedido = await client.query(queryPedido, [
+            id_comprador, 
+            id_usuario_vendedor, 
+            total, 
+            metodo_pago, 
+            lugar_entrega
+        ]);
+
+        const id_pedido_generado = resPedido.rows[0].id_pedido;
+
+        // 3. INSERT en 'detalle_pedido'
+        const queryDetalle = `
+            INSERT INTO detalle_pedido (
+                id_pedido, id_producto, cantidad, precio_unitario
+            ) VALUES ($1, $2, $3, $4)
         `;
+        await client.query(queryDetalle, [
+            id_pedido_generado, id_producto, cantidad || 1, precio
+        ]);
 
-        const result = await pool.query(query, [idVendedor]);
-        
-        // Enviamos los resultados como JSON
-        res.json(result.rows);
+        // 4. Notificación al vendedor (Solo en la tabla de notificaciones)
+        const mensajeVendedor = `¡Nueva petición! Alguien quiere comprar tu ${nombre_producto}.`;
+        await client.query(
+            'INSERT INTO notificaciones (id_usuario, tipo_notificacion, mensaje, leida) VALUES ($1, $2, $3, $4)',
+            [id_usuario_vendedor, 'nuevo_pedido', mensajeVendedor, false]
+        );
+
+        await client.query('COMMIT');
+
+        // Socket.io para tiempo real
+        if (typeof io !== 'undefined') {
+            io.emit(`notificacion_${id_usuario_vendedor}`, {
+                mensaje: mensajeVendedor,
+                id_pedido: id_pedido_generado
+            });
+        }
+
+        res.status(201).json({ success: true, id_pedido: id_pedido_generado });
 
     } catch (error) {
-        console.error("Error en SQL al obtener pedidos:", error.message);
-        res.status(500).json({ error: "Error interno al obtener los pedidos del vendedor" });
+        if (client) await client.query('ROLLBACK');
+        console.error("❌ Error al insertar pedido:", error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
     }
 });
 

@@ -41,6 +41,7 @@ async function obtenerPedidosDelVendedor(idVendedor) {
                 nombreReal = "Error de conexión";
             }
 
+
             const div = document.createElement('div');
             div.className = 'tarjeta-pedido';
 
