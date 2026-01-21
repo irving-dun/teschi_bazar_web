@@ -414,16 +414,20 @@ app.put('/api/pedidos/finalizar/:id', async (req, res) => {
 
 // ------------ RUTA ÚNICA PARA PETICIÓN DE COMPRA ------------
 app.post('/api/pedidos/crear-peticion', async (req, res) => {
-    const { id_comprador, id_producto, cantidad, total, metodo_pago, lugar_entrega } = req.body;
+    // Recibimos también el nombre_comprador que enviamos desde el front
+    const { id_comprador, nombre_comprador, id_producto, cantidad, total, metodo_pago, lugar_entrega } = req.body;
 
-    const client = await pool.connect(); // Usamos un cliente para la transacción
+    const client = await pool.connect();
 
     try {
-        await client.query('BEGIN'); // Iniciamos la transacción
+        await client.query('BEGIN');
 
-        // 1. Buscamos al vendedor del producto
+        // 1. Obtener info del producto y del VENDEDOR
         const productoInfo = await client.query(
-            'SELECT id_usuario_vendedor, precio FROM productos WHERE id_producto = $1',
+            `SELECT p.id_usuario_vendedor, p.precio, p.nombre_producto, u.nombre as nombre_vendedor
+             FROM productos p
+             LEFT JOIN usuarios u ON p.id_usuario_vendedor = u.id_usuario
+             WHERE p.id_producto = $1`,
             [id_producto]
         );
 
@@ -431,67 +435,59 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
             throw new Error("Producto no encontrado");
         }
 
-        const id_vendedor = productoInfo.rows[0].id_usuario_vendedor;
-        const precio_unitario = productoInfo.rows[0].precio;
+        const { id_usuario_vendedor, precio, nombre_producto } = productoInfo.rows[0];
 
-        // 2. Insertamos en la tabla 'pedidos' (Maestro)
-        const queryPedido = `
-            INSERT INTO pedidos (
+        // 2. ASEGURAR QUE EL COMPRADOR EXISTE EN LA TABLA USUARIOS (Sincronización)
+        // Esto evita el error de llave foránea si la tabla usuarios está vacía
+        await client.query(
+            `INSERT INTO usuarios (id_usuario, nombre) 
+             VALUES ($1, $2) 
+             ON CONFLICT (id_usuario) DO UPDATE SET nombre = EXCLUDED.nombre`,
+            [id_comprador, nombre_comprador || "Comprador"]
+        );
+
+        // 3. INSERTAR EL PEDIDO (Ahora ya no fallará porque el usuario existe)
+        const resPedido = await client.query(
+            `INSERT INTO pedidos (
                 id_comprador, id_vendedor, total_pedido, estado_pedido, 
                 metodo_pago, lugar_entrega, fecha_pedido
             ) VALUES ($1, $2, $3, 'pendiente', $4, $5, CURRENT_TIMESTAMP)
-            RETURNING id_pedido
-        `;
-        const resPedido = await client.query(queryPedido, [
-            id_comprador, id_vendedor, total, metodo_pago, lugar_entrega
-        ]);
+            RETURNING id_pedido`,
+            [id_comprador, id_usuario_vendedor, total, metodo_pago, lugar_entrega]
+        );
 
         const id_pedido_generado = resPedido.rows[0].id_pedido;
 
-        // 3. Insertamos en 'detalle_pedido' (Detalle)
-        const queryDetalle = `
-            INSERT INTO detalle_pedido (
-                id_pedido, id_producto, cantidad, precio_unitario
-            ) VALUES ($1, $2, $3, $4)
-        `;
-        await client.query(queryDetalle, [
-            id_pedido_generado, id_producto, cantidad || 1, precio_unitario
-        ]);
-
-        await client.query('COMMIT'); // Guardamos todos los cambios
-
-        // 1. Obtenemos el nombre del producto (ya lo tenemos de la consulta inicial o hacemos una rápida)
-        const nombreProductoRes = await client.query(
-            'SELECT nombre_producto FROM productos WHERE id_producto = $1',
-            [id_producto]
+        // 4. INSERTAR DETALLE
+        await client.query(
+            `INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario) 
+             VALUES ($1, $2, $3, $4)`,
+            [id_pedido_generado, id_producto, cantidad, precio]
         );
-        const nombreProducto = nombreProductoRes.rows[0].nombre_producto;
 
-        const mensajeVendedor = `¡Nueva petición! Alguien quiere comprar tu ${nombreProducto}.`;
-
-        // 2. Guardar en la tabla de notificaciones
-        await pool.query(
+        // 5. NOTIFICACIÓN Y SOCKETS
+        const mensajeVendedor = `¡Nueva petición! Alguien quiere comprar tu ${nombre_producto}.`;
+        
+        await client.query(
             'INSERT INTO notificaciones (id_usuario, tipo_notificacion, mensaje, leida) VALUES ($1, $2, $3, $4)',
-            [id_vendedor, 'nuevo_pedido', mensajeVendedor, false]
+            [id_usuario_vendedor, 'nuevo_pedido', mensajeVendedor, false]
         );
 
-        // 3. Emitir por Socket.io en tiempo real
-        io.emit(`notificacion_${id_vendedor}`, {
+        await client.query('COMMIT');
+
+        io.emit(`notificacion_${id_usuario_vendedor}`, {
             mensaje: mensajeVendedor,
             id_pedido: id_pedido_generado
         });
 
-        res.status(201).json({
-            success: true,
-            id_pedido: id_pedido_generado
-        });
+        res.status(201).json({ success: true, id_pedido: id_pedido_generado });
 
     } catch (error) {
-        await client.query('ROLLBACK'); // Si algo falla, deshacemos todo
-        console.error("Error en la transacción:", error.message);
+        if (client) await client.query('ROLLBACK');
+        console.error("Error en pedido:", error.message);
         res.status(500).json({ error: error.message });
     } finally {
-        client.release(); // Liberamos el cliente
+        client.release();
     }
 });
 

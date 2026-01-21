@@ -102,8 +102,11 @@ document.getElementById('btnConfirmarPedido').onclick = async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const idProducto = urlParams.get('id');
 
+
+
     const peticion = {
         id_comprador: user.uid,
+        nombre_comprador: user.displayName || "Usuario", // Enviamos el nombre desde Firebase
         id_producto: idProducto,
         cantidad: parseInt(document.getElementById('cantidadCompra').value) || 1,
         total: parseFloat(document.getElementById('modalTotalPagar').textContent.replace(/[^0-9.-]+/g, "")),
