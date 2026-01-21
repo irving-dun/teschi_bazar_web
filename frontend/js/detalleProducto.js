@@ -8,15 +8,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-
-        const servidorUrl = "https://teschi-bazar-web.onrender.com";
-        const respuesta = await fetch(`${servidorUrl}/api/productos/${idProducto}`);
+        // CAMBIO: Usamos API_BASE_URL (definida en firebase-config.js)
+        const respuesta = await fetch(`${API_BASE_URL}/api/productos/${idProducto}`);
         
         if (!respuesta.ok) throw new Error("Error al obtener datos del servidor");
         
         const producto = await respuesta.json();
 
-
+        // Llenado de datos básicos
         document.getElementById('nombreProducto').textContent = producto.nombre_producto;
         document.getElementById('precioProducto').textContent = `$${parseFloat(producto.precio).toFixed(2)} MXN`;
         document.getElementById('detalleDescripcion').textContent = producto.descripcion;
@@ -25,34 +24,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('detalleDisponibilidad').textContent = `${producto.disponibilidad} unidades`;
         document.getElementById('detalleUbicacionEntrega').textContent = producto.ubicacion_entrega;
         
-      
+        // CAMBIO: Guardamos el UID real del vendedor en un atributo de datos para que scriptCompra lo use
+        const vendedorSpan = document.getElementById('detalleNombreVendedor');
         if (producto.id_usuario_vendedor) {
+            vendedorSpan.setAttribute('data-uid-vendedor', producto.id_usuario_vendedor);
             obtenerNombreVendedor(producto.id_usuario_vendedor);
         } else {
-            document.getElementById('detalleNombreVendedor').textContent = "Vendedor no especificado";
+            vendedorSpan.textContent = "Vendedor no especificado";
         }
 
-        
+        // Formateo de fecha
         if (producto.fecha_publicacion) {
             const fecha = new Date(producto.fecha_publicacion);
-            const opciones = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
-            const fechaFormateada = fecha.toLocaleDateString('es-ES', opciones);
-            document.getElementById('detalleFechaPublicacion').textContent = fechaFormateada;
-        } else {
-            document.getElementById('detalleFechaPublicacion').textContent = "Fecha no disponible";
+            const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('detalleFechaPublicacion').textContent = fecha.toLocaleDateString('es-ES', opciones);
         }
 
-        //  Cargar la imagen (CAMBIADO PARA CLOUDINARY)
+        // Lógica de Imagen (Soporte Cloudinary e Híbrido)
         if (producto.url_imagen) {
             const mainImg = document.getElementById('mainProductImage');
-         
+            // CAMBIO: Si la URL empieza con http, es Cloudinary. Si no, es ruta de Render.
             const urlImagenFinal = producto.url_imagen.startsWith('http') 
                 ? producto.url_imagen 
-                : `${servidorUrl}${producto.url_imagen}`;
+                : `${API_BASE_URL}${producto.url_imagen}`;
             
             mainImg.src = urlImagenFinal;
         }
@@ -63,18 +57,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-
 async function obtenerNombreVendedor(uid) {
     try {
         const userDoc = await firebase.firestore().collection('usuarios').doc(uid).get();
         if (userDoc.exists) {
-            const nombreReal = userDoc.data().nombre;
-            document.getElementById('detalleNombreVendedor').textContent = nombreReal || "Usuario sin nombre";
-        } else {
-            document.getElementById('detalleNombreVendedor').textContent = "Vendedor no encontrado";
+            document.getElementById('detalleNombreVendedor').textContent = userDoc.data().nombre || "Usuario sin nombre";
         }
     } catch (error) {
         console.error("Error al obtener nombre:", error);
-        document.getElementById('detalleNombreVendedor').textContent = "Error al cargar nombre";
     }
 }
