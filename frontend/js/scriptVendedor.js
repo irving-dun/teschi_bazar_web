@@ -1,6 +1,5 @@
 // --- CONFIGURACIÓN GLOBAL ---
-// Definimos la URL de Render una sola vez para facilitar cambios futuros
-const API_URL = "https://teschi-bazar-web.onrender.com/api";
+const API_URL = API_BASE_URL; 
 
 // ------------ 1. OBSERVADOR DE SESIÓN (FIREBASE) ------------
 firebase.auth().onAuthStateChanged(user => {
@@ -18,7 +17,7 @@ async function obtenerPedidosDelVendedor(idVendedor) {
     const contenedorConfirmados = document.getElementById('lista-pedidos-confirmados');
 
     try {
-        // ACTUALIZADO: Cambiamos localhost por la URL de Render
+        // Petición usando la variable global API_URL
         const response = await fetch(`${API_URL}/vendedor/pedidos/todos/${idVendedor}`);
         const pedidos = await response.json();
 
@@ -81,7 +80,6 @@ async function obtenerPedidosDelVendedor(idVendedor) {
 
 async function finalizarPedido(idPedido) {
     try {
-        // ACTUALIZADO: Cambiamos localhost por la URL de Render
         const response = await fetch(`${API_URL}/pedidos/finalizar/${idPedido}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' }
@@ -130,7 +128,6 @@ async function enviarPropuesta() {
     const datosCita = { id_pedido: idPedido, fecha, hora, lugar };
 
     try {
-        // ACTUALIZADO: Cambiamos localhost por la URL de Render
         const res = await fetch(`${API_URL}/pedidos/confirmar-cita`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
