@@ -292,10 +292,17 @@ async function crearNotificacion(idUsuario, tipo, mensaje, url) {
 app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
     try {
         const idVendedor = req.params.idVendedor;
+        
+        // Esta consulta obtiene los datos del pedido, el nombre del producto y la cantidad
         const query = `
             SELECT 
-                p.id_pedido, p.id_comprador, p.total_pedido, p.estado_pedido, 
-                p.fecha_entrega, p.hora_entrega, p.lugar_entrega,
+                p.id_pedido, 
+                p.id_comprador, 
+                p.total_pedido, 
+                p.estado_pedido, 
+                p.fecha_entrega, 
+                p.hora_entrega, 
+                p.lugar_entrega,
                 pr.nombre_producto,
                 dp.cantidad
             FROM pedidos p
@@ -304,11 +311,15 @@ app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
             WHERE pr.id_usuario_vendedor = $1
             ORDER BY p.id_pedido DESC
         `;
+
         const result = await pool.query(query, [idVendedor]);
+        
+        // Enviamos los resultados como JSON
         res.json(result.rows);
+
     } catch (error) {
-        console.error("Error en SQL:", error.message);
-        res.status(500).json({ error: "Error al obtener pedidos" });
+        console.error("Error en SQL al obtener pedidos:", error.message);
+        res.status(500).json({ error: "Error interno al obtener los pedidos del vendedor" });
     }
 });
 
