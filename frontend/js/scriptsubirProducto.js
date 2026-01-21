@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 // CAMBIO: Usamos la constante API_URL que apunta a Render
-                const response = await fetch(`${API_URL}/productos/insertar`, {
+                const response = await fetch(`${API_URL}/api/productos/insertar`, {
                     method: 'POST',
                     body: formData
                 });
