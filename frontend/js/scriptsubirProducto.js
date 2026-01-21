@@ -2,12 +2,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // Variables globales para el envío del producto
+    // --- CONFIGURACIÓN DE URL ---
+    // Usamos la variable de firebase-config.js
+    const API_URL = API_BASE_URL; 
+
     let uidVendedor = null;
     let nombreVendedor = ""; 
 
     const iniciaSesionBoton = document.getElementById("iniciaSesionButton");
     const contenedorPerfilUsuario = document.getElementById("contenedorPerfilUsuario");
+    const loadingStatus = document.getElementById("loadingStatus"); // Nuevo: para mostrar carga
 
     // === GESTIÓN DINÁMICA DE LA SESIÓN ===
     auth.onAuthStateChanged((usuario) => {
@@ -15,14 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
             uidVendedor = usuario.uid;
             iniciaSesionBoton.style.display = "none";
 
-            // 1. Buscamos el nombre real en Firestore
             db.collection("usuarios").doc(usuario.uid).get().then((doc) => {
                 const datosUsuarios = doc.exists ? doc.data() : {};
-                
-                // Si existe el nombre en la BD lo usa, si no, usa el correo (ej. miranda123)
                 nombreVendedor = datosUsuarios.nombre || usuario.email.split("@")[0];
 
-                // 2. Insertamos el HTML del menú desplegable (igual que en index)
                 contenedorPerfilUsuario.innerHTML = `
                     <div class="perfil-dropdown">
                         <button class="btn-UsuarioNombre" id="dropdownUserButton">
@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>`;
                 contenedorPerfilUsuario.style.display = "block";
 
-                // 3. Lógica del menú desplegable
                 const dropdownButton = document.getElementById("dropdownUserButton");
                 const dropdownContent = document.getElementById("userDropdownContent");
 
@@ -45,22 +44,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             });
         } else {
-            // Si no hay sesión, protegemos la página y mandamos al login
             window.location.href = "login.html";
         }
     });
 
-    // === FUNCIÓN GLOBAL DE CIERRE DE SESIÓN ===
     window.logoutFirebase = function () {
         auth.signOut().then(() => {
             window.location.href = "index.html";
         });
     };
 
-
-
-
-    // 2. Previsualización de imágenes (Mantenemos tu lógica funcional)
+    // === PREVISUALIZACIÓN DE IMÁGENES ===
     const inputArchivo = document.getElementById("imagenes");
     const areaCliqueable = document.getElementById("clicAreaMultimedia");
     const contenidoPorDefecto = document.getElementById("contenidoPorDefecto");
@@ -88,21 +82,26 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // 3. ENVÍO MANUAL (SIN SUBMIT / SIN REFRESCO)
+    // === ENVÍO AL SERVIDOR ===
     const btnSubmit = document.getElementById("btnAccionPublicar");
 
     if (btnSubmit) {
         btnSubmit.onclick = async (event) => {
-            // BLOQUEO ABSOLUTO DE NAVEGACIÓN
             event.preventDefault();
             event.stopPropagation();
 
             if (!uidVendedor) return Swal.fire('Error', 'Cargando sesión...', 'info');
 
+            // Validar que haya al menos una imagen
+            if (inputArchivo.files.length === 0) {
+                return Swal.fire('Atención', 'Por favor sube al menos una imagen del producto.', 'warning');
+            }
+
+            // UI: Desactivar botón y mostrar spinner/mensaje
             btnSubmit.disabled = true;
             btnSubmit.innerText = "Subiendo...";
+            if (loadingStatus) loadingStatus.style.display = "block";
 
-            // RECOLECCIÓN MANUAL (Para evitar el TypeError de FormData)
             const formData = new FormData();
             formData.append('nombre_producto', document.getElementById("nombre_producto").value);
             formData.append('descripcion', document.getElementById("descripcion").value);
@@ -114,25 +113,22 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append('id_usuario_vendedor', uidVendedor);
             formData.append('nombre_vendedor', nombreVendedor);
 
-            // Inyectar imágenes del input
             const fotos = inputArchivo.files;
             for (let i = 0; i < fotos.length; i++) {
                 formData.append('imagen', fotos[i]);
             }
+
             try {
-                const response = await fetch('https://teschi-bazar-web.onrender.com/api/productos/insertar', {
+                // CAMBIO: Usamos la constante API_URL que apunta a Render
+                const response = await fetch(`${API_URL}/productos/insertar`, {
                     method: 'POST',
                     body: formData
                 });
 
-                if (!response.ok) {
-                    throw new Error('Error en el servidor al publicar');
-                }
+                if (!response.ok) throw new Error('Error en el servidor al publicar');
                 
                 const resultado = await response.json();
-                console.log("Producto insertado:", resultado);
 
-                // MENSAJE DE ÉXITO (Solo si el servidor respondió bien)
                 Swal.fire({
                     title: '¡Producto Publicado!',
                     text: 'Tu artículo ya está en TeschiBazar.',
@@ -149,8 +145,11 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (error) {
                 console.error("Error en la conexión:", error);
                 Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+                
+                // Resetear UI en caso de error
                 btnSubmit.disabled = false;
-                btnSubmit.innerText = "Publicar Producto";
+                btnSubmit.innerText = "Listar Producto Ahora";
+                if (loadingStatus) loadingStatus.style.display = "none";
             }
         };
     }

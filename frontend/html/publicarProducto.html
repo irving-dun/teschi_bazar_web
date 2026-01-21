@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js" defer></script>
-    <script src="../js/firebase-config.js" defer></script>
+    <script src="../js/firebase-config.js"defer></script>
     <script src="../js/notificaciones.js"defer></script>
 </head>
 
@@ -145,13 +145,16 @@
                 <button type="submit" id="btnAccionPublicar" class="btn-submit">
                     Listar Producto Ahora
                 </button>
+                <div id="loadingStatus" class="loading-spinner">
+                    <p>⏳ Subiendo producto al Bazar... por favor espera.</p>
+                </div>
             </div>
         </form>
     </main>
 
 
 
-<script src="https://teschi-bazar-web.onrender.com/socket.io/socket.io.js"></script>
+    <script src="https://teschi-bazar-web.onrender.com/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../js/scriptsubirProducto.js" defer></script>
 </body>

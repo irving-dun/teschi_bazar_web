@@ -191,6 +191,18 @@ body {
     transform: translateY(-4px);
     box-shadow: 0 10px 25px rgba(15, 181, 21, 0.4);
 }
+.btn-submit:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.loading-spinner {
+    display: none; /* Se activará con JS */
+    text-align: center;
+    margin-top: 10px;
+    color: #666;
+}
 
 /* Adaptación para móviles */
 @media (max-width: 600px) {
