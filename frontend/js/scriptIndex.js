@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // --- CONFIGURACIÓN DE URL ---
-    const servidorUrl = "https://teschi-bazar-web.onrender.com";
+    // CAMBIO: Ahora usamos API_BASE_URL definida globalmente en firebase-config.js
+    // Eliminamos la redifunición de servidorUrl para evitar confusiones.
 
     const btnLogin = document.getElementById("iniciaSesionButton");
     const divUser = document.getElementById("contenedorPerfilUsuario");
@@ -69,7 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Logout Global
 window.logoutFirebase = function() {
     firebase.auth().signOut().then(() => {
         localStorage.removeItem("usuario_nombre");
@@ -79,14 +78,13 @@ window.logoutFirebase = function() {
 
 // --- 4. CARGA DE PRODUCTOS DESDE RENDER ---
 async function cargarDestacadosDesdeDB() {
-    // CAMBIO: URL de Render
-    const servidorUrl = "https://teschi-bazar-web.onrender.com";
+    // CAMBIO: Usamos la variable global API_BASE_URL para que las laptops se conecten a Render
     const contenedor = document.getElementById("contenedorProductosDestacados");
     
     if (!contenedor) return;
 
     try {
-        const respuesta = await fetch(`${servidorUrl}/api/productos-destacados`);
+        const respuesta = await fetch(`${API_BASE_URL}/api/productos-destacados`);
         const productos = await respuesta.json();
 
         if (productos.length === 0) {
@@ -106,14 +104,12 @@ async function cargarDestacadosDesdeDB() {
                 ? `<div class="etiqueta-ventas"><span>🔥 ${prod.ventas} vendidos</span></div>` 
                 : "";
 
-            // --- IMPORTANTE: LÓGICA DE IMÁGENES ---
-            // Si la imagen ya es una URL de Cloudinary (empieza con http), la usamos directo.
-            // Si es una ruta relativa, le pegamos el servidorUrl.
-            let urlImagenFinal = '../../frontend/img/placeholder.png';
+            // CAMBIO: Mantenemos tu lógica pero usamos API_BASE_URL para rutas relativas
+            let urlImagenFinal = '../img/placeholder.png'; // Ruta ajustada a tu carpeta /frontend/img
             if (prod.url_imagen) {
                 urlImagenFinal = prod.url_imagen.startsWith('http') 
                     ? prod.url_imagen 
-                    : servidorUrl + prod.url_imagen;
+                    : API_BASE_URL + prod.url_imagen;
             }
 
             card.innerHTML = `
@@ -130,7 +126,6 @@ async function cargarDestacadosDesdeDB() {
             contenedor.appendChild(card);
         });
 
-        // Delegación de eventos para el clic
         contenedor.onclick = (e) => {
             const card = e.target.closest(".producto-card");
             if (card) {
@@ -145,5 +140,4 @@ async function cargarDestacadosDesdeDB() {
     }
 }
 
-// Ejecutar carga al iniciar
 document.addEventListener("DOMContentLoaded", cargarDestacadosDesdeDB);

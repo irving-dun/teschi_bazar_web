@@ -11,3 +11,4 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const API_BASE_URL = "https://teschi-bazar-web.onrender.com";

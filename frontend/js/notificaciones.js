@@ -1,7 +1,6 @@
 // 1. Inicialización de Socket.io
-const SERVER_URL = "https://teschi-bazar-web.onrender.com";
-const socket = io(SERVER_URL); 
 
+const socket = io(API_BASE_URL);
 let contadorLocal = 0;
 
 // 2. Observador de estado de Firebase
@@ -83,8 +82,9 @@ function resetearContador() {
 
 async function cargarNotificacionesEnMenu(uid) {
     try {
-        // CAMBIADO: Usamos la URL de Render + /api/notificaciones/
-        const res = await fetch(`${SERVER_URL}/api/notificaciones/${uid}`);
+        
+        
+        const res = await fetch(`${API_BASE_URL}/api/notificaciones/${uid}`);
         const notificaciones = await res.json();
         
         const lista = document.getElementById('listaNotificaciones');

@@ -2,8 +2,6 @@ const searchInput = document.getElementById('search-input');
 const searchForm = document.getElementById('search-form');
 const contenedorResultados = document.getElementById('contenedor-productos') || document.querySelector('.productos-grid');
 
-// CAMBIADO: URL de Render
-const servidorUrl = "https://teschi-bazar-web.onrender.com"; 
 let debounceTimeout = null;
 
 // --- BUSQUEDA EN TIEMPO REAL ---
@@ -18,20 +16,18 @@ searchInput.addEventListener('input', (e) => {
     }, 500);
 });
 
-// --- BUSQUEDA POR BOTÓN O ENTER ---
 searchForm.addEventListener('submit', (e) => {
     e.preventDefault();
     clearTimeout(debounceTimeout);
     ejecutarBusqueda(searchInput.value.trim());
 });
 
-// --- FUNCIÓN DE PETICIÓN ---
 async function ejecutarBusqueda(query) {
     if (query.length < 2) return;
 
     try {
-       
-        const response = await fetch(`${servidorUrl}/api/buscar?q=${encodeURIComponent(query)}`);
+        // CAMBIO: Usamos API_BASE_URL para que la búsqueda consulte al servidor en la nube
+        const response = await fetch(`${API_BASE_URL}/api/buscar?q=${encodeURIComponent(query)}`);
         if (!response.ok) throw new Error("Error en el servidor");
         
         const productos = await response.json();
@@ -42,7 +38,6 @@ async function ejecutarBusqueda(query) {
     }
 }
 
-// --- FUNCIÓN DE INTERFAZ ---
 function renderizarInterfazFusionada(productos, termino) {
     if (!contenedorResultados) return;
     contenedorResultados.innerHTML = ''; 
@@ -60,20 +55,19 @@ function renderizarInterfazFusionada(productos, termino) {
             window.location.href = `detalleProducto.html?id=${prod.id_producto}`;
         };
 
-
-        let urlImagenFinal = '/frontend/img/placeholder.png'; // Imagen por defecto
+        // CAMBIO: Aseguramos que el placeholder apunte correctamente según tu estructura /html /js
+        let urlImagenFinal = '../img/placeholder.png'; 
         
         if (prod.url_imagen) {
-            // Si la imagen ya es un link completo (Cloudinary), se usa tal cual.
-            // Si es una ruta relativa (/uploads/...), le pegamos la URL del servidor.
+            // CAMBIO: Si no es Cloudinary (http), concatenamos con API_BASE_URL de Render
             urlImagenFinal = prod.url_imagen.startsWith('http') 
                 ? prod.url_imagen 
-                : `${servidorUrl}${prod.url_imagen}`;
+                : `${API_BASE_URL}${prod.url_imagen}`;
         }
 
         card.innerHTML = `
             <div class="imagen-contenedor">
-                <img src="${urlImagenFinal}" alt="${prod.nombre_producto}" onerror="this.src='/frontend/img/placeholder.png'" />
+                <img src="${urlImagenFinal}" alt="${prod.nombre_producto}" onerror="this.src='../img/placeholder.png'" />
             </div>
             <div class="info-contenedor">
                 <p class="descripcion">${prod.descripcion || 'Sin descripción'}</p>
