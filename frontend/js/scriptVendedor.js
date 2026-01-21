@@ -1,5 +1,5 @@
 // --- CONFIGURACIÓN GLOBAL ---
-const API_URL = API_BASE_URL; 
+const API_URL = API_BASE_URL;
 
 // ------------ 1. OBSERVADOR DE SESIÓN (FIREBASE) ------------
 firebase.auth().onAuthStateChanged(user => {
@@ -17,8 +17,15 @@ async function obtenerPedidosDelVendedor(idVendedor) {
     const contenedorConfirmados = document.getElementById('lista-pedidos-confirmados');
 
     try {
-        // Petición usando la variable global API_URL
-        const response = await fetch(`${API_URL}/vendedor/pedidos/todos/${idVendedor}`);
+        // CORRECCIÓN: Se añade /api/ a la ruta para coincidir con el servidor
+        const response = await fetch(`${API_URL}/api/vendedor/pedidos/todos/${idVendedor}`);
+        
+        // Validación de respuesta para evitar el error de SyntaxError: Unexpected token '<'
+        if (!response.ok) {
+            console.error(`Error en la petición: ${response.status}`);
+            return;
+        }
+
         const pedidos = await response.json();
 
         contenedorPendientes.innerHTML = "";
@@ -27,6 +34,7 @@ async function obtenerPedidosDelVendedor(idVendedor) {
         for (const p of pedidos) {
             let nombreReal = "Cargando...";
             try {
+                // Mantenemos tu lógica de Firebase Firestore intacta
                 const userDoc = await firebase.firestore().collection('usuarios').doc(p.id_comprador).get();
                 nombreReal = userDoc.exists ? userDoc.data().nombre : "Usuario Desconocido";
             } catch (e) {
@@ -54,13 +62,17 @@ async function obtenerPedidosDelVendedor(idVendedor) {
                 contenedorPendientes.appendChild(div);
             } else if (p.estado_pedido === 'confirmado') {
                 div.style.borderLeft = "6px solid #2196F3";
+                
+                // Manejo seguro de la fecha por si viene nula o en formato inesperado
+                const fechaLimpia = p.fecha_entrega ? p.fecha_entrega.split('T')[0] : "Pendiente";
+
                 div.innerHTML = `
                     <div class="info-principal">
                         <h4>Pedido #${p.id_pedido} ✅</h4>
                         <p><strong>📦 Entrega:</strong> ${p.nombre_producto} (${p.cantidad} pzs)</p>
                         <p><strong>👤 Cliente:</strong> ${nombreReal}</p>
                         <p><strong>📍 Punto:</strong> ${p.lugar_entrega}</p>
-                        <p><strong>⏰ Fecha:</strong> ${p.fecha_entrega.split('T')[0]} a las ${p.hora_entrega}</p>
+                        <p><strong>⏰ Fecha:</strong> ${fechaLimpia} a las ${p.hora_entrega}</p>
                         <p><strong>💵 Monto Total:</strong> $${p.total_pedido}</p>
                     </div>
                     <div class="acciones">
