@@ -357,6 +357,7 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
     }
 });
 
+
 app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
     try {
         const idVendedor = req.params.idVendedor;
@@ -380,7 +381,7 @@ app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
         const result = await pool.query(query, [idVendedor]);
         res.json(result.rows);
     } catch (error) {
-        console.error("Error en SQL:", error.message);
+        console.error("❌ Error en SQL:", error.message);
         res.status(500).json({ error: "Error interno al obtener pedidos" });
     }
 });

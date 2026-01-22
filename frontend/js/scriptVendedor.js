@@ -15,11 +15,13 @@ firebase.auth().onAuthStateChanged(user => {
 async function obtenerPedidosDelVendedor(idVendedor) {
     const contenedorPendientes = document.getElementById('lista-pedidos-pendientes');
     const contenedorConfirmados = document.getElementById('lista-pedidos-confirmados');
+    // Dentro de obtenerPedidosDelVendedor, cuando el estado es 'confirmado'
+    const fechaLimpia = p.fecha_pedido ? p.fecha_pedido.split('T')[0] : "Pendiente";
 
     try {
         // CORRECCIÓN: Se añade /api/ a la ruta para coincidir con el servidor
         const response = await fetch(`${API_URL}/api/vendedor/pedidos/todos/${idVendedor}`);
-        
+
         // Validación de respuesta para evitar el error de SyntaxError: Unexpected token '<'
         if (!response.ok) {
             console.error(`Error en la petición: ${response.status}`);
@@ -63,7 +65,7 @@ async function obtenerPedidosDelVendedor(idVendedor) {
                 contenedorPendientes.appendChild(div);
             } else if (p.estado_pedido === 'confirmado') {
                 div.style.borderLeft = "6px solid #2196F3";
-                
+
                 // Manejo seguro de la fecha por si viene nula o en formato inesperado
                 const fechaLimpia = p.fecha_entrega ? p.fecha_entrega.split('T')[0] : "Pendiente";
 
