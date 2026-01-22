@@ -357,6 +357,32 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
     }
 });
 
+// Asegúrate de que incluya /api al principio si así lo estás llamando en el front
+app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
+    try {
+        const idVendedor = req.params.idVendedor;
+        const query = `
+            SELECT 
+                p.id_pedido, p.id_comprador, p.total_pedido, p.estado_pedido, 
+                p.fecha_entrega, p.hora_entrega, p.lugar_entrega,
+                pr.nombre_producto,
+                dp.cantidad
+            FROM pedidos p
+            JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
+            JOIN productos pr ON dp.id_producto = pr.id_producto
+            WHERE pr.id_usuario_vendedor = $1
+            ORDER BY p.id_pedido DESC
+        `;
+        const result = await pool.query(query, [idVendedor]);
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error al obtener pedidos:", error);
+        res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
+
+
 // Ajustado para recibir los datos de tu función enviarPropuesta()
 app.put('/api/pedidos/confirmar-cita', async (req, res) => {
     const { id_pedido, fecha, hora, lugar } = req.body;
