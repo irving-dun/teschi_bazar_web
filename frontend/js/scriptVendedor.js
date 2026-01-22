@@ -15,8 +15,6 @@ firebase.auth().onAuthStateChanged(user => {
 async function obtenerPedidosDelVendedor(idVendedor) {
     const contenedorPendientes = document.getElementById('lista-pedidos-pendientes');
     const contenedorConfirmados = document.getElementById('lista-pedidos-confirmados');
-    // Dentro de obtenerPedidosDelVendedor, cuando el estado es 'confirmado'
-    const fechaLimpia = p.fecha_pedido ? p.fecha_pedido.split('T')[0] : "Pendiente";
 
     try {
         // CORRECCIÓN: Se añade /api/ a la ruta para coincidir con el servidor
@@ -43,7 +41,6 @@ async function obtenerPedidosDelVendedor(idVendedor) {
                 nombreReal = "Error de conexión";
             }
 
-
             const div = document.createElement('div');
             div.className = 'tarjeta-pedido';
 
@@ -66,8 +63,8 @@ async function obtenerPedidosDelVendedor(idVendedor) {
             } else if (p.estado_pedido === 'confirmado') {
                 div.style.borderLeft = "6px solid #2196F3";
 
-                // Manejo seguro de la fecha por si viene nula o en formato inesperado
-                const fechaLimpia = p.fecha_entrega ? p.fecha_entrega.split('T')[0] : "Pendiente";
+                // CORRECCIÓN: Movido dentro del bucle y usando 'fecha_pedido' que es el nombre real en tu DB
+                const fechaLimpia = p.fecha_pedido ? p.fecha_pedido.split('T')[0] : "Pendiente";
 
                 div.innerHTML = `
                     <div class="info-principal">
