@@ -262,18 +262,17 @@ app.get('/api/buscar', async (req, res) => {
 
 
 
-// RUTA: Obtener notificaciones de un usuario específico
 
-// RUTA: Crear petición de compra corregida
 app.post('/api/pedidos/crear-peticion', async (req, res) => {
-    const { id_comprador, id_producto, cantidad, total, metodo_pago, lugar_entrega } = req.body;
+    // Recibimos id_comprador y opcionalmente el nombre para el registro rápido
+    const { id_comprador, nombre_comprador, id_producto, cantidad, total, metodo_pago, lugar_entrega } = req.body;
 
     const client = await pool.connect();
 
     try {
         await client.query('BEGIN');
 
-        // 1. Obtener información del producto y el ID del vendedor
+        // 1. OBTENER INFO DEL PRODUCTO Y VENDEDOR
         const productoInfo = await client.query(
             'SELECT id_usuario_vendedor, precio, nombre_producto FROM productos WHERE id_producto = $1',
             [id_producto]
@@ -285,8 +284,18 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
 
         const { id_usuario_vendedor, precio, nombre_producto } = productoInfo.rows[0];
 
-        // 2. INSERT en 'pedidos' siguiendo el orden de tu tabla:
-        // Columnas: id_comprador, id_vendedor, fecha_pedido, estado_pedido, total_pedido, metodo_pago, lugar_entrega
+        // 2. SOLUCIÓN AL ERROR DE FOREIGN KEY:
+        // Registramos al comprador en la tabla local si no existe. 
+        // Esto satisface la restricción 'fk_pedidos_comprador' de tu DB.
+        await client.query(
+            `INSERT INTO usuarios (id_usuario, nombre) 
+             VALUES ($1, $2) 
+             ON CONFLICT (id_usuario) DO NOTHING`,
+            [id_comprador, nombre_comprador || "Usuario Bazar"]
+        );
+
+        // 3. INSERT EN 'PEDIDOS' (Orden exacto de tus columnas según las imágenes)
+        // Columnas vistas: id_comprador, id_vendedor, fecha_pedido, estado_pedido, total_pedido, metodo_pago, lugar_entrega
         const queryPedido = `
             INSERT INTO pedidos (
                 id_comprador, 
@@ -310,7 +319,7 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
 
         const id_pedido_generado = resPedido.rows[0].id_pedido;
 
-        // 3. INSERT en 'detalle_pedido'
+        // 4. INSERT EN 'DETALLE_PEDIDO'
         const queryDetalle = `
             INSERT INTO detalle_pedido (
                 id_pedido, id_producto, cantidad, precio_unitario
@@ -320,7 +329,7 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
             id_pedido_generado, id_producto, cantidad || 1, precio
         ]);
 
-        // 4. Notificación al vendedor (Solo en la tabla de notificaciones)
+        // 5. NOTIFICACIÓN AL VENDEDOR
         const mensajeVendedor = `¡Nueva petición! Alguien quiere comprar tu ${nombre_producto}.`;
         await client.query(
             'INSERT INTO notificaciones (id_usuario, tipo_notificacion, mensaje, leida) VALUES ($1, $2, $3, $4)',
@@ -329,7 +338,7 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
 
         await client.query('COMMIT');
 
-        // Socket.io para tiempo real
+        // Emitir por Socket.io si está configurado
         if (typeof io !== 'undefined') {
             io.emit(`notificacion_${id_usuario_vendedor}`, {
                 mensaje: mensajeVendedor,
@@ -341,10 +350,10 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
 
     } catch (error) {
         if (client) await client.query('ROLLBACK');
-        console.error("❌ Error al insertar pedido:", error.message);
+        console.error("❌ Error en la transacción:", error.message);
         res.status(500).json({ error: error.message });
     } finally {
-        client.release();
+        if (client) client.release();
     }
 });
 
