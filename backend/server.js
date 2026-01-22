@@ -357,14 +357,18 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
     }
 });
 
-// Asegúrate de que incluya /api al principio si así lo estás llamando en el front
 app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
     try {
         const idVendedor = req.params.idVendedor;
         const query = `
             SELECT 
-                p.id_pedido, p.id_comprador, p.total_pedido, p.estado_pedido, 
-                p.fecha_entrega, p.hora_entrega, p.lugar_entrega,
+                p.id_pedido, 
+                p.id_comprador, 
+                p.total_pedido, 
+                p.estado_pedido, 
+                p.fecha_pedido, -- CAMBIADO: Antes decía fecha_entrega
+                p.hora_entrega, 
+                p.lugar_entrega,
                 pr.nombre_producto,
                 dp.cantidad
             FROM pedidos p
@@ -376,10 +380,11 @@ app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
         const result = await pool.query(query, [idVendedor]);
         res.json(result.rows);
     } catch (error) {
-        console.error("Error al obtener pedidos:", error);
-        res.status(500).json({ error: "Error en el servidor" });
+        console.error("Error en SQL:", error.message);
+        res.status(500).json({ error: "Error interno al obtener pedidos" });
     }
 });
+
 
 
 
