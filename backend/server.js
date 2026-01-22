@@ -361,24 +361,28 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
 // RUTA: Obtener pedidos (Corregida)
 app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
     try {
-        const idVendedor = req.params.idVendedor;
+        const { idVendedor } = req.params;
         const query = `
             SELECT 
-                p.id_pedido, p.id_comprador, p.total_pedido, p.estado_pedido, 
-                p.fecha_pedido, -- Usamos el nombre real de tu DB
-                p.hora_entrega, p.lugar_entrega,
-                pr.nombre_producto, dp.cantidad
+                p.id_pedido, 
+                p.id_comprador,
+                p.total_pedido, 
+                p.estado_pedido, 
+                p.fecha_pedido, -- Nombre real en tu tabla
+                p.metodo_pago,
+                p.lugar_entrega,
+                pr.nombre_producto
             FROM pedidos p
             JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
             JOIN productos pr ON dp.id_producto = pr.id_producto
-            WHERE pr.id_usuario_vendedor = $1
+            WHERE p.id_vendedor = $1 -- Usamos id_vendedor de la tabla pedidos
             ORDER BY p.id_pedido DESC
         `;
         const result = await pool.query(query, [idVendedor]);
         res.json(result.rows);
     } catch (error) {
         console.error("❌ Error en SQL:", error.message);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: "Error al obtener pedidos" });
     }
 });
 

@@ -1,5 +1,6 @@
 // --- CONFIGURACIÓN GLOBAL ---
-const API_URL = API_BASE_URL;
+
+const API_URL = "https://teschi-bazar-web.onrender.com";
 
 // ------------ 1. OBSERVADOR DE SESIÓN (FIREBASE) ------------
 firebase.auth().onAuthStateChanged(user => {
@@ -13,45 +14,77 @@ firebase.auth().onAuthStateChanged(user => {
 
 // ------------ 2. CARGAR PEDIDOS DESDE EL SERVIDOR ------------
 
+
 async function obtenerPedidosDelVendedor(idVendedor) {
     const contenedorPendientes = document.getElementById('lista-pedidos-pendientes');
     const contenedorConfirmados = document.getElementById('lista-pedidos-confirmados');
 
     try {
-        // Añadimos /api/ a la ruta
         const response = await fetch(`${API_URL}/api/vendedor/pedidos/todos/${idVendedor}`);
         
-        if (!response.ok) throw new Error("Error en servidor");
-        const pedidos = await response.json();
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error ${response.status}: ${errorText}`);
+        }
 
+        const pedidos = await response.json();
+        
+        // Limpiar contenedores
         contenedorPendientes.innerHTML = "";
         contenedorConfirmados.innerHTML = "";
 
-        pedidos.forEach(p => { // 'p' ahora está correctamente definida dentro del bucle
-            const div = document.createElement('div');
-            div.className = 'tarjeta-pedido';
+        if (pedidos.length === 0) {
+            contenedorPendientes.innerHTML = "<p style='color: gray; padding: 20px;'>No tienes pedidos aún.</p>";
+            return;
+        }
 
-            // Usamos fecha_pedido que es lo que envía el servidor
-            const fechaLimpia = p.fecha_pedido ? p.fecha_pedido.split('T')[0] : "Pendiente";
+        pedidos.forEach(p => {
+            // Formatear la fecha que viene de la base de datos
+            const fechaFormateada = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'Fecha pendiente';
+            
+            const tarjeta = document.createElement('div');
+            // Estilo moderno de tarjeta
+            tarjeta.style = `
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 15px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+                border-left: 6px solid ${p.estado_pedido === 'pendiente' ? '#FFA500' : '#2ecc71'};
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            `;
+
+            tarjeta.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-weight: bold; color: #333; font-size: 1.1em;">Pedido #${p.id_pedido}</span>
+                    <span style="background: #f0f0f0; padding: 4px 8px; border-radius: 5px; font-size: 0.85em; color: #666;">${fechaFormateada}</span>
+                </div>
+                <div style="color: #555;">
+                    <p style="margin: 5px 0;"><strong>📦 Producto:</strong> ${p.nombre_producto}</p>
+                    <p style="margin: 5px 0;"><strong>💰 Total:</strong> $${p.total_pedido}</p>
+                    <p style="margin: 5px 0;"><strong>📍 Lugar:</strong> ${p.lugar_entrega || 'No especificado'}</p>
+                    <p style="margin: 5px 0;"><strong>💳 Pago:</strong> ${p.metodo_pago}</p>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 10px;">
+                    ${p.estado_pedido === 'pendiente' 
+                        ? `<button onclick="agendarPedido(${p.id_pedido})" style="flex: 1; background: #3498db; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">🗓️ Agendar Cita</button>`
+                        : `<button onclick="marcarEntregado(${p.id_pedido})" style="flex: 1; background: #2ecc71; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">✅ Finalizar</button>`
+                    }
+                </div>
+            `;
 
             if (p.estado_pedido === 'pendiente') {
-                div.innerHTML = `
-                    <h4>Pedido #${p.id_pedido}</h4>
-                    <p>Producto: ${p.nombre_producto}</p>
-                    <button onclick="abrirModalAgendar(${p.id_pedido})">📅 Agendar</button>
-                `;
-                contenedorPendientes.appendChild(div);
-            } else if (p.estado_pedido === 'confirmado') {
-                div.innerHTML = `
-                    <h4>Pedido #${p.id_pedido} ✅</h4>
-                    <p>Fecha: ${fechaLimpia} - Hora: ${p.hora_entrega}</p>
-                    <button onclick="finalizarPedido(${p.id_pedido})">📦 Entregado</button>
-                `;
-                contenedorConfirmados.appendChild(div);
+                contenedorPendientes.appendChild(tarjeta);
+            } else {
+                contenedorConfirmados.appendChild(tarjeta);
             }
         });
+
     } catch (error) {
         console.error("❌ Error al cargar pedidos:", error);
+        alert("Error de conexión con el servidor. Por favor, intenta más tarde.");
     }
 }
 
