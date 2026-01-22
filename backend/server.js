@@ -358,20 +358,16 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
 });
 
 
+// RUTA: Obtener pedidos (Corregida)
 app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
     try {
         const idVendedor = req.params.idVendedor;
         const query = `
             SELECT 
-                p.id_pedido, 
-                p.id_comprador, 
-                p.total_pedido, 
-                p.estado_pedido, 
-                p.fecha_pedido, -- Corregido: antes decía fecha_entrega
-                p.hora_entrega, 
-                p.lugar_entrega,
-                pr.nombre_producto,
-                dp.cantidad
+                p.id_pedido, p.id_comprador, p.total_pedido, p.estado_pedido, 
+                p.fecha_pedido, -- Usamos el nombre real de tu DB
+                p.hora_entrega, p.lugar_entrega,
+                pr.nombre_producto, dp.cantidad
             FROM pedidos p
             JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
             JOIN productos pr ON dp.id_producto = pr.id_producto
@@ -381,11 +377,27 @@ app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
         const result = await pool.query(query, [idVendedor]);
         res.json(result.rows);
     } catch (error) {
-        console.error("Error en SQL:", error.message);
-        res.status(500).json({ error: "Error interno al obtener pedidos" });
+        console.error("❌ Error en SQL:", error.message);
+        res.status(500).json({ error: error.message });
     }
 });
 
+// RUTA: Confirmar cita (Corregida)
+app.put('/api/pedidos/confirmar-cita', async (req, res) => {
+    const { id_pedido, fecha, hora, lugar } = req.body;
+    try {
+        // Actualizamos usando 'fecha_pedido' que es la columna que existe
+        await pool.query(
+            `UPDATE pedidos 
+             SET fecha_pedido = $1, hora_entrega = $2, lugar_entrega = $3, estado_pedido = 'confirmado' 
+             WHERE id_pedido = $4`,
+            [fecha, hora, lugar, id_pedido]
+        );
+        res.json({ success: true, message: "Cita agendada" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 
 
