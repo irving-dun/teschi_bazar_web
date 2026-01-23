@@ -17,27 +17,19 @@
       <div class="form-contenedor sign-up-contenedor">
         <form class="formulario" id="registroForm">
           <h1>Regístrate aquí</h1>
-          <input type="text" placeholder="Nombre" id="reg-nombre" />
-          <input type="email" placeholder="Correo electrónico" id="reg-email" />
-          <input type="tel" placeholder="Telefono" id="reg-telefono" />
-          <input type="password" placeholder="Contraseña" id="reg-password" />
+          <input type="text" placeholder="Nombre" id="reg-nombre" required />
+          <input type="email" placeholder="Correo electrónico" id="reg-email" required />
+          <input type="tel" placeholder="Telefono" id="reg-telefono" required />
+          <input type="password" placeholder="Contraseña" id="reg-password" required />
           <button type="submit">REGISTRAR</button>
-          <div class="social-media">
-            <p>o usa tu cuenta</p>
-            <a href="#" class="social-icon"
-              ><i class="fab fa-facebook-f"></i
-            ></a>
-            <a href="#" class="social-icon"><i class="fab fa-google"></i></a>
-            <a href="#" class="social-icon"><i class="fab fa-tiktok"></i></a>
-          </div>
-        </form>
+          </form>
       </div>
 
       <div class="form-contenedor sign-in-contenedor">
         <form class="formulario" id="loginForm">
           <h1>Inicia sesión aquí</h1>
-          <input type="email" placeholder="Correo electrónico" id="log-email" />
-          <input type="password" placeholder="Contraseña" id="log-password" />
+          <input type="email" placeholder="Correo electrónico" id="log-email" required />
+          <input type="password" placeholder="Contraseña" id="log-password" required />
 
           <div class="recuerdame">
             <div class="recuerdame-checkbox-group">
@@ -49,15 +41,7 @@
             >
           </div>
           <button type="submit">INICIAR SESIÓN</button>
-          <div class="social-media">
-            <p>o usa tu cuenta</p>
-            <a href="#" class="social-icon"
-              ><i class="fab fa-facebook-f"></i
-            ></a>
-            <a href="#" class="social-icon"><i class="fab fa-google"></i></a>
-            <a href="#" class="social-icon"><i class="fab fa-tiktok"></i></a>
-          </div>
-        </form>
+          </form>
       </div>
 
       <div class="overlay-contenedor">
@@ -98,7 +82,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
     <script src="../js/firebase-config.js"></script>
-
     <script src="../js/scriptyLogin.js"></script>
   </body>
 </html>
