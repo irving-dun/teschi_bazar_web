@@ -21,56 +21,47 @@ async function obtenerPedidosDelVendedor(idVendedor) {
 
     try {
         const response = await fetch(`${API_URL}/api/vendedor/pedidos/todos/${idVendedor}`);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Error ${response.status}: ${errorText}`);
-        }
-
         const pedidos = await response.json();
         
-        // Limpiar contenedores
         contenedorPendientes.innerHTML = "";
         contenedorConfirmados.innerHTML = "";
 
-        if (pedidos.length === 0) {
-            contenedorPendientes.innerHTML = "<p style='color: gray; padding: 20px;'>No tienes pedidos aún.</p>";
-            return;
-        }
-
         pedidos.forEach(p => {
-            // Formatear la fecha que viene de la base de datos
-            const fechaFormateada = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'Fecha pendiente';
+            const fecha = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'Pendiente';
             
             const tarjeta = document.createElement('div');
-            // Estilo moderno de tarjeta
+            tarjeta.className = "tarjeta-pedido-v3"; // Clase para tus estilos CSS
             tarjeta.style = `
                 background: white;
-                border-radius: 12px;
-                padding: 20px;
+                border-radius: 10px;
+                padding: 18px;
                 margin-bottom: 15px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-                border-left: 6px solid ${p.estado_pedido === 'pendiente' ? '#FFA500' : '#2ecc71'};
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                border-left: 6px solid ${p.estado_pedido === 'pendiente' ? '#ff9f43' : '#10ac84'};
             `;
 
             tarjeta.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <span style="font-weight: bold; color: #333; font-size: 1.1em;">Pedido #${p.id_pedido}</span>
-                    <span style="background: #f0f0f0; padding: 4px 8px; border-radius: 5px; font-size: 0.85em; color: #666;">${fechaFormateada}</span>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px;">
+                    <span style="font-weight: bold; color: #2c3e50;">🆔 Pedido #${p.id_pedido}</span>
+                    <span style="color: #7f8c8d; font-size: 0.9em;">📅 ${fecha}</span>
                 </div>
-                <div style="color: #555;">
-                    <p style="margin: 5px 0;"><strong>📦 Producto:</strong> ${p.nombre_producto}</p>
-                    <p style="margin: 5px 0;"><strong>💰 Total:</strong> $${p.total_pedido}</p>
-                    <p style="margin: 5px 0;"><strong>📍 Lugar:</strong> ${p.lugar_entrega || 'No especificado'}</p>
-                    <p style="margin: 5px 0;"><strong>💳 Pago:</strong> ${p.metodo_pago}</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95em;">
+                    <p><strong>👤 Cliente:</strong><br> ${p.nombre_comprador}</p>
+                    <p><strong>📦 Producto:</strong><br> ${p.nombre_producto}</p>
+                    <p><strong>🔢 Cantidad:</strong><br> ${p.cantidad} unidad(es)</p>
+                    <p><strong>💰 Precio Unit:</strong><br> $${p.precio_unitario}</p>
                 </div>
-                <div style="margin-top: 10px; display: flex; gap: 10px;">
+
+                <div style="background: #f9f9f9; padding: 10px; border-radius: 6px; margin-top: 10px;">
+                    <p style="margin: 0;"><strong>📍 Entrega:</strong> ${p.lugar_entrega}</p>
+                    <p style="margin: 5px 0 0 0; color: #27ae60; font-size: 1.1em;"><strong>Total: $${p.total_pedido}</strong></p>
+                </div>
+
+                <div style="margin-top: 15px;">
                     ${p.estado_pedido === 'pendiente' 
-                        ? `<button onclick="agendarPedido(${p.id_pedido})" style="flex: 1; background: #3498db; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">🗓️ Agendar Cita</button>`
-                        : `<button onclick="marcarEntregado(${p.id_pedido})" style="flex: 1; background: #2ecc71; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold;">✅ Finalizar</button>`
+                        ? `<button onclick="agendarPedido(${p.id_pedido})" style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">📅 Agendar con Cliente</button>`
+                        : `<button onclick="marcarEntregado(${p.id_pedido})" style="width: 100%; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✅ Confirmar Entrega</button>`
                     }
                 </div>
             `;
@@ -81,10 +72,8 @@ async function obtenerPedidosDelVendedor(idVendedor) {
                 contenedorConfirmados.appendChild(tarjeta);
             }
         });
-
     } catch (error) {
-        console.error("❌ Error al cargar pedidos:", error);
-        alert("Error de conexión con el servidor. Por favor, intenta más tarde.");
+        console.error("Error:", error);
     }
 }
 
