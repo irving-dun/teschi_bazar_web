@@ -12,19 +12,7 @@
     <link rel="stylesheet" href="../css/detalleProducto.css" />
     <link rel="stylesheet" href="../css/notificaciones.css" />
     
-    <style>
-        .chat-oculto { display: none; }
-        .chat-visible { display: flex !important; flex-direction: column; }
-        #chat-container {
-            position: fixed; bottom: 20px; right: 20px;
-            width: 320px; height: 450px;
-            background: white; border: 1px solid #ccc;
-            border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 2000;
-        }
-        #chat-body { flex-grow: 1; overflow-y: auto; padding: 10px; background: #f9f9f9; }
-        .item-conversacion:hover { background: #eef2f7; }
-    </style>
+    
 </head>
 
 <body>
@@ -175,9 +163,14 @@
     
     <script>
         document.getElementById('cerrar-chat-btn').onclick = () => {
-            document.getElementById('chat-window').style.display = 'none';
-            document.getElementById('btnContactarVendedor').style.display = 'block';
-        };
+    const chatWindow = document.getElementById('chat-window');
+    const btnContactar = document.getElementById('btnContactarVendedor');
+
+    chatWindow.classList.remove('chat-visible');
+    chatWindow.classList.add('chat-oculto');
+    
+    btnContactar.style.display = 'block';
+};
     </script>
 </body>
 </html>

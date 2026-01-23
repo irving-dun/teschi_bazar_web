@@ -13,8 +13,10 @@ btnContactar.addEventListener('click', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     const idProducto = urlParams.get('id');
 
+    chatWindow.classList.remove('chat-oculto');
+    chatWindow.classList.add('chat-visible');
+    
     btnContactar.style.display = 'none';
-    chatWindow.style.display = 'block';
 
     if (user.uid === idVendedor) {
         // ESCENARIO VENDEDOR: Cargar lista de interesados

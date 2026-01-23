@@ -307,9 +307,10 @@ body.modal-open {
 }
 
 .chat-visible {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0) scale(1);
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) scale(1) !important;
+    display: flex !important; /* IMPORTANTE: Para que respete el diseño interno */
 }
 
 /* --- Encabezado --- */
@@ -372,7 +373,7 @@ body.modal-open {
     border-top: 1px solid #eee;
 }
 
-#chat-input {
+#inputMensaje {
     flex-grow: 1;
     padding: 10px;
     border: 1px solid #ced4da;
@@ -383,7 +384,7 @@ body.modal-open {
     transition: height 0.2s;
 }
 
-#enviar-mensaje-btn {
+#btnEnviarMensaje {
     background-color: #28a745; /* Color de éxito */
     color: white;
     border: none;
