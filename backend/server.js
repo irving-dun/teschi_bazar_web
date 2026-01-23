@@ -590,35 +590,49 @@ app.get('/api/productos-destacados', async (req, res) => {
 
 // RUTAS: mensajería
 // A. Buscar o crear conversación (Lógica Comprador)
+
 app.post('/api/chat/obtener-conversacion', async (req, res) => {
     const { id_comprador, id_vendedor, id_producto } = req.body;
+    const estadoInicial = 'activa'; // Definimos el valor aquí
+
     try {
-        // Buscamos si ya existe el hilo para este producto entre estos dos usuarios
-        let query = `SELECT id_conversacion FROM conversacion 
-                     WHERE id_comprador = $1 AND id_vendedor = $2 AND id_producto = $3`;
-        let result = await pool.query(query, [id_comprador, id_vendedor, id_producto]);
+        // 1. Buscar si ya existe
+        const buscarQuery = `SELECT id_conversacion FROM conversaciones 
+                             WHERE id_comprador = $1 AND id_vendedor = $2 AND id_producto = $3`;
+        const result = await pool.query(buscarQuery, [id_comprador, id_vendedor, id_producto]);
 
         if (result.rows.length > 0) {
             return res.json(result.rows[0]);
         }
 
-        // Si no existe, la creamos
-       
-const insertQuery = `INSERT INTO conversacion (id_comprador, id_vendedor, id_producto, estado_producto) 
-                     VALUES ($1, $2, $3, 'activa') RETURNING id_conversacion`;
-        const newConv = await pool.query(insertQuery, [id_comprador, id_vendedor, id_producto]);
+        // 2. Si no existe, crearla
+        // Ahora sí: 4 columnas (comprador, vendedor, producto, estado) 
+        // y 4 variables ($1, $2, $3, $4)
+        const insertQuery = `
+            INSERT INTO conversaciones (id_comprador, id_vendedor, id_producto, estado_producto) 
+            VALUES ($1, $2, $3, $4) 
+            RETURNING id_conversacion`;
+        
+        const newConv = await pool.query(insertQuery, [
+            id_comprador, 
+            id_vendedor, 
+            id_producto, 
+            estadoInicial // <--- Este es el valor número 4 ($4)
+        ]);
+        
         res.json(newConv.rows[0]);
+
     } catch (error) {
+        console.error("ERROR DETALLADO:", error.message);
         res.status(500).json({ error: error.message });
     }
 });
-
 // B. Listar conversaciones de un producto (Lógica Vendedor)
 app.get('/api/chat/vendedor/producto/:idProducto', async (req, res) => {
     try {
         const { idProducto } = req.params;
         const query = `SELECT id_conversacion, id_comprador, ultimo_mensaje_at 
-                       FROM conversacion WHERE id_producto = $1 ORDER BY ultimo_mensaje_at DESC`;
+                       FROM conversaciones WHERE id_producto = $1 ORDER BY ultimo_mensaje_at DESC`;
         const result = await pool.query(query, [idProducto]);
         res.json(result.rows);
     } catch (error) {
