@@ -121,29 +121,25 @@
     </div>
 
     <div id="chat-window" class="chat-oculto"> 
-        <div id="chat-container">
-            <div id="chat-header" style="background: #2c3e50; color: white; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0;">
-                <div>
-                    <h3 id="chat-producto-nombre" style="margin: 0; font-size: 1em;">Chat de Producto</h3>
-                    <p id="chat-vendedor-info" style="margin: 0; font-size: 0.8em; opacity: 0.8;">Cargando...</p>
-                </div>
-                <button id="cerrar-chat-btn" style="background: none; border: none; color: white; cursor: pointer; font-weight: bold;">X</button>
-            </div>
-            
-            <div id="chat-body">
-                <div id="chat-content">
-                    <div id="loading-indicator" style="text-align: center; padding: 10px;">
-                        Iniciando chat...
-                    </div>
-                </div>
-            </div>
-
-            <div id="chat-footer" style="padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px;">
-                <textarea id="inputMensaje" placeholder="Escribe un mensaje..." rows="1" style="flex-grow: 1; resize: none; border-radius: 5px; border: 1px solid #ddd; padding: 5px;"></textarea>
-                <button id="btnEnviarMensaje" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Enviar</button>
-            </div>
+    <div id="chat-header">
+        <div>
+            <h3 id="chat-producto-nombre">Chat de Producto</h3>
+            <p id="chat-vendedor-info">Cargando...</p>
         </div>
-   </div>
+        <button id="cerrar-chat-btn">X</button>
+    </div>
+    
+    <div id="chat-body">
+        <div id="chat-content">
+            <div id="loading-indicator">Iniciando chat...</div>
+        </div>
+    </div>
+
+    <div id="chat-footer">
+        <textarea id="inputMensaje" placeholder="Escribe un mensaje..." rows="1"></textarea>
+        <button id="btnEnviarMensaje">Enviar</button>
+    </div>
+</div>
 
     <footer>
         <p>&copy; 2026 Teschi-Bazar</p>

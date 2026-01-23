@@ -282,19 +282,6 @@ body.modal-open {
 
 /* --- Contenedor General --- */
 /* Este es el contenedor PADRE que controla la lógica de visibilidad */
-#chat-window {
-    position: fixed !important; /* Obligatorio para que flote */
-    bottom: 20px !important;    /* Distancia del suelo */
-    right: 20px !important;     /* Distancia de la derecha */
-    width: 350px;
-    height: 500px;
-    z-index: 99999 !important;  /* Por encima de TODO (header, footer, modales) */
-    display: flex !important;   /* Solo para la prueba, luego lo manejas con JS */
-    background: white;          /* Para que no sea transparente */
-    border-radius: 12px;
-}
-
-/* Cuando se activa esta clase, FORZAMOS que se vea */
 
 
 /* Modifica tu contenedor de diseño para que no choque con el padre */
@@ -311,31 +298,8 @@ body.modal-open {
 }
 
 
-/* Clases para manejar visibilidad con JS */
-.chat-oculto {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px) scale(0.95);
-}
 
-.chat-visible {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: translateY(0) scale(1) !important;
-    display: flex !important; /* IMPORTANTE: Para que respete el diseño interno */
-}
 
-/* --- Encabezado --- */
-#chat-header {
-    background-color: #007bff; /* Color primario para el encabezado */
-    color: white;
-    padding: 15px;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 
 #chat-header h3 {
     margin: 0;
@@ -359,15 +323,7 @@ body.modal-open {
 }
 
 /* --- Cuerpo de Mensajes --- */
-#chat-body {
-    flex-grow: 1; /* Ocupa todo el espacio restante */
-    padding: 15px;
-    overflow-y: auto; /* Scroll para los mensajes */
-    background-color: #f8f9fa;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+
 
 #loading-indicator {
     text-align: center;
@@ -378,12 +334,6 @@ body.modal-open {
 }
 
 /* --- Pie de Página (Input y Botón) --- */
-#chat-footer {
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
-    border-top: 1px solid #eee;
-}
 
 #inputMensaje {
     flex-grow: 1;
@@ -471,4 +421,53 @@ footer p {
     margin: 0;
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
+}
+/* RESET DE POSICIÓN PARA EL CHAT */
+#chat-window {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    width: 350px !important;
+    height: 500px !important;
+    background-color: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+    z-index: 99999 !important; /* El valor más alto posible */
+    display: flex; /* Cambiar a 'none' una vez que funcione */
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #ddd;
+}
+
+/* Visibilidad */
+.chat-oculto {
+    display: none !important;
+}
+
+.chat-visible {
+    display: flex !important;
+}
+
+/* Estilos internos para que no dependan del HTML */
+#chat-header {
+    background: #2c3e50;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#chat-body {
+    flex-grow: 1;
+    overflow-y: auto;
+    background: #f9f9f9;
+    padding: 10px;
+}
+
+#chat-footer {
+    padding: 10px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 5px;
 }
