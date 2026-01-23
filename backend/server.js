@@ -604,7 +604,7 @@ app.post('/api/chat/obtener-conversacion', async (req, res) => {
 
         // Si no existe, la creamos
        
-const insertQuery = `INSERT INTO conversacion (id_comprador, id_vendedor, id_producto, estado_conversacion_enum) 
+const insertQuery = `INSERT INTO conversacion (id_comprador, id_vendedor, id_producto, estado_producto) 
                      VALUES ($1, $2, $3, 'activa') RETURNING id_conversacion`;
         const newConv = await pool.query(insertQuery, [id_comprador, id_vendedor, id_producto]);
         res.json(newConv.rows[0]);
