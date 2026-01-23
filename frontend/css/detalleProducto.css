@@ -283,11 +283,15 @@ body.modal-open {
 /* --- Contenedor General --- */
 /* Este es el contenedor PADRE que controla la lógica de visibilidad */
 #chat-window {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999; /* Lo subimos al máximo para que nada lo tape */
-    display: flex !important; /* Por defecto empieza en none */
+    position: fixed !important; /* Obligatorio para que flote */
+    bottom: 20px !important;    /* Distancia del suelo */
+    right: 20px !important;     /* Distancia de la derecha */
+    width: 350px;
+    height: 500px;
+    z-index: 99999 !important;  /* Por encima de TODO (header, footer, modales) */
+    display: flex !important;   /* Solo para la prueba, luego lo manejas con JS */
+    background: white;          /* Para que no sea transparente */
+    border-radius: 12px;
 }
 
 /* Cuando se activa esta clase, FORZAMOS que se vea */
