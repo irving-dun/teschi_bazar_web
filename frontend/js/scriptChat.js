@@ -59,7 +59,7 @@ async function abrirChatDirecto(uidComprador, uidVendedor, idProducto) {
 // En scriptChat.js
 
 // Conexión inicial al socket (ya tienes la librería en tu HTML)
-const socket = io(API_BASE_URL); 
+
 
 async function iniciarMensajeria(idConv) {
     currentConvId = idConv;
