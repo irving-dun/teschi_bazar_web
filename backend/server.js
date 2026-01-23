@@ -593,7 +593,7 @@ app.get('/api/productos-destacados', async (req, res) => {
 
 app.post('/api/chat/obtener-conversacion', async (req, res) => {
     const { id_comprador, id_vendedor, id_producto } = req.body;
-    const estadoInicial = 'activa'; // Definimos el valor aquí
+    const estadoInicial = 'activo'; // Definimos el valor aquí
 
     try {
         // 1. Buscar si ya existe
