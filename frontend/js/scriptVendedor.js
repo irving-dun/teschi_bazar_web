@@ -158,11 +158,13 @@ async function enviarPropuesta() {
     const datosCita = { id_pedido: idPedido, fecha, hora, lugar };
 
     try {
-        const res = await fetch(`${API_URL}/api/pedidos/confirmar-cita`, {
+        const res = await fetch(`https://teschi-bazar-web.onrender.com/api/pedidos/confirmar-cita`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datosCita)
         });
+
+
 
         if (res.ok) {
             alert(`¡Cita agendada para el día ${fecha} a las ${hora} en ${lugar}.`);

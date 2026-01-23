@@ -419,7 +419,7 @@ app.put('/api/pedidos/confirmar-cita', async (req, res) => {
             `UPDATE pedidos 
              SET fecha_pedido = $1, 
                  lugar_entrega = $2, 
-                 estado_pedido = 'agendado' 
+                 estado_pedido = 'agendado'::estado_pedido_enum 
              WHERE id_pedido = $3`,
             [fecha, lugar, id_pedido] // Si no tienes columna 'hora_entrega', debes crearla en SQL o mandarla en la fecha
         );
