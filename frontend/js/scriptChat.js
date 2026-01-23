@@ -47,13 +47,34 @@ async function cargarListaInteresados(idProducto) {
 }
 
 async function abrirChatDirecto(uidComprador, uidVendedor, idProducto) {
-    const res = await fetch(`${API_BASE_URL}/api/chat/obtener-conversacion`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_comprador: uidComprador, id_vendedor: uidVendedor, id_producto: idProducto })
-    });
-    const conv = await res.json();
-    iniciarMensajeria(conv.id_conversacion);
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/chat/obtener-conversacion`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                id_comprador: uidComprador, 
+                id_vendedor: uidVendedor, 
+                id_producto: idProducto 
+            })
+        });
+
+        if (!res.ok) {
+            const error = await res.json();
+            console.error("Error del servidor:", error);
+            return alert("No se pudo iniciar el chat: " + (error.error || "Error desconocido"));
+        }
+
+        const conv = await res.json();
+        
+        // Solo si tenemos un ID válido, iniciamos la mensajería
+        if (conv && conv.id_conversacion) {
+            iniciarMensajeria(conv.id_conversacion);
+        } else {
+            console.error("El servidor no devolvió un ID de conversación válido");
+        }
+    } catch (err) {
+        console.error("Error en la petición:", err);
+    }
 }
 
 // En scriptChat.js

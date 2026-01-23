@@ -597,7 +597,7 @@ app.post('/api/chat/obtener-conversacion', async (req, res) => {
 
     try {
         // 1. Buscar si ya existe
-        const buscarQuery = `SELECT id_conversacion FROM conversacion 
+        const buscarQuery = `SELECT id_conversacion FROM conversaciones 
                              WHERE id_comprador = $1 AND id_vendedor = $2 AND id_producto = $3`;
         const result = await pool.query(buscarQuery, [id_comprador, id_vendedor, id_producto]);
 
@@ -609,7 +609,7 @@ app.post('/api/chat/obtener-conversacion', async (req, res) => {
         // Ahora sí: 4 columnas (comprador, vendedor, producto, estado) 
         // y 4 variables ($1, $2, $3, $4)
         const insertQuery = `
-            INSERT INTO conversacion (id_comprador, id_vendedor, id_producto, estado_producto) 
+            INSERT INTO conversaciones (id_comprador, id_vendedor, id_producto, estado_producto) 
             VALUES ($1, $2, $3, $4) 
             RETURNING id_conversacion`;
         
@@ -632,7 +632,7 @@ app.get('/api/chat/vendedor/producto/:idProducto', async (req, res) => {
     try {
         const { idProducto } = req.params;
         const query = `SELECT id_conversacion, id_comprador, ultimo_mensaje_at 
-                       FROM conversacion WHERE id_producto = $1 ORDER BY ultimo_mensaje_at DESC`;
+                       FROM conversaciones WHERE id_producto = $1 ORDER BY ultimo_mensaje_at DESC`;
         const result = await pool.query(query, [idProducto]);
         res.json(result.rows);
     } catch (error) {
