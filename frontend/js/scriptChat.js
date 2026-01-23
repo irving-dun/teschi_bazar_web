@@ -15,7 +15,7 @@ btnContactar.addEventListener('click', async () => {
 
     chatWindow.classList.remove('chat-oculto');
     chatWindow.classList.add('chat-visible');
-    
+    chatWindow.style.display = 'flex';
     btnContactar.style.display = 'none';
 
     if (user.uid === idVendedor) {

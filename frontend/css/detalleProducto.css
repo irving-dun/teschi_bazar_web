@@ -281,23 +281,31 @@ body.modal-open {
 
 
 /* --- Contenedor General --- */
-#chat-container {
+/* Este es el contenedor PADRE que controla la lógica de visibilidad */
+#chat-window {
     position: fixed;
     bottom: 20px;
     right: 20px;
+    z-index: 9999; /* Lo subimos al máximo para que nada lo tape */
+    display: none; /* Por defecto empieza en none */
+}
+
+/* Cuando se activa esta clase, FORZAMOS que se vea */
+
+
+/* Modifica tu contenedor de diseño para que no choque con el padre */
+#chat-container {
     width: 350px;
-    max-width: 90vw; /* Responsivo para móviles */
     height: 500px;
-    max-height: 80vh;
     background-color: #ffffff;
     border: 1px solid #ccc;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     border-radius: 12px;
-    z-index: 1000; /* Asegura que esté por encima de otros elementos */
     display: flex;
     flex-direction: column;
-    transition: all 0.3s ease;
+    overflow: hidden; /* Para que el header redondeado no se corte */
 }
+
 
 /* Clases para manejar visibilidad con JS */
 .chat-oculto {
