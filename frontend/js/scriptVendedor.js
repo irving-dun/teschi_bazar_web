@@ -22,13 +22,13 @@ async function obtenerPedidosDelVendedor(idVendedor) {
     try {
         const response = await fetch(`${API_URL}/api/vendedor/pedidos/todos/${idVendedor}`);
         const pedidos = await response.json();
-        
+
         contenedorPendientes.innerHTML = "";
         contenedorConfirmados.innerHTML = "";
 
         pedidos.forEach(p => {
             const fecha = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'Pendiente';
-            
+
             const tarjeta = document.createElement('div');
             tarjeta.className = "tarjeta-pedido-v3"; // Clase para tus estilos CSS
             tarjeta.style = `
@@ -47,7 +47,7 @@ async function obtenerPedidosDelVendedor(idVendedor) {
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95em;">
-                    <p><strong>👤 Cliente:</strong><br> ${p.nombre_comprador}</p>
+                    <p><strong>👤 Cliente:</strong><br> ${p.nombre_comprador ? p.nombre_comprador : 'Usuario sin nombre'}</p>
                     <p><strong>📦 Producto:</strong><br> ${p.nombre_producto}</p>
                     <p><strong>🔢 Cantidad:</strong><br> ${p.cantidad} unidad(es)</p>
                     <p><strong>💰 Precio Unit:</strong><br> $${p.precio_unitario}</p>
@@ -59,10 +59,10 @@ async function obtenerPedidosDelVendedor(idVendedor) {
                 </div>
 
                 <div style="margin-top: 15px;">
-                    ${p.estado_pedido === 'pendiente' 
-                        ? `<button onclick="agendarPedido(${p.id_pedido})" style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">📅 Agendar con Cliente</button>`
-                        : `<button onclick="marcarEntregado(${p.id_pedido})" style="width: 100%; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✅ Confirmar Entrega</button>`
-                    }
+                    ${p.estado_pedido === 'pendiente'
+                    ? `<button onclick="agendarPedido(${p.id_pedido})" style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">📅 Agendar con Cliente</button>`
+                    : `<button onclick="marcarEntregado(${p.id_pedido})" style="width: 100%; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✅ Confirmar Entrega</button>`
+                }
                 </div>
             `;
 
