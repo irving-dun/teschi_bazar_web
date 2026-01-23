@@ -1,5 +1,4 @@
 // --- CONFIGURACIÓN GLOBAL ---
-
 const API_URL = "https://teschi-bazar-web.onrender.com";
 
 // ------------ 1. OBSERVADOR DE SESIÓN (FIREBASE) ------------
@@ -12,9 +11,7 @@ firebase.auth().onAuthStateChanged(user => {
     }
 });
 
-
 // ------------ 2. CARGAR PEDIDOS DESDE EL SERVIDOR ------------
-
 async function obtenerPedidosDelVendedor(idVendedor) {
     const contenedorPendientes = document.getElementById('lista-pedidos-pendientes');
     const contenedorConfirmados = document.getElementById('lista-pedidos-confirmados');
@@ -26,102 +23,103 @@ async function obtenerPedidosDelVendedor(idVendedor) {
         contenedorPendientes.innerHTML = "";
         contenedorConfirmados.innerHTML = "";
 
-        // Usamos for...of para poder usar await y consultar Firebase secuencialmente
         for (const p of pedidos) {
-            const fecha = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : '1/22/2026';
-            
-            // --- LÓGICA PARA EXTRAER NOMBRE DESDE FIREBASE ---
-            let nombreCompradorReal = "Cargando..."; 
-            
+            // --- NUEVO: RECUPERAR NOMBRE REAL DESDE FIREBASE ---
+            let nombreCompradorReal = "Usuario"; 
             if (p.id_comprador) {
                 try {
-                    // Consultamos el documento en Firestore usando el UID de la tabla de PostgreSQL
-                    const userDoc = await firebase.firestore()
-                        .collection('usuarios')
-                        .doc(p.id_comprador.trim())
-                        .get();
-
+                    // Consultamos Firestore usando el ID del comprador que viene de la DB
+                    const userDoc = await firebase.firestore().collection('usuarios').doc(p.id_comprador.trim()).get();
                     if (userDoc.exists) {
-                        nombreCompradorReal = userDoc.data().nombre || "Usuario sin nombre";
-                    } else {
-                        nombreCompradorReal = "ID no encontrado";
+                        nombreCompradorReal = userDoc.data().nombre || "Sin nombre";
                     }
                 } catch (errorFB) {
-                    console.error("Error consultando Firestore:", errorFB);
-                    nombreCompradorReal = "Error de conexión";
+                    console.error("Error al obtener nombre de Firebase:", errorFB);
                 }
             }
-            // -----------------------------------------------
+
+            // Formatear la fecha para que se vea limpia
+            const fechaTxt = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'Pendiente';
 
             const tarjeta = document.createElement('div');
-            
-            // Mantenemos tus estilos originales exactamente como los tenías
+            tarjeta.className = "tarjeta-pedido-v3";
             tarjeta.style = `
-                background: white;
-                border-radius: 10px;
-                padding: 18px;
-                margin-bottom: 15px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-                border-left: 6px solid ${p.estado_pedido === 'pendiente' ? '#ff9f43' : '#10ac84'};
+                background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                border-left: 6px solid ${p.estado_pedido === 'pendiente' ? '#ff9f43' : '#27ae60'};
             `;
 
+            // LÓGICA DE BOTÓN DINÁMICO
+            let botonAccion = "";
+            if (p.estado_pedido === 'pendiente') {
+                botonAccion = `<button onclick="abrirModalAgendar(${p.id_pedido}, '${nombreCompradorReal}')" 
+                               style="width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                               📅 Agendar Cita
+                               </button>`;
+            } else if (p.estado_pedido === 'agendado') {
+                botonAccion = `<button onclick="confirmarEntregaFinal(${p.id_pedido})" 
+                               style="width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                               💰 Confirmar entrega
+                               </button>`;
+            }
+
+            // DISEÑO RECUPERADO (Incluye cantidad, cliente y fecha arriba)
             tarjeta.innerHTML = `
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px;">
-                    <span style="font-weight: bold; color: #2c3e50;">🆔 Pedido #${p.id_pedido}</span>
-                    <span style="color: #7f8c8d; font-size: 0.9em;">📅 ${fecha}</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 15px;">
+                    <span style="font-weight: 800; color: #2c3e50; font-size: 1.1em;">🆔 Pedido #${p.id_pedido}</span>
+                    <span style="color: #7f8c8d; font-size: 0.9em; font-weight: 500;">📅 ${fechaTxt}</span>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95em;">
-                    <p style="margin: 5px 0;"><strong>👤 Cliente:</strong><br> <span class="nombre-cliente">${nombreCompradorReal}</span></p>
-                    <p style="margin: 5px 0;"><strong>📦 Producto:</strong><br> ${p.nombre_producto}</p>
-                    <p style="margin: 5px 0;"><strong>🔢 Cantidad:</strong><br> ${p.cantidad} unidad(es)</p>
-                    <p style="margin: 5px 0;"><strong>💰 Total:</strong><br> $${p.total_pedido}</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.95em; color: #34495e;">
+                    <p style="margin: 0;"><strong>👤 Cliente:</strong><br> ${nombreCompradorReal}</p>
+                    <p style="margin: 0;"><strong>📦 Producto:</strong><br> ${p.nombre_producto}</p>
+                    <p style="margin: 0;"><strong>🔢 Cantidad:</strong><br> ${p.cantidad || 1} unidad(es)</p>
+                    <p style="margin: 0;"><strong>💰 Total:</strong><br> <span style="font-weight: 800; color: #2c3e50;">$${p.total_pedido}</span></p>
                 </div>
 
-                <div style="background: #f9f9f9; padding: 10px; border-radius: 6px; margin-top: 10px;">
-                    <p style="margin: 0; font-size: 0.9em;"><strong>📍 Entrega:</strong> ${p.lugar_entrega}</p>
+                <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 15px; border: 1px dashed #dee2e6;">
+                    <p style="margin: 0; font-size: 0.9em; color: #636e72;">
+                        <i class="fas fa-map-marker-alt" style="color: #e74c3c;"></i> <strong>Entrega:</strong> ${p.lugar_entrega || 'No especificada'}
+                    </p>
                 </div>
 
                 <div style="margin-top: 15px;">
-                    ${p.estado_pedido === 'pendiente'
-                    ? `<button onclick="abrirModalAgendar(${p.id_pedido}, '${nombreCompradorReal}')" 
-                               style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                               📅 Agendar Cita
-                       </button>`
-                    : `<div style="text-align: center; color: #10ac84; font-weight: bold; padding: 10px; border: 1px solid #10ac84; border-radius: 5px;">
-                           ✅ Cita Confirmada
-                       </div>`
-                    }
+                    ${botonAccion}
                 </div>
             `;
 
+            // Clasificación por contenedores según el estado
             if (p.estado_pedido === 'pendiente') {
                 contenedorPendientes.appendChild(tarjeta);
-            } else {
+            } else if (p.estado_pedido === 'agendado') {
                 contenedorConfirmados.appendChild(tarjeta);
             }
         }
-    } catch (error) {
-        console.error("Error al cargar pedidos:", error);
+    } catch (error) { 
+        console.error("Error al cargar pedidos:", error); 
     }
 }
-// ---------------------------------------
 
+// --- FUNCIÓN PARA CONFIRMAR DINERO Y ENTREGA (Botón Verde) ---
+async function confirmarEntregaFinal(idPedido) {
+    const respuesta = confirm("¿Confirmas que recibiste el dinero y entregaste el producto?");
+    
+    if (respuesta) {
+        try {
+            const res = await fetch(`${API_URL}/api/pedidos/finalizar/${idPedido}`, {
+                method: 'PUT'
+            });
 
-async function finalizarPedido(idPedido) {
-    try {
-        const response = await fetch(`${API_URL}/pedidos/finalizar/${idPedido}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            alert("Venta finalizada y stock actualizado");
-            location.reload();
+            if (res.ok) {
+                alert("✅ ¡Venta finalizada con éxito! El dinero ha sido confirmado.");
+                location.reload(); 
+            } else {
+                alert("Error al procesar la entrega en el servidor.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("No se pudo conectar con el servidor.");
         }
-    } catch (error) {
-        console.error("Error al conectar con el servidor:", error);
     }
 }
 
@@ -129,8 +127,7 @@ async function finalizarPedido(idPedido) {
 function abrirModalAgendar(idPedido, nombreComprador) {
     const modal = document.getElementById('modal-agendar');
     const infoTxt = document.getElementById('info-pedido-txt');
-
-    if (!modal) return console.error("Error: No se encontró el modal.");
+    if (!modal) return;
 
     modal.dataset.idPedido = idPedido;
     infoTxt.innerText = `Define la cita de entrega para: ${nombreComprador}`;
@@ -142,11 +139,9 @@ function cerrarModal() {
     modal.classList.add('hidden');
 }
 
-
 // ------------ 4. ENVIAR PROPUESTA (BOTÓN GUARDAR) ------------
 async function enviarPropuesta() {
     const modal = document.getElementById('modal-agendar');
-    // Aseguramos que el ID sea un número entero
     const idPedido = parseInt(modal.dataset.idPedido); 
     const fecha = document.getElementById('fecha-entrega').value;
     const hora = document.getElementById('hora-entrega').value;
@@ -157,46 +152,33 @@ async function enviarPropuesta() {
         return;
     }
 
-    // Estas variables deben coincidir exactamente con los nombres que recibe tu server.js
-    const datosCita = { 
-        id_pedido: idPedido, 
-        fecha: fecha, 
-        hora: hora, 
-        lugar: lugar 
-    };
+    const datosCita = { id_pedido: idPedido, fecha, hora, lugar };
 
     try {
-        const res = await fetch(`https://teschi-bazar-web.onrender.com/api/pedidos/confirmar-cita`, {
+        const res = await fetch(`${API_URL}/api/pedidos/confirmar-cita`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datosCita)
         });
         
         if (res.ok) {
-            alert(`¡Cita agendada para el día ${fecha} a las ${hora} en ${lugar}.`);
+            alert(`¡Cita agendada con éxito!`);
             cerrarModal();
             location.reload();
         } else {
-            // Si el servidor responde con 500, aquí leeremos el mensaje de error de SQL
             const error = await res.json();
-            alert("Error al guardar la cita: " + error.error);
+            alert("Error: " + error.error);
         }
     } catch (error) {
-        console.error("Error en la conexión:", error);
-        alert("No se pudo conectar con el servidor para guardar la cita.");
+        alert("No se pudo conectar con el servidor.");
     }
 }
-
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const inputFecha = document.getElementById('fecha-entrega');
     if (inputFecha) {
         const hoy = new Date();
-        const yyyy = hoy.getFullYear();
-        let mm = String(hoy.getMonth() + 1).padStart(2, '0');
-        let dd = String(hoy.getDate()).padStart(2, '0');
-        const fechaMinima = `${yyyy}-${mm}-${dd}`;
+        const fechaMinima = hoy.toISOString().split('T')[0];
         inputFecha.setAttribute('min', fechaMinima);
     }
 });

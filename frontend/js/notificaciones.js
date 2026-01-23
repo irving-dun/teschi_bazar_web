@@ -1,5 +1,4 @@
 // 1. Inicialización de Socket.io
-
 const socket = io(API_BASE_URL);
 let contadorLocal = 0;
 
@@ -8,7 +7,7 @@ firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         console.log("🔔 Sistema de notificaciones activo para:", user.uid);
 
-        // --- ESCUCHAR NOTIFICACIONES EN TIEMPO REAL ---
+        // --- ESCUCHAR NOTIFICACIONES DE PETICIONES (EXISTENTE) ---
         socket.on(`notificacion_${user.uid}`, (data) => {
             mostrarAlertaVisual(data.mensaje); 
             incrementarContador();
@@ -16,6 +15,26 @@ firebase.auth().onAuthStateChanged((user) => {
             if (menu && menu.style.display === 'block') {
                 cargarNotificacionesEnMenu(user.uid);
             }
+        });
+
+        // --- NUEVO: ESCUCHAR NOTIFICACIONES DE CHAT ---
+        // Usamos el evento que definimos en server.js
+        socket.on(`notificacion_chat_${user.uid}`, (data) => {
+            // Verificamos si el chat está abierto para NO notificar si el usuario ya está leyendo
+            // currentConvId e iniciarMensajeria vienen de scriptChat.js
+            const chatAbierto = (typeof chatWindow !== 'undefined' && chatWindow.style.display === 'block');
+            const enMismaConversacion = (typeof currentConvId !== 'undefined' && currentConvId === data.id_conversacion);
+
+            if (chatAbierto && enMismaConversacion) {
+                return; // Silencio, el usuario ya está en el chat
+            }
+
+            // Si no está en el chat, usamos tus funciones originales
+            mostrarAlertaVisual(`Mensaje nuevo: ${data.contenido}`);
+            incrementarContador();
+            
+            // Agregamos el mensaje al menú manualmente para que aparezca de inmediato
+            agregarChatAlMenu(data);
         });
 
         // --- CONFIGURACIÓN DE LA CAMPANA ---
@@ -39,7 +58,50 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 
-// --- FUNCIONES DE APOYO ---
+// --- NUEVA FUNCIÓN DE APOYO PARA CHAT (No cambia las anteriores) ---
+
+function agregarChatAlMenu(data) {
+    const lista = document.getElementById('listaNotificaciones');
+    if (!lista) return;
+
+    // Buscamos el mensaje de "No tienes notificaciones" por su clase o etiqueta
+    const vacio = lista.querySelector('.notif-vacia') || lista.querySelector('p');
+    if (vacio) vacio.remove();
+
+    const item = document.createElement('div');
+    // Usamos tus clases de CSS si las tienes, o mantenemos el estilo para que resalte
+    item.className = 'notif-item-chat'; // Puedes darle estilo en notificaciones.css
+    item.style.cssText = `
+        padding: 12px; 
+        border-bottom: 1px solid #eee; 
+        cursor: pointer; 
+        background: #f0f7ff; 
+    `;
+    
+    item.innerHTML = `
+        <strong style="font-size: 12px; color: #007bff;">💬 NUEVO MENSAJE</strong>
+        <p style="margin: 0; font-size: 13px; color: #333;">${data.contenido}</p>
+        <small style="font-size: 10px; color: #999;">Ahora mismo</small>
+    `;
+
+    item.onclick = (e) => {
+        e.stopPropagation();
+        // Si el usuario está en index.html, lo mandamos al producto
+        // Si está en detalleProducto.html, abrimos el chat
+        if (typeof iniciarMensajeria === 'function') {
+            document.getElementById('btnContactarVendedor').click();
+            iniciarMensajeria(data.id_conversacion);
+        } else {
+            // Si no está en la página del producto, lo ideal es llevarlo allá
+            // Para esto necesitaríamos el ID del producto en el evento del socket
+            window.location.href = `detalleProducto.html?id=${data.id_producto}`;
+        }
+    };
+
+    lista.prepend(item);
+}
+
+// --- FUNCIONES DE APOYO (SE MANTIENEN IGUAL) ---
 
 function mostrarAlertaVisual(mensaje) {
     const toast = document.createElement('div');
@@ -67,10 +129,11 @@ function mostrarAlertaVisual(mensaje) {
 
 function incrementarContador() {
     contadorLocal++;
-    const badge = document.getElementById('contadorNotificaciones');
-    if (badge) {
-        badge.innerText = contadorLocal;
-        badge.style.display = 'block';
+    const badge = document.getElementById('contadorNotifications'); // Verifica si es 'contadorNotificaciones' o 'contadorNotifications'
+    const realBadge = badge || document.getElementById('contadorNotificaciones');
+    if (realBadge) {
+        realBadge.innerText = contadorLocal;
+        realBadge.style.display = 'block';
     }
 }
 
@@ -82,8 +145,6 @@ function resetearContador() {
 
 async function cargarNotificacionesEnMenu(uid) {
     try {
-        
-        
         const res = await fetch(`${API_BASE_URL}/api/notificaciones/${uid}`);
         const notificaciones = await res.json();
         
@@ -125,13 +186,12 @@ async function cargarNotificacionesEnMenu(uid) {
         console.error("Error al cargar menú:", error);
     }
 }
-// Cerrar menú al hacer clic en cualquier otra parte
+
 window.addEventListener('click', () => {
     const menu = document.getElementById('menuNotificaciones');
     if (menu) menu.style.display = 'none';
 });
 
-// Estilos de animación
 const style = document.createElement('style');
 style.innerHTML = `
     @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }

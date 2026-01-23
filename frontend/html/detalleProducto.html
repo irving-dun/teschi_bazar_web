@@ -10,7 +10,22 @@
     
     <link rel="stylesheet" href="../css/encabezado.css" />
     <link rel="stylesheet" href="../css/detalleProducto.css" />
-    </head>
+    <link rel="stylesheet" href="../css/notificaciones.css" />
+    
+    <style>
+        .chat-oculto { display: none; }
+        .chat-visible { display: flex !important; flex-direction: column; }
+        #chat-container {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 320px; height: 450px;
+            background: white; border: 1px solid #ccc;
+            border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 2000;
+        }
+        #chat-body { flex-grow: 1; overflow-y: auto; padding: 10px; background: #f9f9f9; }
+        .item-conversacion:hover { background: #eef2f7; }
+    </style>
+</head>
 
 <body>
     <header>
@@ -22,15 +37,15 @@
             </ul>
         </nav>
 
-        <div class="notificaciones-container" style="position: relative; display: inline-block;">
-            <button id="btnCampana" style="background: none; border: none; cursor: pointer; font-size: 24px;">
-                🔔 <span id="contadorNotificaciones" style="display: none; position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px;">0</span>
+        <div class="notificaciones-wrapper">
+            <button id="btnCampana" class="btn-campana">
+                🔔 <span id="contadorNotificaciones" class="notif-badge">0</span>
             </button>
 
-            <div id="menuNotificaciones" style="display: none; position: absolute; right: 0; top: 40px; width: 250px; background: white; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 1000; border-radius: 8px;">
-                <div style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Notificaciones</div>
-                <div id="listaNotificaciones" style="max-height: 300px; overflow-y: auto;">
-                    <p style="padding: 10px; font-size: 14px; color: #666;">No tienes notificaciones</p>
+            <div id="menuNotificaciones" class="notif-menu">
+                <div class="notif-header">Notificaciones</div>
+                <div id="listaNotificaciones" class="notif-list">
+                    <p class="notif-vacia">No tienes notificaciones</p>
                 </div>
             </div>
         </div>
@@ -77,7 +92,7 @@
 
                 <div class="action-buttons-single">
                     <button class="btn-primary" id="botonComprar">Comprar Ahora</button>
-                    <button class="btn-secondary" id="botonContactar">Contactar Vendedor</button>
+                    <button class="btn-secondary" id="btnContactarVendedor">Contactar Vendedor</button>
                 </div>
             </div>
         </section>
@@ -117,30 +132,36 @@
         </div>
     </div>
 
-    <div id="chat-container" class="chat-oculto">
-        <div id="chat-header">
-            <div>
-                <h3 id="chat-producto-nombre">Chat de Producto</h3>
-                <p id="chat-vendedor-info">Cargando vendedor...</p>
+    <div id="chat-window" class="chat-oculto"> 
+        <div id="chat-container">
+            <div id="chat-header" style="background: #2c3e50; color: white; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-radius: 10px 10px 0 0;">
+                <div>
+                    <h3 id="chat-producto-nombre" style="margin: 0; font-size: 1em;">Chat de Producto</h3>
+                    <p id="chat-vendedor-info" style="margin: 0; font-size: 0.8em; opacity: 0.8;">Cargando...</p>
+                </div>
+                <button id="cerrar-chat-btn" style="background: none; border: none; color: white; cursor: pointer; font-weight: bold;">X</button>
             </div>
-            <button id="cerrar-chat-btn">X</button>
-        </div>
-        <div id="chat-body">
-            <div id="loading-indicator" style="display: none; text-align: center; padding: 10px;">
-                Cargando mensajes...
+            
+            <div id="chat-body">
+                <div id="chat-content">
+                    <div id="loading-indicator" style="text-align: center; padding: 10px;">
+                        Iniciando chat...
+                    </div>
+                </div>
             </div>
+
+            <div id="chat-footer" style="padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px;">
+                <textarea id="inputMensaje" placeholder="Escribe un mensaje..." rows="1" style="flex-grow: 1; resize: none; border-radius: 5px; border: 1px solid #ddd; padding: 5px;"></textarea>
+                <button id="btnEnviarMensaje" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Enviar</button>
             </div>
-        <div id="chat-footer">
-            <textarea id="chat-input" placeholder="Escribe un mensaje..." rows="1"></textarea>
-            <button id="enviar-mensaje-btn" disabled>Enviar</button>
         </div>
    </div>
 
     <footer>
-    <p>&copy; 2026 Teschi-Bazar</p>
-</footer>
+        <p>&copy; 2026 Teschi-Bazar</p>
+    </footer>
 
-<script src="https://teschi-bazar-web.onrender.com/socket.io/socket.io.js"></script>    
+    <script src="https://teschi-bazar-web.onrender.com/socket.io/socket.io.js"></script>    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -150,8 +171,13 @@
     <script src="../js/scriptIndex.js"></script>
     <script src="../js/detalleProducto.js"></script>
     <script src="../js/scriptCompra.js"></script>
-    
     <script src="../js/scriptChat.js"></script>
+    
+    <script>
+        document.getElementById('cerrar-chat-btn').onclick = () => {
+            document.getElementById('chat-window').style.display = 'none';
+            document.getElementById('btnContactarVendedor').style.display = 'block';
+        };
+    </script>
 </body>
-
 </html>
