@@ -363,18 +363,17 @@ app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
         const query = `
             SELECT 
                 p.id_pedido, 
+                p.id_comprador, -- Ahora enviamos el UID directamente de la tabla pedidos
                 p.total_pedido, 
                 p.estado_pedido, 
                 p.fecha_pedido,
                 p.metodo_pago,
                 p.lugar_entrega,
                 p.notas_comprador,
-                u.nombre AS nombre_comprador, -- Crucial: Trae el nombre de la tabla usuarios
                 pr.nombre_producto,
                 dp.cantidad,
                 dp.precio_unitario
             FROM pedidos p
-            INNER JOIN usuarios u ON p.id_comprador = u.id_usuario -- Unimos por el ID del comprador
             INNER JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
             INNER JOIN productos pr ON dp.id_producto = pr.id_producto
             WHERE p.id_vendedor = $1
@@ -384,7 +383,7 @@ app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
         res.json(result.rows);
     } catch (error) {
         console.error("❌ Error en SQL:", error.message);
-        res.status(500).json({ error: "Error al obtener datos del cliente" });
+        res.status(500).json({ error: "Error al obtener datos de los pedidos" });
     }
 });
 

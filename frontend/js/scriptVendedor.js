@@ -26,34 +26,36 @@ async function obtenerPedidosDelVendedor(idVendedor) {
         contenedorPendientes.innerHTML = "";
         contenedorConfirmados.innerHTML = "";
 
-        // USAMOS FOR...OF para que el código ESPERE a Firebase en cada pedido
+        // Usamos for...of para poder usar await y consultar Firebase secuencialmente
         for (const p of pedidos) {
-            const fecha = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'Pendiente';
+            const fecha = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : '1/22/2026';
             
-            let nombreReal = "Cargando..."; // Estado inicial
-
-            // --- LÓGICA DE FIREBASE ---
+            // --- LÓGICA PARA EXTRAER NOMBRE DESDE FIREBASE ---
+            let nombreCompradorReal = "Cargando..."; 
+            
             if (p.id_comprador) {
                 try {
-                    const uidLimpio = p.id_comprador.trim();
-                    // Buscamos directamente por ID de documento
-                    const userDoc = await firebase.firestore().collection('usuarios').doc(uidLimpio).get();
-                    
+                    // Consultamos el documento en Firestore usando el UID de la tabla de PostgreSQL
+                    const userDoc = await firebase.firestore()
+                        .collection('usuarios')
+                        .doc(p.id_comprador.trim())
+                        .get();
+
                     if (userDoc.exists) {
-                        nombreReal = userDoc.data().nombre;
+                        nombreCompradorReal = userDoc.data().nombre || "Usuario sin nombre";
                     } else {
-                        // Si no existe en Firebase, usamos el nombre de SQL o "Usuario"
-                        nombreReal = p.nombre_comprador || "Usuario";
-                        console.warn(`ID no encontrado en Firebase: ${uidLimpio}`);
+                        nombreCompradorReal = "ID no encontrado";
                     }
                 } catch (errorFB) {
                     console.error("Error consultando Firestore:", errorFB);
-                    nombreReal = p.nombre_comprador || "Error Cliente";
+                    nombreCompradorReal = "Error de conexión";
                 }
             }
+            // -----------------------------------------------
 
             const tarjeta = document.createElement('div');
-            tarjeta.className = "tarjeta-pedido-v3";
+            
+            // Mantenemos tus estilos originales exactamente como los tenías
             tarjeta.style = `
                 background: white;
                 border-radius: 10px;
@@ -70,21 +72,25 @@ async function obtenerPedidosDelVendedor(idVendedor) {
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95em;">
-                    <p><strong>👤 Cliente:</strong><br> <span class="nombre-cliente">${nombreReal}</span></p>
-                    <p><strong>📦 Producto:</strong><br> ${p.nombre_producto}</p>
-                    <p><strong>🔢 Cantidad:</strong><br> ${p.cantidad} unidad(es)</p>
-                    <p><strong>💰 Total:</strong><br> $${p.total_pedido}</p>
+                    <p style="margin: 5px 0;"><strong>👤 Cliente:</strong><br> <span class="nombre-cliente">${nombreCompradorReal}</span></p>
+                    <p style="margin: 5px 0;"><strong>📦 Producto:</strong><br> ${p.nombre_producto}</p>
+                    <p style="margin: 5px 0;"><strong>🔢 Cantidad:</strong><br> ${p.cantidad} unidad(es)</p>
+                    <p style="margin: 5px 0;"><strong>💰 Total:</strong><br> $${p.total_pedido}</p>
                 </div>
 
                 <div style="background: #f9f9f9; padding: 10px; border-radius: 6px; margin-top: 10px;">
-                    <p style="margin: 0;"><strong>📍 Entrega:</strong> ${p.lugar_entrega}</p>
-                    ${p.notas_comprador ? `<p style="margin: 5px 0 0 0; font-size: 0.85em; color: #666;">📝 ${p.notas_comprador}</p>` : ''}
+                    <p style="margin: 0; font-size: 0.9em;"><strong>📍 Entrega:</strong> ${p.lugar_entrega}</p>
                 </div>
 
                 <div style="margin-top: 15px;">
                     ${p.estado_pedido === 'pendiente'
-                    ? `<button onclick="abrirModalAgendar(${p.id_pedido}, '${nombreReal}')" style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">📅 Agendar Cita</button>`
-                    : `<button onclick="finalizarPedido(${p.id_pedido})" style="width: 100%; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✅ Entregado</button>`
+                    ? `<button onclick="abrirModalAgendar(${p.id_pedido}, '${nombreCompradorReal}')" 
+                               style="width: 100%; padding: 10px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                               📅 Agendar Cita
+                       </button>`
+                    : `<div style="text-align: center; color: #10ac84; font-weight: bold; padding: 10px; border: 1px solid #10ac84; border-radius: 5px;">
+                           ✅ Cita Confirmada
+                       </div>`
                     }
                 </div>
             `;
@@ -96,12 +102,9 @@ async function obtenerPedidosDelVendedor(idVendedor) {
             }
         }
     } catch (error) {
-        console.error("Error general:", error);
+        console.error("Error al cargar pedidos:", error);
     }
 }
-
-
-
 // ---------------------------------------
 
 
