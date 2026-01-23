@@ -387,33 +387,17 @@ app.get('/api/vendedor/pedidos/todos/:idVendedor', async (req, res) => {
     }
 });
 
-// RUTA: Confirmar cita (Corregida)
+
+
+// SECCION AGENDAR CITA (Sharon)
+
 app.put('/api/pedidos/confirmar-cita', async (req, res) => {
-    const { id_pedido, fecha, hora, lugar } = req.body;
-    try {
-        // Actualizamos usando 'fecha_pedido' que es la columna que existe
-        await pool.query(
-            `UPDATE pedidos 
-             SET fecha_pedido = $1, hora_entrega = $2, lugar_entrega = $3, estado_pedido = 'confirmado' 
-             WHERE id_pedido = $4`,
-            [fecha, hora, lugar, id_pedido]
-        );
-        res.json({ success: true, message: "Cita agendada" });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
-
-
-// Ajustado para recibir los datos de tu función enviarPropuesta()
-app.put('/api/pedidos/confirmar-cita', async (req, res) => {
     const { id_pedido, fecha, hora, lugar } = req.body;
 
     try {
-        // 1. Actualizamos el pedido y usamos un JOIN para obtener el id_comprador 
-        // y el nombre del producto en una sola consulta
-        const consultaPedido = await pool.query(
+        // 1. Obtener datos necesarios
+        const consulta = await pool.query(
             `SELECT p.id_comprador, pr.nombre_producto 
              FROM pedidos p
              JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
@@ -422,42 +406,53 @@ app.put('/api/pedidos/confirmar-cita', async (req, res) => {
             [id_pedido]
         );
 
-        if (consultaPedido.rows.length === 0) {
-            return res.status(404).json({ error: "No se encontró el detalle del pedido." });
+        if (consulta.rows.length === 0) {
+            return res.status(404).json({ error: "Pedido no encontrado" });
         }
 
-        const { id_comprador, nombre_producto } = consultaPedido.rows[0];
+        const { id_comprador, nombre_producto } = consulta.rows[0];
 
-        // 2. Ejecutamos la actualización de la cita
+        // 2. ACTUALIZACIÓN (Usando columnas reales de tu imagen)
+        // Nota: He cambiado 'confirmado' por 'agendado' como pediste
+        // He usado 'fecha_pedido' porque es la que veo en tu tabla
         await pool.query(
             `UPDATE pedidos 
-             SET fecha_entrega = $1, hora_entrega = $2, lugar_entrega = $3, estado_pedido = 'confirmado' 
-             WHERE id_pedido = $4`,
-            [fecha, hora, lugar, id_pedido]
+             SET fecha_pedido = $1, 
+                 lugar_entrega = $2, 
+                 estado_pedido = 'agendado' 
+             WHERE id_pedido = $3`,
+            [fecha, lugar, id_pedido] // Si no tienes columna 'hora_entrega', debes crearla en SQL o mandarla en la fecha
         );
 
-        // 3. MENSAJE PERSONALIZADO: Ahora incluye el nombre del producto
+        // 3. Notificación y Socket.io
         const mensajeComprador = `¡Cita agendada! Tu entrega de "${nombre_producto}" es el ${fecha} a las ${hora} en ${lugar}.`;
 
-        // 4. Insertar en la tabla de notificaciones
+
         await pool.query(
             'INSERT INTO notificaciones (id_usuario, tipo_notificacion, mensaje, leida) VALUES ($1, $2, $3, $4)',
             [id_comprador, 'cita_confirmada', mensajeComprador, false]
         );
 
-        // 5. Emitir por Socket.io para la alerta instantánea
+
         io.emit(`notificacion_${id_comprador}`, {
             mensaje: mensajeComprador,
             id_pedido: id_pedido
         });
 
-        res.json({ success: true, message: "Comprador notificado con éxito." });
+        res.json({ success: true, message: "Cita agendada y estado actualizado a agendado" });
 
     } catch (error) {
-        console.error("Error al procesar la cita:", error.message);
-        res.status(500).json({ error: "Error interno del servidor" });
+        console.error("Error en el servidor:", error.message);
+        res.status(500).json({ error: "Error al procesar la cita en la base de datos" });
     }
+
 });
+
+
+
+
+
+
 
 app.put('/api/pedidos/finalizar/:id', async (req, res) => {
     const idPedido = req.params.id;
