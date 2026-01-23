@@ -1,172 +1,169 @@
-// =======================================================
-// CONFIGURACIÓN Y VARIABLES GLOBALES DEL CHAT
-// =======================================================
-// CAMBIO: Ahora usamos API_BASE_URL (de firebase-config.js) para que funcione en cualquier laptop
-let socketChat;
-let idConversacionActual = null;
+const btnContactar = document.getElementById('btnContactarVendedor');
+const chatWindow = document.getElementById('chat-window'); // Tu ventana emergente
+const chatContent = document.getElementById('chat-content'); // Contenedor interno
 
-// Elementos del DOM
-const chatContainer = document.getElementById('chat-container');
-const chatBody = document.getElementById('chat-body');
-const chatInput = document.getElementById('chat-input');
-const enviarMensajeBtn = document.getElementById('enviar-mensaje-btn');
-const loadingIndicator = document.getElementById('loading-indicator');
-const chatProductoNombre = document.getElementById('chat-producto-nombre');
+let currentConvId = null;
 
-// =======================================================
-// 1. UTILIDADES DE FIREBASE (Obtener Token y Usuario)
-// =======================================================
+btnContactar.addEventListener('click', async () => {
+    const user = firebase.auth().currentUser;
+    if (!user) return alert("Debes iniciar sesión para contactar al vendedor");
 
-function obtenerUsuarioFirebase() {
-    return new Promise((resolve, reject) => {
-        const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-            unsubscribe();
-            if (user) resolve(user);
-            else resolve(null);
-        }, reject);
-    });
+    // Datos obtenidos de detalleProducto.js
+    const idVendedor = document.getElementById('detalleNombreVendedor').getAttribute('data-uid-vendedor');
+    const urlParams = new URLSearchParams(window.location.search);
+    const idProducto = urlParams.get('id');
+
+    btnContactar.style.display = 'none';
+    chatWindow.style.display = 'block';
+
+    if (user.uid === idVendedor) {
+        // ESCENARIO VENDEDOR: Cargar lista de interesados
+        cargarListaInteresados(idProducto);
+    } else {
+        // ESCENARIO COMPRADOR: Abrir chat directo
+        abrirChatDirecto(user.uid, idVendedor, idProducto);
+    }
+});
+
+async function cargarListaInteresados(idProducto) {
+    chatContent.innerHTML = "<p>Cargando interesados...</p>";
+    const res = await fetch(`${API_BASE_URL}/api/chat/vendedor/producto/${idProducto}`);
+    const conversatines = await res.json();
+
+    chatContent.innerHTML = "<h4>Interesados en este producto:</h4>";
+    
+    for (const conv of conversatines) {
+        // Extraemos nombre desde Firebase como lo haces en el perfil
+        const userDoc = await firebase.firestore().collection('usuarios').doc(conv.id_comprador).get();
+        const nombre = userDoc.exists ? userDoc.data().nombre : "Usuario";
+
+        const item = document.createElement('div');
+        item.className = "item-conversacion";
+        item.style = "padding: 10px; border-bottom: 1px solid #eee; cursor: pointer;";
+        item.innerHTML = `<strong>${nombre}</strong><br><small>ID: ${conv.id_conversacion}</small>`;
+        item.onclick = () => iniciarMensajeria(conv.id_conversacion);
+        chatContent.appendChild(item);
+    }
 }
 
-// =======================================================
-// 2. LÓGICA DE CONEXIÓN Y REGISTRO (Socket.IO)
-// =======================================================
+async function abrirChatDirecto(uidComprador, uidVendedor, idProducto) {
+    const res = await fetch(`${API_BASE_URL}/api/chat/obtener-conversacion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_comprador: uidComprador, id_vendedor: uidVendedor, id_producto: idProducto })
+    });
+    const conv = await res.json();
+    iniciarMensajeria(conv.id_conversacion);
+}
 
-async function conectarChat(userId, idToken, idProducto) {
-    if (!socketChat) {
-        // CAMBIO: Conectamos directamente al servidor de Render definido globalmente
-        socketChat = io(API_BASE_URL);
+// En scriptChat.js
 
-        socketChat.on('server:auth_error', (msg) => {
-            alert(msg);
-            cerrarChat();
-        });
+// Conexión inicial al socket (ya tienes la librería en tu HTML)
+const socket = io(API_BASE_URL); 
 
-        // Escuchar nuevos mensajes en tiempo real
-        socketChat.on('server:nuevo_mensaje', (mensaje) => {
-            // El userId es necesario para saber si el mensaje es "mio" o "del otro"
-            renderizarMensaje(mensaje, userId);
-        });
+async function iniciarMensajeria(idConv) {
+    currentConvId = idConv;
+    socket.emit('join_room', idConv); // Unirse a la sala privada
+
+    // 1. Limpiar contenedor y preparar interfaz de chat
+    chatContent.innerHTML = `
+        <div id="header-chat" style="display: flex; align-items: center; padding: 5px; border-bottom: 1px solid #ddd;">
+            <button id="btnVolverChat" style="display:none; margin-right: 10px; background: none; border: none; cursor: pointer;">⬅️</button>
+            <span id="chat-con-quien" style="font-weight: bold; font-size: 0.9em;">Chat</span>
+        </div>
+        <div id="mensajes-lista" style="height: 300px; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+            </div>
+    `;
+
+    // 2. Mostrar botón volver solo si el usuario es el vendedor
+    const idVendedor = document.getElementById('detalleNombreVendedor').getAttribute('data-uid-vendedor');
+    if (firebase.auth().currentUser.uid === idVendedor) {
+        const btnVolver = document.getElementById('btnVolverChat');
+        btnVolver.style.display = 'block';
+        btnVolver.onclick = () => {
+            const idProducto = new URLSearchParams(window.location.search).get('id');
+            cargarListaInteresados(idProducto);
+        };
     }
 
-    // Registrar al usuario en el servidor para que el socket sepa quién es
-    socketChat.emit('client:registrar_usuario', { idToken, userId });
+    // 3. Cargar mensajes antiguos desde la DB
+    cargarHistorial(idConv);
 }
 
-// =======================================================
-// 3. CARGAR HISTORIAL DE MENSAJES (API REST)
-// =======================================================
+// ... (tu código anterior de scriptChat.js se mantiene igual hasta iniciarMensajeria)
 
-async function cargarHistorialYConversacion(idProducto) {
+async function cargarHistorial(idConv) {
+    const lista = document.getElementById('mensajes-lista');
+    lista.innerHTML = "<p style='text-align:center; font-size:0.8em;'>Cargando historial...</p>";
+
     try {
-        // CAMBIO: Aquí se podría implementar un fetch a `${API_BASE_URL}/api/chat/historial/${idProducto}`
-        // Por ahora, mantenemos la limpieza del indicador de carga como en tu original.
-        if (loadingIndicator) loadingIndicator.style.display = 'none';
+        const res = await fetch(`${API_BASE_URL}/api/chat/mensajes/${idConv}`);
+        const mensajes = await res.json();
+        
+        lista.innerHTML = ""; // Limpiar el "cargando"
+        mensajes.forEach(msg => pintarMensaje(msg));
+        lista.scrollTop = lista.scrollHeight; // Bajar el scroll al final
     } catch (error) {
         console.error("Error al cargar historial:", error);
     }
 }
 
-// =======================================================
-// 4. INTERFAZ DE USUARIO (Renderizado)
-// =======================================================
+// Función para pintar las burbujas de texto
+function pintarMensaje(msg) {
+    const lista = document.getElementById('mensajes-lista');
+    if (!lista) return;
 
-function renderizarMensaje(msg, userIdLocal) {
-    const div = document.createElement('div');
-    // CAMBIO: Verificamos si el remitente coincide con el usuario logueado para asignar la clase CSS
-    const claseMio = msg.id_remitente === userIdLocal ? 'mio' : 'otro';
-    div.classList.add('mensaje-chat', claseMio);
-
-    // Formatear la hora
-    const fecha = msg.fecha_envio ? new Date(msg.fecha_envio) : new Date();
-    const horaFormateada = fecha.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    div.innerHTML = `
-        <p>${msg.contenido}</p>
-        <span class="timestamp">${horaFormateada}</span>
+    const soyYo = msg.id_remitente === firebase.auth().currentUser.uid;
+    const burbuja = document.createElement('div');
+    
+    burbuja.style = `
+        max-width: 85%;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 0.9em;
+        margin-bottom: 4px;
+        word-wrap: break-word;
+        align-self: ${soyYo ? 'flex-end' : 'flex-start'};
+        background: ${soyYo ? '#3498db' : '#ecf0f1'};
+        color: ${soyYo ? 'white' : '#2c3e50'};
     `;
-
-    chatBody.appendChild(div);
-    chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll al final para ver el último mensaje
+    burbuja.textContent = msg.contenido;
+    lista.appendChild(burbuja);
+    lista.scrollTop = lista.scrollHeight;
 }
 
-// =======================================================
-// 5. ACCIONES PRINCIPALES (Abrir, Cerrar, Enviar)
-// =======================================================
+// Lógica para enviar mensajes
+document.getElementById('btnEnviarMensaje').addEventListener('click', enviarMensaje);
 
-async function abrirChat() {
-    const user = await obtenerUsuarioFirebase();
-    
-    if (!user) {
-        alert("Debes iniciar sesión para contactar al vendedor.");
-        window.location.href = 'login.html';
-        return;
-    }
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const idProducto = urlParams.get('id');
-    const idToken = await user.getIdToken();
-
-    // Mostrar UI del Chat
-    chatContainer.classList.remove('chat-oculto');
-    chatContainer.classList.add('chat-visible');
-    
-    // Ocultar botón de contactar mientras el chat está abierto
-    const btnContactar = document.getElementById('botonContactar');
-    if (btnContactar) btnContactar.style.display = 'none';
-    
-    // Configurar nombre del producto en el encabezado del chat
-    const nombreProd = document.getElementById('nombreProducto').textContent;
-    chatProductoNombre.textContent = `Chat: ${nombreProd}`;
-
-    // Conectar vía Sockets
-    await conectarChat(user.uid, idToken, idProducto);
-    enviarMensajeBtn.disabled = false;
-    cargarHistorialYConversacion(idProducto);
-}
-
-function cerrarChat() {
-    chatContainer.classList.remove('chat-visible');
-    chatContainer.classList.add('chat-oculto');
-    const btnContactar = document.getElementById('botonContactar');
-    if (btnContactar) btnContactar.style.display = 'block';
-}
-
-async function enviarMensaje() {
-    const contenido = chatInput.value.trim();
-    if (!contenido) return;
-
-    const user = firebase.auth().currentUser;
-    if (!user) return;
-
-    const idToken = await user.getIdToken();
-    const urlParams = new URLSearchParams(window.location.search);
-    const idProducto = urlParams.get('id');
-
-    const data = {
-        idToken: idToken,
-        remitenteId: user.uid,
-        productoId: idProducto,
-        contenido: contenido
-    };
-
-    // CAMBIO: Emitimos el mensaje al servidor a través del Socket
-    socketChat.emit('client:enviar_mensaje', data);
-    chatInput.value = ''; // Limpiar el campo de texto
-}
-
-// Event Listeners
-const btnContactar = document.getElementById('botonContactar');
-if (btnContactar) btnContactar.addEventListener('click', abrirChat);
-
-const btnCerrarChat = document.getElementById('cerrar-chat-btn');
-if (btnCerrarChat) btnCerrarChat.addEventListener('click', cerrarChat);
-
-if (enviarMensajeBtn) enviarMensajeBtn.addEventListener('click', enviarMensaje);
-
-// Enviar con la tecla Enter
-chatInput.addEventListener('keypress', (e) => {
+// También enviar con la tecla "Enter"
+document.getElementById('inputMensaje').addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         enviarMensaje();
+    }
+});
+
+function enviarMensaje() {
+    const input = document.getElementById('inputMensaje');
+    const contenido = input.value.trim();
+    const user = firebase.auth().currentUser;
+
+    if (contenido && currentConvId && user) {
+        const data = {
+            id_conversacion: currentConvId,
+            id_remitente: user.uid,
+            contenido: contenido
+        };
+        
+        // Enviamos por Socket.io
+        socket.emit('send_message', data);
+        input.value = ""; // Limpiar caja
+    }
+}
+
+// Escuchar mensajes en tiempo real
+socket.on('receive_message', (msg) => {
+    if (msg.id_conversacion === currentConvId) {
+        pintarMensaje(msg);
     }
 });

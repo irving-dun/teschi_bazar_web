@@ -5,9 +5,9 @@ const cloudinary = require('cloudinary').v2; // Importa Cloudinary
 
 // Configuración de Cloudinary usando tus variables del .env
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
 // CÓDIGO TEMPORAL DE PRUEBA 
@@ -22,7 +22,7 @@ const app = express();
 const server = http.createServer(app);
 const cors = require('cors');
 //middleware inicial
-app.use(cors()); 
+app.use(cors());
 
 //  Base de datos y servicios externos
 const { Pool } = require('pg');
@@ -59,8 +59,8 @@ app.use('/uploads', express.static(UPLOADS_DIR));
 const firebaseConfig = {
     projectId: process.env.FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY 
-        ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
+    privateKey: process.env.FIREBASE_PRIVATE_KEY
+        ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
         : undefined,
 };
 
@@ -76,8 +76,8 @@ if (!admin.apps.length) {
     }
 }
 //------------ CONFIGURACIÓN DE MULTER (PROCESAMIENTO EN MEMORIA) ------------
-const storage = multer.memoryStorage(); 
-const upload = multer({ 
+const storage = multer.memoryStorage();
+const upload = multer({
     storage: storage,
     limits: { fileSize: 5 * 1024 * 1024 } // Límite de 5MB por imagen
 });
@@ -356,12 +356,12 @@ app.post('/api/pedidos/crear-peticion', async (req, res) => {
             ) VALUES ($1, $2, CURRENT_TIMESTAMP, 'pendiente', $3, $4, $5)
             RETURNING id_pedido
         `;
-        
+
         const resPedido = await client.query(queryPedido, [
-            id_comprador, 
-            id_usuario_vendedor, 
-            total, 
-            metodo_pago, 
+            id_comprador,
+            id_usuario_vendedor,
+            total,
+            metodo_pago,
             lugar_entrega
         ]);
 
@@ -450,7 +450,7 @@ app.put('/api/pedidos/confirmar-cita', async (req, res) => {
              FROM pedidos p
              JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
              JOIN productos pr ON dp.id_producto = pr.id_producto
-             WHERE p.id_pedido = $1`, 
+             WHERE p.id_pedido = $1`,
             [id_pedido]
         );
 
@@ -587,11 +587,108 @@ app.get('/api/productos-destacados', async (req, res) => {
         res.status(500).json({ error: 'Error al obtener destacados.' });
     }
 });
+
+// RUTAS: mensajería
+// A. Buscar o crear conversación (Lógica Comprador)
+app.post('/api/chat/obtener-conversacion', async (req, res) => {
+    const { id_comprador, id_vendedor, id_producto } = req.body;
+    try {
+        // Buscamos si ya existe el hilo para este producto entre estos dos usuarios
+        let query = `SELECT id_conversacion FROM conversacion 
+                     WHERE id_comprador = $1 AND id_vendedor = $2 AND id_producto = $3`;
+        let result = await pool.query(query, [id_comprador, id_vendedor, id_producto]);
+
+        if (result.rows.length > 0) {
+            return res.json(result.rows[0]);
+        }
+
+        // Si no existe, la creamos
+        const insertQuery = `INSERT INTO conversacion (id_comprador, id_vendedor, id_producto, estado_conversacion_enum) 
+                             VALUES ($1, $2, $3, 'activa') RETURNING id_conversacion`;
+        const newConv = await pool.query(insertQuery, [id_comprador, id_vendedor, id_producto]);
+        res.json(newConv.rows[0]);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// B. Listar conversaciones de un producto (Lógica Vendedor)
+app.get('/api/chat/vendedor/producto/:idProducto', async (req, res) => {
+    try {
+        const { idProducto } = req.params;
+        const query = `SELECT id_conversacion, id_comprador, ultimo_mensaje_at 
+                       FROM conversacion WHERE id_producto = $1 ORDER BY ultimo_mensaje_at DESC`;
+        const result = await pool.query(query, [idProducto]);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ruta historial 
+app.get('/api/chat/mensajes/:idConversacion', async (req, res) => {
+    try {
+        const { idConversacion } = req.params;
+        const query = `SELECT * FROM mensajes WHERE id_conversacion = $1 ORDER BY fecha_envio ASC`;
+        const result = await pool.query(query, [idConversacion]);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 //------------ SERVIDOR Y SOCKET.IO------------
 const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
 
 initializeDatabase().then(() => {
     server.listen(port, () => {
         console.log(`🚀 Servidor en puerto ${port}`);
+    });
+});
+
+// socket para mensajería 
+// Agrega esto a tu server.js
+io.on('connection', (socket) => {
+    // El cliente se une a una conversación específica
+    socket.on('join_room', (idConversacion) => {
+        socket.join(idConversacion);
+        console.log(`Usuario unido a sala: ${idConversacion}`);
+    });
+
+    // Escuchar cuando alguien envía un mensaje
+    socket.on('send_message', async (data) => {
+        const { id_conversacion, id_remitente, contenido } = data;
+
+        try {
+            // 1. Guardar mensaje y actualizar conversación (Lo que ya tenías)
+            const queryMsg = `INSERT INTO mensajes (id_conversacion, id_remitente, contenido) VALUES ($1, $2, $3) RETURNING *`;
+            const result = await pool.query(queryMsg, [id_conversacion, id_remitente, contenido]);
+            await pool.query(`UPDATE conversacion SET ultimo_mensaje_at = NOW() WHERE id_conversacion = $1`, [id_conversacion]);
+
+            // 2. BUSCAR AL RECEPTOR: Obtenemos los IDs de la conversación para saber a quién notificar
+            const queryConv = `SELECT id_comprador, id_vendedor FROM conversacion WHERE id_conversacion = $1`;
+            const convData = await pool.query(queryConv, [id_conversacion]);
+
+            if (convData.rows.length > 0) {
+                const { id_comprador, id_vendedor } = convData.rows[0];
+                // Si el remitente es el comprador, el receptor es el vendedor. Si no, es el comprador.
+                const id_receptor = (id_remitente === id_comprador) ? id_vendedor : id_comprador;
+
+                // 3. EMITIR EVENTO GLOBAL DE NOTIFICACIÓN
+                // Enviamos el mensaje al receptor específico usando su UID como nombre de sala
+                // En server.js, dentro de send_message
+                io.emit(`notificacion_chat_${id_receptor}`, {
+                    tipo: 'chat',
+                    contenido: contenido.substring(0, 30),
+                    id_conversacion: id_conversacion,
+                    id_producto: id_producto // <-- Agrega esto aquí
+                });
+            }
+
+            // 4. Emitir el mensaje a la sala del chat (Lo que ya tenías)
+            io.to(id_conversacion).emit('receive_message', result.rows[0]);
+
+        } catch (err) {
+            console.error("Error en proceso de mensaje/notificación:", err);
+        }
     });
 });
