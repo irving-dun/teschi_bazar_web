@@ -4,9 +4,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const registroForm = document.getElementById("registroForm");
     const loginForm = document.getElementById("loginForm");
     const loginmensajeError = document.getElementById("login-error-mensaje");
-    const perfilCargadoContainer = document.getElementById("perfil-cargado");
+    const recuerdameCheckbox = document.getElementById("recuerdame"); // Checkbox
 
     let estaRegistrando = false; 
+
+    // --- 0. LÓGICA DE "RECUÉRDAME" (AL CARGAR) ---
+    // Revisamos si hay un correo guardado previamente
+    const emailGuardado = localStorage.getItem("usuarioEmail");
+    if (emailGuardado && document.getElementById("log-email")) {
+        document.getElementById("log-email").value = emailGuardado;
+        if (recuerdameCheckbox) recuerdameCheckbox.checked = true;
+    }
 
     // --- Control de las Animaciones ---
     const registraSesionButton = document.getElementById("signUp");
@@ -44,8 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
                 const user = userCredential.user;
 
-                // GUARDAR EN FIRESTORE
-                // Usamos firebase.firestore() directamente para evitar errores si 'db' no fue definida globalmente
                 await firebase.firestore().collection("usuarios").doc(user.uid).set({
                     nombre: nombre,
                     telefono: telefono,
@@ -75,10 +81,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const email = document.getElementById("log-email").value.trim();
             const password = document.getElementById("log-password").value;
+            
+            // Lógica para Guardar o Borrar el correo según el checkbox
+            if (recuerdameCheckbox && recuerdameCheckbox.checked) {
+                localStorage.setItem("usuarioEmail", email);
+            } else {
+                localStorage.removeItem("usuarioEmail");
+            }
 
             firebase.auth().signInWithEmailAndPassword(email, password)
                 .then(() => {
-                    // No hace falta alert aquí si queremos que sea rápido
                     window.location.href = "index.html";
                 })
                 .catch((error) => {
@@ -96,8 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===============================================
     firebase.auth().onAuthStateChanged((user) => {
         if (user && !estaRegistrando) { 
-            // Si ya está logueado, no mostramos el form, vamos directo al inicio
-            window.location.replace("index.html"); // .replace evita que el usuario regrese al login con el botón 'atrás'
+            window.location.replace("index.html");
         } else if (!user) {
             if (contenedorPrincipal) contenedorPrincipal.style.display = "flex";
         }
