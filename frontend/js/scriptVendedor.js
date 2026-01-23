@@ -14,8 +14,7 @@ firebase.auth().onAuthStateChanged(user => {
 
 // ------------ 2. CARGAR PEDIDOS DESDE EL SERVIDOR ------------
 
-
-async function obtenerPedidosDelVendedor(idVendedor) {
+ async function obtenerPedidosDelVendedor(idVendedor) {
     const contenedorPendientes = document.getElementById('lista-pedidos-pendientes');
     const contenedorConfirmados = document.getElementById('lista-pedidos-confirmados');
 
@@ -26,11 +25,29 @@ async function obtenerPedidosDelVendedor(idVendedor) {
         contenedorPendientes.innerHTML = "";
         contenedorConfirmados.innerHTML = "";
 
-        pedidos.forEach(p => {
+        // Usamos for...of para poder usar await dentro del bucle
+        for (const p of pedidos) {
             const fecha = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'Pendiente';
 
+            // --- LÓGICA PARA TRAER NOMBRE DESDE FIREBASE ---
+            let nombreFirebase = "Usuario"; 
+            try {
+                // p.id_comprador debe ser el UID de Firebase que guardaste en PostgreSQL
+                const userDoc = await firebase.firestore().collection('usuarios').doc(p.id_comprador).get();
+                if (userDoc.exists) {
+                    nombreFirebase = userDoc.data().nombre;
+                } else if (p.nombre_comprador) {
+                    // Si no está en Firestore, usamos el que trajo SQL por si acaso
+                    nombreFirebase = p.nombre_comprador;
+                }
+            } catch (errorFirebase) {
+                console.warn("No se pudo obtener nombre de Firebase para:", p.id_comprador);
+                nombreFirebase = p.nombre_comprador || "Usuario";
+            }
+            // -----------------------------------------------
+
             const tarjeta = document.createElement('div');
-            tarjeta.className = "tarjeta-pedido-v3"; // Clase para tus estilos CSS
+            tarjeta.className = "tarjeta-pedido-v3";
             tarjeta.style = `
                 background: white;
                 border-radius: 10px;
@@ -47,7 +64,7 @@ async function obtenerPedidosDelVendedor(idVendedor) {
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95em;">
-                    <p><strong>👤 Cliente:</strong><br> ${p.nombre_comprador ? p.nombre_comprador : 'Usuario sin nombre'}</p>
+                    <p><strong>👤 Cliente:</strong><br> ${nombreFirebase}</p>
                     <p><strong>📦 Producto:</strong><br> ${p.nombre_producto}</p>
                     <p><strong>🔢 Cantidad:</strong><br> ${p.cantidad} unidad(es)</p>
                     <p><strong>💰 Precio Unit:</strong><br> $${p.precio_unitario}</p>
@@ -60,8 +77,8 @@ async function obtenerPedidosDelVendedor(idVendedor) {
 
                 <div style="margin-top: 15px;">
                     ${p.estado_pedido === 'pendiente'
-                    ? `<button onclick="agendarPedido(${p.id_pedido})" style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">📅 Agendar con Cliente</button>`
-                    : `<button onclick="marcarEntregado(${p.id_pedido})" style="width: 100%; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✅ Confirmar Entrega</button>`
+                    ? `<button onclick="abrirModalAgendar(${p.id_pedido}, '${nombreFirebase}')" style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">📅 Agendar con Cliente</button>`
+                    : `<button onclick="finalizarPedido(${p.id_pedido})" style="width: 100%; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✅ Confirmar Entrega</button>`
                 }
                 </div>
             `;
@@ -71,11 +88,12 @@ async function obtenerPedidosDelVendedor(idVendedor) {
             } else {
                 contenedorConfirmados.appendChild(tarjeta);
             }
-        });
+        }
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error al cargar pedidos:", error);
     }
 }
+
 
 async function finalizarPedido(idPedido) {
     try {
