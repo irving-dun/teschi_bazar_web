@@ -25,31 +25,31 @@ async function obtenerPedidosDelVendedor(idVendedor) {
         contenedorPendientes.innerHTML = "";
         contenedorConfirmados.innerHTML = "";
 
-        // Usamos for...of para manejar peticiones asíncronas (Firebase) una por una
+        // USAMOS FOR...OF para que el código ESPERE a Firebase en cada pedido
         for (const p of pedidos) {
             const fecha = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'Pendiente';
+            
+            let nombreReal = "Cargando..."; // Estado inicial
 
-            // --- LÓGICA REFORZADA PARA FIREBASE ---
-            let nombreReal = "Usuario Desconocido";
-
+            // --- LÓGICA DE FIREBASE ---
             if (p.id_comprador) {
                 try {
-                    // .trim() limpia cualquier espacio accidental que venga de la DB
                     const uidLimpio = p.id_comprador.trim();
+                    // Buscamos directamente por ID de documento
                     const userDoc = await firebase.firestore().collection('usuarios').doc(uidLimpio).get();
-
-                    if (userDoc.exists && userDoc.data().nombre) {
+                    
+                    if (userDoc.exists) {
                         nombreReal = userDoc.data().nombre;
                     } else {
-                        // Si no existe en Firebase, usamos el nombre que traiga PostgreSQL
+                        // Si no existe en Firebase, usamos el nombre de SQL o "Usuario"
                         nombreReal = p.nombre_comprador || "Usuario";
+                        console.warn(`ID no encontrado en Firebase: ${uidLimpio}`);
                     }
                 } catch (errorFB) {
-                    console.error("Error al consultar Firebase para UID:", p.id_comprador, errorFB);
-                    nombreReal = p.nombre_comprador || "Error al cargar nombre";
+                    console.error("Error consultando Firestore:", errorFB);
+                    nombreReal = p.nombre_comprador || "Error Cliente";
                 }
             }
-            // ---------------------------------------
 
             const tarjeta = document.createElement('div');
             tarjeta.className = "tarjeta-pedido-v3";
@@ -69,22 +69,22 @@ async function obtenerPedidosDelVendedor(idVendedor) {
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95em;">
-                    <p><strong>👤 Cliente:</strong><br> ${nombreReal}</p>
+                    <p><strong>👤 Cliente:</strong><br> <span class="nombre-cliente">${nombreReal}</span></p>
                     <p><strong>📦 Producto:</strong><br> ${p.nombre_producto}</p>
                     <p><strong>🔢 Cantidad:</strong><br> ${p.cantidad} unidad(es)</p>
-                    <p><strong>💰 Precio Unit:</strong><br> $${p.precio_unitario}</p>
+                    <p><strong>💰 Total:</strong><br> $${p.total_pedido}</p>
                 </div>
 
                 <div style="background: #f9f9f9; padding: 10px; border-radius: 6px; margin-top: 10px;">
                     <p style="margin: 0;"><strong>📍 Entrega:</strong> ${p.lugar_entrega}</p>
-                    <p style="margin: 5px 0 0 0; color: #27ae60; font-size: 1.1em;"><strong>Total: $${p.total_pedido}</strong></p>
+                    ${p.notas_comprador ? `<p style="margin: 5px 0 0 0; font-size: 0.85em; color: #666;">📝 ${p.notas_comprador}</p>` : ''}
                 </div>
 
                 <div style="margin-top: 15px;">
                     ${p.estado_pedido === 'pendiente'
-                    ? `<button onclick="abrirModalAgendar(${p.id_pedido}, '${nombreReal}')" style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">📅 Agendar con Cliente</button>`
-                    : `<button onclick="finalizarPedido(${p.id_pedido})" style="width: 100%; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✅ Confirmar Entrega</button>`
-                }
+                    ? `<button onclick="abrirModalAgendar(${p.id_pedido}, '${nombreReal}')" style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">📅 Agendar Cita</button>`
+                    : `<button onclick="finalizarPedido(${p.id_pedido})" style="width: 100%; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✅ Entregado</button>`
+                    }
                 </div>
             `;
 
@@ -95,7 +95,7 @@ async function obtenerPedidosDelVendedor(idVendedor) {
             }
         }
     } catch (error) {
-        console.error("Error al procesar la lista de pedidos:", error);
+        console.error("Error general:", error);
     }
 }
 
