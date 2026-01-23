@@ -12,39 +12,6 @@ firebase.auth().onAuthStateChanged(user => {
     }
 });
 
-// --- LÓGICA REFORZADA PARA FIREBASE ---
-let nombreReal = "Usuario Desconocido"; 
-
-if (p.id_comprador) {
-    try {
-        const uidBusqueda = p.id_comprador.trim();
-        
-        // Intentamos primero buscar por el ID del documento (lo más rápido)
-        let userDoc = await firebase.firestore().collection('usuarios').doc(uidBusqueda).get();
-        
-        if (userDoc.exists) {
-            nombreReal = userDoc.data().nombre || "Sin nombre en Firebase";
-        } else {
-            // Si no lo encuentra por ID, lo buscamos como un campo 'uid' dentro de los documentos
-            // Esto es muy común si usaste set() con IDs automáticos
-            const querySnapshot = await firebase.firestore()
-                .collection('usuarios')
-                .where('uid', '==', uidBusqueda)
-                .get();
-
-            if (!querySnapshot.empty) {
-                nombreReal = querySnapshot.docs[0].data().nombre;
-            } else {
-                // Si nada funciona, dejamos el nombre que viene de la base de datos SQL
-                nombreReal = p.nombre_comprador || "Usuario";
-                console.warn(`⚠️ El UID ${uidBusqueda} no existe en la colección 'usuarios' de Firebase.`);
-            }
-        }
-    } catch (errorFB) {
-        console.error("❌ Error real de Firebase:", errorFB);
-        nombreReal = p.nombre_comprador || "Error de conexión";
-    }
-}
 
 // ------------ 2. CARGAR PEDIDOS DESDE EL SERVIDOR ------------
 
