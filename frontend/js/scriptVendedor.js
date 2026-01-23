@@ -14,7 +14,7 @@ firebase.auth().onAuthStateChanged(user => {
 
 // ------------ 2. CARGAR PEDIDOS DESDE EL SERVIDOR ------------
 
- async function obtenerPedidosDelVendedor(idVendedor) {
+async function obtenerPedidosDelVendedor(idVendedor) {
     const contenedorPendientes = document.getElementById('lista-pedidos-pendientes');
     const contenedorConfirmados = document.getElementById('lista-pedidos-confirmados');
 
@@ -25,26 +25,31 @@ firebase.auth().onAuthStateChanged(user => {
         contenedorPendientes.innerHTML = "";
         contenedorConfirmados.innerHTML = "";
 
-        // Usamos for...of para poder usar await dentro del bucle
+        // Usamos for...of para manejar peticiones asíncronas (Firebase) una por una
         for (const p of pedidos) {
             const fecha = p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleDateString() : 'Pendiente';
 
-            // --- LÓGICA PARA TRAER NOMBRE DESDE FIREBASE ---
-            let nombreFirebase = "Usuario"; 
-            try {
-                // p.id_comprador debe ser el UID de Firebase que guardaste en PostgreSQL
-                const userDoc = await firebase.firestore().collection('usuarios').doc(p.id_comprador).get();
-                if (userDoc.exists) {
-                    nombreFirebase = userDoc.data().nombre;
-                } else if (p.nombre_comprador) {
-                    // Si no está en Firestore, usamos el que trajo SQL por si acaso
-                    nombreFirebase = p.nombre_comprador;
+            // --- LÓGICA REFORZADA PARA FIREBASE ---
+            let nombreReal = "Usuario Desconocido";
+
+            if (p.id_comprador) {
+                try {
+                    // .trim() limpia cualquier espacio accidental que venga de la DB
+                    const uidLimpio = p.id_comprador.trim();
+                    const userDoc = await firebase.firestore().collection('usuarios').doc(uidLimpio).get();
+
+                    if (userDoc.exists && userDoc.data().nombre) {
+                        nombreReal = userDoc.data().nombre;
+                    } else {
+                        // Si no existe en Firebase, usamos el nombre que traiga PostgreSQL
+                        nombreReal = p.nombre_comprador || "Usuario";
+                    }
+                } catch (errorFB) {
+                    console.error("Error al consultar Firebase para UID:", p.id_comprador, errorFB);
+                    nombreReal = p.nombre_comprador || "Error al cargar nombre";
                 }
-            } catch (errorFirebase) {
-                console.warn("No se pudo obtener nombre de Firebase para:", p.id_comprador);
-                nombreFirebase = p.nombre_comprador || "Usuario";
             }
-            // -----------------------------------------------
+            // ---------------------------------------
 
             const tarjeta = document.createElement('div');
             tarjeta.className = "tarjeta-pedido-v3";
@@ -64,7 +69,7 @@ firebase.auth().onAuthStateChanged(user => {
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95em;">
-                    <p><strong>👤 Cliente:</strong><br> ${nombreFirebase}</p>
+                    <p><strong>👤 Cliente:</strong><br> ${nombreReal}</p>
                     <p><strong>📦 Producto:</strong><br> ${p.nombre_producto}</p>
                     <p><strong>🔢 Cantidad:</strong><br> ${p.cantidad} unidad(es)</p>
                     <p><strong>💰 Precio Unit:</strong><br> $${p.precio_unitario}</p>
@@ -77,7 +82,7 @@ firebase.auth().onAuthStateChanged(user => {
 
                 <div style="margin-top: 15px;">
                     ${p.estado_pedido === 'pendiente'
-                    ? `<button onclick="abrirModalAgendar(${p.id_pedido}, '${nombreFirebase}')" style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">📅 Agendar con Cliente</button>`
+                    ? `<button onclick="abrirModalAgendar(${p.id_pedido}, '${nombreReal}')" style="width: 100%; background: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">📅 Agendar con Cliente</button>`
                     : `<button onclick="finalizarPedido(${p.id_pedido})" style="width: 100%; background: #27ae60; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✅ Confirmar Entrega</button>`
                 }
                 </div>
@@ -90,7 +95,7 @@ firebase.auth().onAuthStateChanged(user => {
             }
         }
     } catch (error) {
-        console.error("Error al cargar pedidos:", error);
+        console.error("Error al procesar la lista de pedidos:", error);
     }
 }
 
