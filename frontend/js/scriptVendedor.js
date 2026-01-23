@@ -142,20 +142,28 @@ function cerrarModal() {
     modal.classList.add('hidden');
 }
 
+
 // ------------ 4. ENVIAR PROPUESTA (BOTÓN GUARDAR) ------------
 async function enviarPropuesta() {
     const modal = document.getElementById('modal-agendar');
-    const idPedido = modal.dataset.idPedido;
+    // Aseguramos que el ID sea un número entero
+    const idPedido = parseInt(modal.dataset.idPedido); 
     const fecha = document.getElementById('fecha-entrega').value;
     const hora = document.getElementById('hora-entrega').value;
     const lugar = document.getElementById('lugar-entrega').value;
 
-    if (!fecha || !hora || !lugar) {
+    if (!idPedido || !fecha || !hora || !lugar) {
         alert("Por favor, completa todos los campos de la cita.");
         return;
     }
 
-    const datosCita = { id_pedido: idPedido, fecha, hora, lugar };
+    // Estas variables deben coincidir exactamente con los nombres que recibe tu server.js
+    const datosCita = { 
+        id_pedido: idPedido, 
+        fecha: fecha, 
+        hora: hora, 
+        lugar: lugar 
+    };
 
     try {
         const res = await fetch(`https://teschi-bazar-web.onrender.com/api/pedidos/confirmar-cita`, {
@@ -163,14 +171,13 @@ async function enviarPropuesta() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datosCita)
         });
-
-
-
+        
         if (res.ok) {
             alert(`¡Cita agendada para el día ${fecha} a las ${hora} en ${lugar}.`);
             cerrarModal();
             location.reload();
         } else {
+            // Si el servidor responde con 500, aquí leeremos el mensaje de error de SQL
             const error = await res.json();
             alert("Error al guardar la cita: " + error.error);
         }
@@ -179,6 +186,8 @@ async function enviarPropuesta() {
         alert("No se pudo conectar con el servidor para guardar la cita.");
     }
 }
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const inputFecha = document.getElementById('fecha-entrega');

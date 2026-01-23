@@ -396,7 +396,7 @@ app.put('/api/pedidos/confirmar-cita', async (req, res) => {
     const { id_pedido, fecha, hora, lugar } = req.body;
 
     try {
-        // 1. Obtener datos necesarios
+        // 1. Obtener datos para la notificación
         const consulta = await pool.query(
             `SELECT p.id_comprador, pr.nombre_producto 
              FROM pedidos p
@@ -412,40 +412,40 @@ app.put('/api/pedidos/confirmar-cita', async (req, res) => {
 
         const { id_comprador, nombre_producto } = consulta.rows[0];
 
-        // 2. ACTUALIZACIÓN (Usando columnas reales de tu imagen)
-        // Nota: He cambiado 'confirmado' por 'agendado' como pediste
-        // He usado 'fecha_pedido' porque es la que veo en tu tabla
-        await pool.query(
-            `UPDATE pedidos 
-             SET fecha_pedido = $1, 
-                 lugar_entrega = $2, 
-                 estado_pedido = 'agendado'::estado_pedido_enum 
-             WHERE id_pedido = $3`,
-            [fecha, lugar, id_pedido] // Si no tienes columna 'hora_entrega', debes crearla en SQL o mandarla en la fecha
-        );
+        // 2. ACTUALIZACIÓN SEGURA
+        // IMPORTANTE: Se usa ::text::estado_pedido_enum para forzar la compatibilidad
+        const queryUpdate = `
+            UPDATE pedidos 
+            SET fecha_pedido = $1, 
+                lugar_entrega = $2, 
+                estado_pedido = 'agendado'::text::estado_pedido_enum 
+            WHERE id_pedido = $3
+        `;
+        
+        // Unificamos fecha y hora para guardarlo en fecha_pedido (que es timestamp)
+        const fechaCompleta = `${fecha} ${hora}`; 
 
-        // 3. Notificación y Socket.io
-        const mensajeComprador = `¡Cita agendada! Tu entrega de "${nombre_producto}" es el ${fecha} a las ${hora} en ${lugar}.`;
+        await pool.query(queryUpdate, [fechaCompleta, lugar, id_pedido]);
 
+        // 3. Notificación
+        const mensajeComprador = `¡Cita agendada! Entrega de "${nombre_producto}" el ${fecha} a las ${hora} en ${lugar}.`;
 
         await pool.query(
             'INSERT INTO notificaciones (id_usuario, tipo_notificacion, mensaje, leida) VALUES ($1, $2, $3, $4)',
             [id_comprador, 'cita_confirmada', mensajeComprador, false]
         );
 
+        if (typeof io !== 'undefined') {
+            io.emit(`notificacion_${id_comprador}`, { mensaje: mensajeComprador, id_pedido });
+        }
 
-        io.emit(`notificacion_${id_comprador}`, {
-            mensaje: mensajeComprador,
-            id_pedido: id_pedido
-        });
-
-        res.json({ success: true, message: "Cita agendada y estado actualizado a agendado" });
+        res.json({ success: true, message: "Cita agendada correctamente" });
 
     } catch (error) {
-        console.error("Error en el servidor:", error.message);
-        res.status(500).json({ error: "Error al procesar la cita en la base de datos" });
+        console.error("❌ Error detallado:", error.message);
+        res.status(500).json({ error: "Error al procesar la cita: " + error.message });
     }
-
+    
 });
 
 
