@@ -136,6 +136,54 @@ app.post('/api/productos/insertar', upload.single('imagen'), async (req, res) =>
         id_usuario_vendedor, nombre_vendedor, ubicacion_entrega
     } = req.body;
 
+// RUTA: Finalizar pedido (Confirmar entrega)
+app.put('/api/pedidos/finalizar/:id', async (req, res) => {
+    const idPedido = req.params.id;
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // 1. Actualizamos el estado del pedido a 'entregado'
+        // IMPORTANTE: Asegúrate de que 'entregado' exista en tu estado_pedido_enum
+        const queryUpdate = `
+            UPDATE pedidos 
+            SET estado_pedido = 'entregado'::text::estado_pedido_enum 
+            WHERE id_pedido = $1 
+            RETURNING id_comprador
+        `;
+        const result = await client.query(queryUpdate, [idPedido]);
+
+        if (result.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: "Pedido no encontrado" });
+        }
+
+        // 2. Opcional: Descontar stock si no lo hiciste antes
+        const detalle = await client.query(
+            'SELECT id_producto, cantidad FROM detalle_pedido WHERE id_pedido = $1',
+            [idPedido]
+        );
+        for (const fila of detalle.rows) {
+            await client.query(
+                'UPDATE productos SET disponibilidad = disponibilidad - $1 WHERE id_producto = $2',
+                [fila.cantidad, fila.id_producto]
+            );
+        }
+
+        await client.query('COMMIT');
+        res.json({ success: true, message: "¡Venta finalizada con éxito!" });
+
+    } catch (err) {
+        if (client) await client.query('ROLLBACK');
+        console.error("❌ Error al finalizar:", err.message);
+        res.status(500).json({ error: err.message });
+    } finally {
+        client.release();
+    }
+});
+
+
     // --- 1. PROCESAR IMAGEN ANTES DE LA DB --- // <--- MEJORA AQUÍ
     let url_imagen_cloudinary = null;
 
@@ -461,40 +509,39 @@ app.put('/api/pedidos/finalizar/:id', async (req, res) => {
     try {
         await client.query('BEGIN');
 
-        // 1. Buscamos qué hay que descontar en detalle_pedido
+        // 1. Obtener detalles para descontar stock
         const detalle = await client.query(
             'SELECT id_producto, cantidad FROM detalle_pedido WHERE id_pedido = $1',
             [idPedido]
         );
 
         if (detalle.rows.length === 0) {
-            console.log("⚠️ No se encontró detalle para el pedido:", idPedido);
             await client.query('ROLLBACK');
-            return res.status(404).json({ error: "Detalle no encontrado" });
+            return res.status(404).json({ error: "No se encontró el detalle del pedido." });
         }
 
-        // 2. Descontamos de la tabla productos usando 'disponibilidad'
+        // 2. Descontar disponibilidad de productos
         for (const fila of detalle.rows) {
-            console.log(`📉 Descontando ${fila.cantidad} del producto ID: ${fila.id_producto}`);
-            
             await client.query(
                 'UPDATE productos SET disponibilidad = disponibilidad - $1 WHERE id_producto = $2',
                 [fila.cantidad, fila.id_producto]
             );
         }
 
-        // 3. Actualizamos el estado del pedido
-        await client.query(
-            "UPDATE pedidos SET estado_pedido = 'entregado' WHERE id_pedido = $1",
-            [idPedido]
-        );
+        // 3. Actualizar estado a 'entregado' con casting de ENUM
+        const queryUpdate = `
+            UPDATE pedidos 
+            SET estado_pedido = 'entregado'::text::estado_pedido_enum 
+            WHERE id_pedido = $1
+        `;
+        await client.query(queryUpdate, [idPedido]);
 
         await client.query('COMMIT');
-        res.json({ success: true, message: "Stock actualizado y pedido entregado." });
+        res.json({ success: true, message: "¡Venta finalizada y stock actualizado!" });
 
     } catch (err) {
-        await client.query('ROLLBACK');
-        console.error("❌ Error en servidor:", err.message);
+        if (client) await client.query('ROLLBACK');
+        console.error("❌ Error al finalizar pedido:", err.message);
         res.status(500).json({ error: err.message });
     } finally {
         client.release();
